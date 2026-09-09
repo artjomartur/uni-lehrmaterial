@@ -376,14 +376,28 @@ VorlNr -> Titel, PersNr</textarea>
       return document.getElementById("input-attributes").value.split(",").map(s => s.trim()).filter(s => s.length > 0);
     }
 
+    function parseAttributeString(str) {
+      if (str.includes(",")) {
+        return str.split(",").map(s => s.trim()).filter(Boolean);
+      }
+      if (str.includes(" ")) {
+        return str.split(/\s+/).filter(Boolean);
+      }
+      if (str.match(/^[A-Z]+$/) && str.length > 1) {
+        return str.split("");
+      }
+      if (str) return [str];
+      return [];
+    }
+
     function parseFDs() {
       const lines = document.getElementById("input-fds").value.split("\n");
       const fds = [];
       lines.forEach(l => {
         const parts = l.split("->");
         if (parts.length === 2) {
-          const lhs = parts[0].split(",").map(s => s.trim()).filter(Boolean);
-          const rhs = parts[1].split(",").map(s => s.trim()).filter(Boolean);
+          const lhs = parseAttributeString(parts[0].trim());
+          const rhs = parseAttributeString(parts[1].trim());
           if (lhs.length > 0 && rhs.length > 0) {
             fds.push({ lhs, rhs });
           }
@@ -414,7 +428,7 @@ VorlNr -> Titel, PersNr</textarea>
 
     function calcCustomClosure() {
       const targetStr = document.getElementById("input-closure-target").value;
-      const target = targetStr.split(",").map(s => s.trim()).filter(Boolean);
+      const target = parseAttributeString(targetStr.trim());
       const fds = parseFDs();
       const res = computeClosure(target, fds);
       document.getElementById("closure-live-result").innerHTML = `<b>{${target.join(", ")}}<sup>+</sup></b> = { ${res.join(", ")} }`;
@@ -453,8 +467,37 @@ VorlNr -> Titel, PersNr</textarea>
     }
 
     function runAnalysis() {
-      const attrs = parseAttributes();
+      let attrs = parseAttributes();
       const fds = parseFDs();
+
+      // Auto-detect missing attributes from FDs
+      const fdAttrs = new Set();
+      fds.forEach(fd => {
+        fd.lhs.forEach(a => fdAttrs.add(a));
+        fd.rhs.forEach(a => fdAttrs.add(a));
+      });
+      
+      let addedAny = false;
+      const originalAttrs = new Set(attrs);
+      
+      const intersection = attrs.filter(a => fdAttrs.has(a));
+      if (intersection.length === 0 && fdAttrs.size > 0) {
+        // Complete mismatch! User changed FDs but forgot attributes.
+        attrs = Array.from(fdAttrs);
+        document.getElementById("input-attributes").value = attrs.join(", ");
+        document.getElementById("input-closure-target").value = attrs[0] || "";
+      } else {
+        fdAttrs.forEach(a => {
+          if (!originalAttrs.has(a)) {
+            attrs.push(a);
+            addedAny = true;
+          }
+        });
+        if (addedAny) {
+          document.getElementById("input-attributes").value = attrs.join(", ");
+        }
+      }
+
       calcCustomClosure();
 
       const candidateKeys = findCandidateKeys(attrs, fds);
