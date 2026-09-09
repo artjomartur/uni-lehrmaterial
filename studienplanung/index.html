@@ -30,25 +30,25 @@
 <body class="min-h-full flex flex-col custom-scrollbar selection:bg-blue-600 selection:text-white">
 
   <!-- Header -->
-  <div id="app-header"></div>
+  <div id="app-header" class="hidden-print"></div>
   <script src="../components.js"></script>
   <script>renderHeader("../");</script>
 
   <!-- Main Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <main class="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     
     <!-- Hero / Title -->
-    <div class="space-y-4">
+    <div class="space-y-4 hidden-print">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-900 to-indigo-900 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-lg shadow-[0_0_15px_rgba(59,130,246,0.2)]">
           📅
         </div>
         <div>
           <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
-            Studienplanung &amp; Stundenplan
+            Studienplanung &amp; VV Katalog
           </h1>
           <p class="text-sm text-slate-400 mt-1">
-            Persönliche Modulübersicht, Raumsuche und Notenspiegel.
+            Gesamtkatalog aller Module, wöchentlicher Kalender und iCal Export.
           </p>
         </div>
       </div>
@@ -66,56 +66,52 @@
     </div>
 
     <!-- Interface -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       
-      <!-- Left Column: Search & Add -->
-      <div class="lg:col-span-1 space-y-4">
-        <div class="cs-card rounded-xl p-5 space-y-4">
-          <h2 class="font-heading font-bold text-white text-lg">Modul Suchen & Hinzufügen</h2>
+      <!-- Left Column: Search & Add (Hidden in Print) -->
+      <div class="lg:col-span-1 space-y-4 hidden-print">
+        <div class="cs-card rounded-xl p-5 space-y-4 flex flex-col h-[600px]">
+          <h2 class="font-heading font-bold text-white text-lg">Modul-Katalog</h2>
           
           <div class="relative">
-            <input type="text" id="search-input" placeholder="Z.B. 'Informationsmanagement'..." class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+            <input type="text" id="search-input" placeholder="Modul suchen..." class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition">
           </div>
           
-          <div id="search-results" class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+          <div id="search-results" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1">
             <!-- Dynamically populated -->
           </div>
         </div>
 
         <div class="cs-card rounded-xl p-5 space-y-4">
-          <h2 class="font-heading font-bold text-white text-lg">Modul-Details & Notenspiegel</h2>
+          <h2 class="font-heading font-bold text-white text-lg">Modul-Details</h2>
           <div id="module-details" class="text-sm text-slate-400">
-            Klicke auf ein Modul, um Rauminfos, Vorlesungsinhalte und alte Notenspiegel zu sehen.
+            Klicke auf ein Modul im Katalog, um Rauminfos, Vorlesungsinhalte und alte Notenspiegel zu sehen.
           </div>
         </div>
       </div>
 
-      <!-- Right Column: Timetable -->
-      <div class="lg:col-span-2 space-y-4">
-        <div class="cs-card rounded-xl p-5">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="font-heading font-bold text-white text-lg">Mein Stundenplan (WiSe 26/27)</h2>
-            <button onclick="clearPlan()" class="px-3 py-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/30 border border-red-900/50 hover:bg-red-900/50 rounded transition">
-              Plan leeren
-            </button>
+      <!-- Right Column: Weekly Timetable -->
+      <div class="lg:col-span-3 space-y-4">
+        <div class="cs-card rounded-xl p-5 flex flex-col h-full min-h-[700px]">
+          <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
+            <h2 class="font-heading font-bold text-white text-lg print:text-black">Wochen-Stundenplan</h2>
+            <div class="flex items-center gap-2 hidden-print">
+              <button onclick="exportICS()" class="px-3 py-1.5 text-xs font-mono font-bold text-emerald-400 bg-emerald-950/30 border border-emerald-900/50 hover:bg-emerald-900/50 rounded transition flex items-center gap-1.5">
+                <span>🗓️</span> als .ics Exportieren
+              </button>
+              <button onclick="window.print()" class="px-3 py-1.5 text-xs font-mono font-bold text-blue-400 bg-blue-950/30 border border-blue-900/50 hover:bg-blue-900/50 rounded transition flex items-center gap-1.5">
+                <span>📄</span> als PDF Drucken
+              </button>
+              <button onclick="clearPlan()" class="px-3 py-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/30 border border-red-900/50 hover:bg-red-900/50 rounded transition">
+                Plan leeren
+              </button>
+            </div>
           </div>
           
-          <div class="overflow-x-auto custom-scrollbar">
-            <table class="w-full text-left border-collapse text-sm">
-              <thead>
-                <tr class="border-b border-[#1e2533] text-slate-400 font-mono text-xs">
-                  <th class="py-3 px-4 font-normal">Zeit</th>
-                  <th class="py-3 px-4 font-normal">Montag</th>
-                  <th class="py-3 px-4 font-normal">Dienstag</th>
-                  <th class="py-3 px-4 font-normal">Mittwoch</th>
-                  <th class="py-3 px-4 font-normal">Donnerstag</th>
-                  <th class="py-3 px-4 font-normal">Freitag</th>
-                </tr>
-              </thead>
-              <tbody id="timetable-body" class="text-slate-300">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
+          <div class="flex-1 overflow-x-auto custom-scrollbar">
+            <div class="min-w-[700px] h-full flex border-t border-l border-[#1e2533] text-sm relative" id="weekly-calendar">
+              <!-- Calendar will be drawn by JS -->
+            </div>
           </div>
         </div>
       </div>
@@ -123,140 +119,137 @@
 
   </main>
 
-  <div id="app-footer"></div>
+  <div id="app-footer" class="hidden-print"></div>
   <script>renderFooter("../");</script>
 
   <script>
-    // --- Mock Database (Since we can't scrape TUCaN live due to authentication) ---
+    // --- Full Module Catalog ---
     const MOCK_MODULES = [
-      {
-        id: "infoman",
-        name: "Informationsmanagement",
-        type: "VL + Ü",
-        day: 2, // Tuesday
-        timeSlot: "11:40 - 13:20",
-        room: "hex/S311/08",
-        contents: "Relationales Modell, SQL, Normalisierung, Transaktionen (2PL, ACID).",
-        grades: "Durchschnitt: 2.7 | Durchfallquote: 18%",
-        color: "bg-blue-900/50 border-blue-500/50 text-blue-300"
-      },
-      {
-        id: "aud",
-        name: "Algorithmen & Datenstrukturen",
-        type: "VL",
-        day: 4, // Thursday
-        timeSlot: "09:50 - 11:30",
-        room: "hex/S101/A1",
-        contents: "Graphen, Sortierverfahren, Hashing, AVL-Bäume.",
-        grades: "Durchschnitt: 3.2 | Durchfallquote: 42%",
-        color: "bg-amber-900/50 border-amber-500/50 text-amber-300"
-      },
-      {
-        id: "ro",
-        name: "Rechnerorganisation",
-        type: "VL",
-        day: 1, // Monday
-        timeSlot: "13:30 - 15:10",
-        room: "hex/S311/08",
-        contents: "RISC-V Pipeline, Caches, IEEE-754, KV-Diagramme.",
-        grades: "Durchschnitt: 2.9 | Durchfallquote: 25%",
-        color: "bg-emerald-900/50 border-emerald-500/50 text-emerald-300"
-      },
-      {
-        id: "mathe3",
-        name: "Probabilistische Methoden",
-        type: "VL + Ü",
-        day: 3, // Wednesday
-        timeSlot: "08:00 - 09:40",
-        room: "hex/S103/226",
-        contents: "Wahrscheinlichkeit, Bayes, Markov-Ketten, Verteilungen.",
-        grades: "Durchschnitt: 3.5 | Durchfallquote: 48%",
-        color: "bg-rose-900/50 border-rose-500/50 text-rose-300"
-      },
-      {
-        id: "fop",
-        name: "FOP (Java)",
-        type: "VL",
-        day: 5, // Friday
-        timeSlot: "11:40 - 13:20",
-        room: "hex/S101/A1",
-        contents: "Funktionale und Objektorientierte Programmierung in Java.",
-        grades: "Durchschnitt: 2.5 | Durchfallquote: 15%",
-        color: "bg-purple-900/50 border-purple-500/50 text-purple-300"
-      }
+      { id: "mathe1", name: "Mathematik I", type: "VL + Ü", day: 1, startTime: "08:00", endTime: "09:40", room: "S311/08", contents: "Analysis: Grenzwerte, Stetigkeit, Differentialrechnung.", grades: "Ø 3.1 | Dfq: 35%", color: "bg-rose-900/50 border-rose-500/50 text-rose-300" },
+      { id: "mathe2", name: "Mathematik II", type: "VL + Ü", day: 2, startTime: "09:50", endTime: "11:30", room: "S311/08", contents: "Lineare Algebra: Vektorräume, Matrizen.", grades: "Ø 3.3 | Dfq: 40%", color: "bg-rose-900/50 border-rose-500/50 text-rose-300" },
+      { id: "mathe3", name: "Probabilistische Methoden", type: "VL", day: 3, startTime: "11:40", endTime: "13:20", room: "S101/A1", contents: "Stochastik, Wahrscheinlichkeit, Bayes.", grades: "Ø 3.5 | Dfq: 48%", color: "bg-rose-900/50 border-rose-500/50 text-rose-300" },
+      { id: "fop", name: "Funktionale & OOP", type: "VL", day: 4, startTime: "13:30", endTime: "15:10", room: "S101/A1", contents: "Java, Objektorientierung, Rekursion.", grades: "Ø 2.5 | Dfq: 15%", color: "bg-purple-900/50 border-purple-500/50 text-purple-300" },
+      { id: "dt", name: "Digitaltechnik", type: "VL", day: 5, startTime: "08:00", endTime: "09:40", room: "S311/08", contents: "Logikgatter, Boolesche Algebra, Automaten.", grades: "Ø 2.8 | Dfq: 22%", color: "bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id: "aud", name: "Algorithmen & Daten", type: "VL", day: 1, startTime: "11:40", endTime: "13:20", room: "S101/A1", contents: "Graphen, Sortierverfahren, Hashing.", grades: "Ø 3.2 | Dfq: 42%", color: "bg-amber-900/50 border-amber-500/50 text-amber-300" },
+      { id: "ro", name: "Rechnerorganisation", type: "VL", day: 2, startTime: "13:30", endTime: "15:10", room: "S311/08", contents: "RISC-V, Caches, IEEE-754.", grades: "Ø 2.9 | Dfq: 25%", color: "bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id: "apl", name: "Aussagen- & Prädikaten.", type: "VL", day: 3, startTime: "15:20", endTime: "17:00", room: "S103/226", contents: "PL1, Resolution, Unifikation, Prolog.", grades: "Ø 3.0 | Dfq: 28%", color: "bg-purple-900/50 border-purple-500/50 text-purple-300" },
+      { id: "se", name: "Software Engineering", type: "VL", day: 4, startTime: "09:50", endTime: "11:30", room: "S101/A1", contents: "Design Patterns, UML, SCRUM.", grades: "Ø 2.2 | Dfq: 5%", color: "bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id: "sec", name: "Computersicherheit", type: "VL", day: 5, startTime: "11:40", endTime: "13:20", room: "S311/08", contents: "Kryptografie, RSA, AES, Network Security.", grades: "Ø 2.6 | Dfq: 18%", color: "bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id: "ki", name: "Künstliche Intelligenz", type: "VL", day: 1, startTime: "15:20", endTime: "17:00", room: "S101/A1", contents: "Suchalgorithmen, Neuronale Netze.", grades: "Ø 2.4 | Dfq: 12%", color: "bg-fuchsia-900/50 border-fuchsia-500/50 text-fuchsia-300" },
+      { id: "moses", name: "Modell., Spezifikation & Sem.", type: "VL", day: 2, startTime: "08:00", endTime: "09:40", room: "S103/226", contents: "Hoare-Kalkül, LTL, Kripke.", grades: "Ø 3.4 | Dfq: 38%", color: "bg-purple-900/50 border-purple-500/50 text-purple-300" },
+      { id: "infoman", name: "Informationsmanagement", type: "VL", day: 3, startTime: "09:50", endTime: "11:30", room: "S311/08", contents: "SQL, Normalisierung, 2PL.", grades: "Ø 2.7 | Dfq: 18%", color: "bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id: "netz", name: "Computernetze", type: "VL", day: 4, startTime: "11:40", endTime: "13:20", room: "S101/A1", contents: "OSI-Modell, TCP/IP, Routing.", grades: "Ø 2.8 | Dfq: 20%", color: "bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id: "parallel", name: "Parallele Prog.", type: "VL", day: 5, startTime: "13:30", endTime: "15:10", room: "S311/08", contents: "Threads, Deadlocks, Mutex.", grades: "Ø 3.1 | Dfq: 30%", color: "bg-teal-900/50 border-teal-500/50 text-teal-300" },
+      { id: "iug", name: "Informatik und Gesellschaft", type: "VL", day: 1, startTime: "09:50", endTime: "11:30", room: "S103/226", contents: "Ethik, Datenschutz, KI & Recht.", grades: "Ø 1.8 | Dfq: 2%", color: "bg-yellow-900/50 border-yellow-500/50 text-yellow-300" },
+      { id: "wiss", name: "Wiss. Arbeiten", type: "VL", day: 2, startTime: "15:20", endTime: "17:00", room: "S103/226", contents: "LaTeX, Zitationen, Literaturrecherche.", grades: "Ø 1.5 | Dfq: 1%", color: "bg-yellow-900/50 border-yellow-500/50 text-yellow-300" },
+      { id: "afe", name: "Automaten & Sprachen", type: "VL", day: 3, startTime: "13:30", endTime: "15:10", room: "S311/08", contents: "DFA, NFA, Reguläre Ausdrücke, Turing.", grades: "Ø 3.6 | Dfq: 50%", color: "bg-purple-900/50 border-purple-500/50 text-purple-300" }
     ];
 
-    const timeSlots = ["08:00 - 09:40", "09:50 - 11:30", "11:40 - 13:20", "13:30 - 15:10", "15:20 - 17:00"];
-    
-    let myPlan = JSON.parse(localStorage.getItem('unisuite_stundenplan')) || [];
+    let myPlan = JSON.parse(localStorage.getItem('unisuite_stundenplan_v2')) || [];
+
+    function timeToPercent(timeStr) {
+      // timeStr format "HH:MM"
+      const [h, m] = timeStr.split(':').map(Number);
+      const startHour = 8;
+      const endHour = 18;
+      const totalMinutes = (endHour - startHour) * 60;
+      const currentMinutes = (h - startHour) * 60 + m;
+      return (currentMinutes / totalMinutes) * 100;
+    }
 
     function renderTimetable() {
-      const tbody = document.getElementById('timetable-body');
-      tbody.innerHTML = '';
-
-      timeSlots.forEach(slot => {
-        let tr = document.createElement('tr');
-        tr.className = "border-b border-[#1e2533] last:border-0";
-        
-        let th = document.createElement('td');
-        th.className = "py-3 px-4 font-mono text-xs text-slate-500 whitespace-nowrap";
-        th.textContent = slot;
-        tr.appendChild(th);
-
-        for (let day = 1; day <= 5; day++) {
-          let td = document.createElement('td');
-          td.className = "py-2 px-2 min-w-[140px] align-top";
-          
-          const modId = myPlan.find(m => m.day === day && m.slot === slot);
-          if (modId) {
-            const mod = MOCK_MODULES.find(m => m.id === modId.id);
-            if(mod) {
-              td.innerHTML = `
-                <div class="p-2 border rounded ${mod.color} cursor-pointer hover:brightness-110 transition" onclick="showDetails('${mod.id}')">
-                  <div class="font-bold text-xs leading-tight">${mod.name}</div>
-                  <div class="text-[10px] font-mono mt-1 opacity-80">${mod.room}</div>
-                  <div class="text-[10px] font-mono opacity-80">${mod.type}</div>
-                </div>
-              `;
-            }
-          }
-          tr.appendChild(td);
-        }
-        tbody.appendChild(tr);
-      });
+      const cal = document.getElementById('weekly-calendar');
+      cal.innerHTML = '';
       
-      localStorage.setItem('unisuite_stundenplan', JSON.stringify(myPlan));
+      const days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+      
+      // Draw grid lines
+      const hours = 10; // 8:00 to 18:00
+      let gridHTML = '<div class="absolute inset-0 flex flex-col pointer-events-none z-0">';
+      for(let i = 0; i < hours; i++) {
+        gridHTML += `<div class="flex-1 border-b border-[#1e2533] relative">
+          <span class="absolute -top-3 -left-10 text-[10px] text-slate-500 font-mono hidden md:block">${8+i}:00</span>
+        </div>`;
+      }
+      gridHTML += '</div>';
+      cal.innerHTML += gridHTML;
+
+      // Draw day columns
+      days.forEach((dayName, index) => {
+        const dayNum = index + 1;
+        let col = document.createElement('div');
+        col.className = "flex-1 border-r border-[#1e2533] relative flex flex-col z-10";
+        
+        let header = document.createElement('div');
+        header.className = "text-center py-2 border-b border-[#1e2533] font-bold text-slate-400 text-xs uppercase tracking-wider bg-[#0d1117] print:bg-white print:text-black sticky top-0 z-20";
+        header.textContent = dayName;
+        col.appendChild(header);
+
+        let eventContainer = document.createElement('div');
+        eventContainer.className = "relative flex-1";
+        
+        // Add events for this day
+        const dayEvents = myPlan.filter(p => p.day === dayNum);
+        dayEvents.forEach(ev => {
+          const mod = MOCK_MODULES.find(m => m.id === ev.id);
+          if(!mod) return;
+          
+          const topPercent = timeToPercent(mod.startTime);
+          const bottomPercent = timeToPercent(mod.endTime);
+          const heightPercent = bottomPercent - topPercent;
+
+          let block = document.createElement('div');
+          block.className = `absolute left-1 right-1 rounded border ${mod.color} p-2 overflow-hidden shadow-lg hover:brightness-125 transition-all cursor-pointer`;
+          block.style.top = topPercent + '%';
+          block.style.height = heightPercent + '%';
+          block.onclick = () => showDetails(mod.id);
+          
+          block.innerHTML = `
+            <div class="font-bold text-[11px] leading-tight text-white print:text-black">${mod.name}</div>
+            <div class="text-[9px] font-mono mt-1 opacity-80 print:text-black">${mod.startTime}-${mod.endTime}</div>
+            <div class="text-[9px] font-mono opacity-80 print:text-black">${mod.room}</div>
+          `;
+          eventContainer.appendChild(block);
+        });
+
+        col.appendChild(eventContainer);
+        cal.appendChild(col);
+      });
+
+      localStorage.setItem('unisuite_stundenplan_v2', JSON.stringify(myPlan));
     }
 
     function renderSearchResults(query = "") {
       const resDiv = document.getElementById('search-results');
       resDiv.innerHTML = '';
       
-      const filtered = MOCK_MODULES.filter(m => m.name.toLowerCase().includes(query.toLowerCase()));
+      const filtered = MOCK_MODULES.filter(m => m.name.toLowerCase().includes(query.toLowerCase()) || m.id.toLowerCase().includes(query.toLowerCase()));
       
       filtered.forEach(mod => {
         const isAdded = myPlan.some(p => p.id === mod.id);
         const div = document.createElement('div');
-        div.className = "p-3 bg-[#151c28] border border-[#273248] rounded-lg flex items-center justify-between";
+        div.className = "p-3 bg-[#151c28] border border-[#273248] rounded-lg flex items-center justify-between shrink-0";
+        const daysArr = ["", "Mo", "Di", "Mi", "Do", "Fr"];
         div.innerHTML = `
           <div>
-            <div class="text-sm font-bold text-white cursor-pointer hover:text-blue-400 transition" onclick="showDetails('${mod.id}')">${mod.name}</div>
-            <div class="text-xs font-mono text-slate-500">${mod.timeSlot} (Tag ${mod.day})</div>
+            <div class="text-sm font-bold text-white cursor-pointer hover:text-blue-400 transition truncate max-w-[150px]" title="${mod.name}" onclick="showDetails('${mod.id}')">${mod.name}</div>
+            <div class="text-[10px] font-mono text-slate-500">${daysArr[mod.day]} ${mod.startTime}-${mod.endTime}</div>
           </div>
-          <button onclick="toggleModul('${mod.id}', ${mod.day}, '${mod.timeSlot}')" class="px-2 py-1 rounded text-xs font-bold font-mono transition ${isAdded ? 'bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white' : 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500 hover:text-white'}">
-            ${isAdded ? 'Entfernen' : 'Hinzufügen'}
+          <button onclick="toggleModul('${mod.id}')" class="px-2 py-1 rounded text-[10px] font-bold font-mono transition ${isAdded ? 'bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white' : 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500 hover:text-white'}">
+            ${isAdded ? 'Entf.' : 'Add'}
           </button>
         `;
         resDiv.appendChild(div);
       });
     }
 
-    function toggleModul(id, day, slot) {
+    function toggleModul(id) {
       const idx = myPlan.findIndex(p => p.id === id);
       if (idx >= 0) {
         myPlan.splice(idx, 1);
       } else {
-        myPlan.push({id, day, slot});
+        const mod = MOCK_MODULES.find(m => m.id === id);
+        myPlan.push({ id: mod.id, day: mod.day });
       }
       renderSearchResults(document.getElementById('search-input').value);
       renderTimetable();
@@ -274,6 +267,10 @@
               <span class="text-slate-300">${mod.type}</span>
             </div>
             <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
+              <span class="text-slate-500 block mb-1">Zeit:</span>
+              <span class="text-slate-300">${mod.startTime} - ${mod.endTime}</span>
+            </div>
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded col-span-2">
               <span class="text-slate-500 block mb-1">Raum:</span>
               <span class="text-slate-300">${mod.room}</span>
             </div>
@@ -296,6 +293,50 @@
       renderTimetable();
     }
 
+    function exportICS() {
+      if(myPlan.length === 0) {
+        alert("Der Stundenplan ist leer.");
+        return;
+      }
+      
+      let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//UniSuite//Stundenplaner//DE\n";
+      
+      const daysOffset = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 }; // Offset from a base Monday
+      // Let's use a dummy base Monday date like 2026-10-12
+      const baseDate = new Date('2026-10-12T00:00:00Z');
+
+      myPlan.forEach(ev => {
+        const mod = MOCK_MODULES.find(m => m.id === ev.id);
+        if(!mod) return;
+        
+        let evtDate = new Date(baseDate);
+        evtDate.setDate(evtDate.getDate() + daysOffset[mod.day]);
+        
+        const dateStr = evtDate.toISOString().split('T')[0].replace(/-/g, '');
+        const startStr = mod.startTime.replace(':', '') + '00';
+        const endStr = mod.endTime.replace(':', '') + '00';
+        
+        icsContent += "BEGIN:VEVENT\n";
+        icsContent += `DTSTART;TZID=Europe/Berlin:${dateStr}T${startStr}\n`;
+        icsContent += `DTEND;TZID=Europe/Berlin:${dateStr}T${endStr}\n`;
+        icsContent += `RRULE:FREQ=WEEKLY;UNTIL=20270215T000000Z\n`;
+        icsContent += `SUMMARY:${mod.name}\n`;
+        icsContent += `LOCATION:${mod.room}\n`;
+        icsContent += `DESCRIPTION:${mod.contents}\n`;
+        icsContent += "END:VEVENT\n";
+      });
+
+      icsContent += "END:VCALENDAR";
+      
+      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = "stundenplan.ics";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
     document.getElementById('search-input').addEventListener('input', (e) => {
       renderSearchResults(e.target.value);
     });
@@ -306,4 +347,3 @@
   </script>
 </body>
 </html>
-
