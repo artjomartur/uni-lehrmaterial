@@ -1,6 +1,8 @@
-# 🎓 Interaktive Uni-Lehrmaterialien & Simulatoren
+# 🎓 UniSuite: Interaktive Hochschul-Lehrmaterialien
 
-> Eine kuratierte Sammlung visueller Simulatoren, interaktiver Entscheidungsbäume und Übungswerkzeuge für komplexe Informatik- und Datenbankthemen der **TU Darmstadt**. Entwickelt von **Artjom Becker**.
+> Live verfügbar unter: **[https://unisuite.artjombecker.com](https://unisuite.artjombecker.com)**
+
+Eine kuratierte Sammlung visueller Simulatoren, interaktiver Entscheidungsbäume und Übungswerkzeuge für komplexe Informatik- und Datenbankthemen der **TU Darmstadt**. Entwickelt von **Artjom Becker**.
 
 ---
 
@@ -37,11 +39,11 @@
 
 ---
 
-## 🛠️ Tech Stack & Didaktik
-- **Core**: Vanilla HTML5, JavaScript (ES6+), Tailwind CSS.
-- **Mathematische Typographie**: KaTeX mit Auto-Render Extension.
-- **Analytics & Grafiken**: Chart.js, HTML5 Canvas & flexibler SVG/AST Tree Renderer.
-- **Design**: Modernes Dark Glassmorphism Theme mit hoher Barrierefreiheit und Responsivität.
+## 🛠️ Tech Stack
+- **Core**: Vanilla HTML5, JavaScript (ES6+), Tailwind CSS
+- **Mathematische Typographie**: KaTeX (LaTeX Auto-Render)
+- **Analytics & Grafiken**: Chart.js, HTML5 Canvas, SVG/AST Tree Renderer
+- **Deployment**: Cloudflare Pages / Workers via `unisuite.artjombecker.com`
 
 ---
 
@@ -55,7 +57,7 @@ cd uni-lehrmaterial
 # Lokalen Webserver starten
 npx serve .
 
-# Deployment auf Cloudflare Pages / Workers
+# Deployment auf Cloudflare Pages
 npm run deploy
 ```
 
@@ -63,6 +65,7 @@ npm run deploy
 
 ## 👤 Autor
 **Artjom Becker**
-- Portfolio: [artjombecker.com](https://artjombecker.com)
+- Live Suite: [https://unisuite.artjombecker.com](https://unisuite.artjombecker.com)
+- Hauptportfolio: [artjombecker.com](https://artjombecker.com)
 - GitHub: [@artjomartur](https://github.com/artjomartur)
 - Hochschule: TU Darmstadt
