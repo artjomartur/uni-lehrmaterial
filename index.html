@@ -32,18 +32,29 @@
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.5);
+    .portal-card {
+      background: rgba(30, 41, 59, 0.45);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .glass-card:hover {
-      background: rgba(30, 41, 59, 0.85);
-      border-color: rgba(99, 102, 241, 0.4);
+    .portal-card:hover {
+      background: rgba(30, 41, 59, 0.8);
       transform: translateY(-4px);
-      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 25px -5px rgba(99, 102, 241, 0.2);
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
+    }
+    .portal-card-im:hover {
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 30px -5px rgba(99, 102, 241, 0.25);
+    }
+    .portal-card-aud:hover {
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 30px -5px rgba(245, 158, 11, 0.25);
+    }
+    .portal-card-ro:hover {
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 30px -5px rgba(16, 185, 129, 0.25);
     }
     .gradient-text {
       background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #38bdf8 100%);
@@ -59,12 +70,6 @@
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #334155;
       border-radius: 4px;
-    }
-    .nav-category-btn.active {
-      background-color: #4f46e5;
-      color: #ffffff;
-      border-color: #6366f1;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
     }
   </style>
 </head>
@@ -108,24 +113,21 @@
           </div>
           <div class="flex items-center gap-2">
             <span class="font-heading font-black text-xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-400 tracking-tight">UniSuite</span>
-            <span class="hidden md:inline-block text-[10px] text-slate-400 font-mono px-2 py-0.5 rounded bg-slate-900/80 border border-slate-800">CS Hub</span>
+            <span class="hidden md:inline-block text-[10px] text-slate-400 font-mono px-2 py-0.5 rounded bg-slate-900/80 border border-slate-800">CS Learning Hub</span>
           </div>
         </a>
 
         <!-- Desktop Menu: Überkategorien -->
         <nav class="hidden lg:flex items-center space-x-1 border-l border-slate-800 pl-6 text-xs font-semibold">
-          <button onclick="filterModules('all')" id="top-nav-all" class="top-menu-btn text-indigo-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
-            Alle Module
-          </button>
-          <button onclick="filterModules('db')" id="top-nav-db" class="top-menu-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
-            Informationsmanagement
-          </button>
-          <button onclick="filterModules('aud')" id="top-nav-aud" class="top-menu-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
-            Algorithmen &amp; Datenstrukturen
-          </button>
-          <button onclick="filterModules('ro')" id="top-nav-ro" class="top-menu-btn text-slate-300 hover:text-white px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
-            Rechnerorganisation
-          </button>
+          <a href="./informationsmanagement/" class="text-slate-300 hover:text-indigo-300 px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
+            🗄️ Informationsmanagement
+          </a>
+          <a href="./algorithmen-datenstrukturen/" class="text-slate-300 hover:text-amber-300 px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
+            ⚡ Algorithmen &amp; Datenstrukturen
+          </a>
+          <a href="./rechnerorganisation/" class="text-slate-300 hover:text-emerald-300 px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
+            ⚙️ Rechnerorganisation
+          </a>
         </nav>
       </div>
 
@@ -138,324 +140,187 @@
   </header>
 
   <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
     
     <!-- Hero Header -->
-    <div class="text-center space-y-3 max-w-3xl mx-auto pt-2">
+    <div class="text-center space-y-4 max-w-3xl mx-auto pt-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-xs font-mono font-semibold text-indigo-300">
+        <span>◈</span> TU Darmstadt • Informatik Lehrmaterialien
+      </div>
       <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
         Interaktives <span class="gradient-text">Uni Lehrmaterial</span>
       </h1>
       <p class="text-sm sm:text-base text-slate-400 leading-relaxed">
-        Kuratierte visuelle Simulatoren, interaktive Lernlabore und Klausur-Trainer für die Kernbereiche des Informatik-Studiums.
+        Wählen Sie einen Fachbereich, um die dazugehörigen visuellen Simulatoren, Algorithmen-Labore und Klausur-Trainer zu starten.
       </p>
     </div>
 
-    <!-- Menü: Überkategorien Bar -->
-    <section class="space-y-4">
-      <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2 sm:p-3 shadow-lg">
-        <div class="flex items-center justify-between pb-2 px-2 border-b border-slate-800/80 mb-2">
-          <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">
-            📂 Überkategorien &amp; Fachgebiete
-          </span>
-          <span class="text-xs text-slate-500" id="category-counter">7 Module verfügbar</span>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          
-          <!-- Category 1: Alle -->
-          <button 
-            onclick="filterModules('all')" 
-            id="cat-btn-all"
-            class="nav-category-btn active p-3 rounded-lg text-left border border-slate-800 bg-slate-950/60 hover:border-slate-600 transition flex items-center gap-3 group"
-          >
-            <span class="text-xl">📚</span>
-            <div>
-              <div class="text-xs font-bold text-slate-100 group-hover:text-white">Alle Module</div>
-              <div class="text-[10px] text-slate-400">Gesamte Sammlung</div>
-            </div>
-          </button>
-
-          <!-- Category 2: Informationsmanagement -->
-          <button 
-            onclick="filterModules('db')" 
-            id="cat-btn-db"
-            class="nav-category-btn p-3 rounded-lg text-left border border-slate-800 bg-slate-950/60 hover:border-slate-600 transition flex items-center gap-3 group"
-          >
-            <span class="text-xl">🗄️</span>
-            <div>
-              <div class="text-xs font-bold text-slate-200 group-hover:text-white">Informationsmanagement</div>
-              <div class="text-[10px] text-slate-400">5 Datenbank-Tools</div>
-            </div>
-          </button>
-
-          <!-- Category 3: Algorithmen & Datenstrukturen -->
-          <button 
-            onclick="filterModules('aud')" 
-            id="cat-btn-aud"
-            class="nav-category-btn p-3 rounded-lg text-left border border-slate-800 bg-slate-950/60 hover:border-slate-600 transition flex items-center gap-3 group"
-          >
-            <span class="text-xl">⚡</span>
-            <div>
-              <div class="text-xs font-bold text-slate-200 group-hover:text-white">Algorithmen &amp; Datenstrukturen</div>
-              <div class="text-[10px] text-slate-400">Graphen, Bäume &amp; O-Notation</div>
-            </div>
-          </button>
-
-          <!-- Category 4: Rechnerorganisation -->
-          <button 
-            onclick="filterModules('ro')" 
-            id="cat-btn-ro"
-            class="nav-category-btn p-3 rounded-lg text-left border border-slate-800 bg-slate-950/60 hover:border-slate-600 transition flex items-center gap-3 group"
-          >
-            <span class="text-xl">⚙️</span>
-            <div>
-              <div class="text-xs font-bold text-slate-200 group-hover:text-white">Rechnerorganisation</div>
-              <div class="text-[10px] text-slate-400">RISC-V, Cache &amp; IEEE-754</div>
-            </div>
-          </button>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- Modules Catalog -->
+    <!-- 3 Core Fachbereiche (Überkategorien Portale) -->
     <section class="space-y-6">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2" id="current-section-title">
-          <span>📚</span> Alle Module
+        <h2 class="text-sm font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <span>📂</span> Fachbereiche &amp; Themenfelder
         </h2>
-        <span class="text-xs text-indigo-400 font-mono" id="results-count">7 interaktive Werkzeuge</span>
+        <span class="text-xs text-slate-500 font-mono">3 Hauptkategorien</span>
       </div>
 
-      <!-- Modules Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="modules-container">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Category 1: Informationsmanagement & Datenbanken -->
+        <div class="portal-card portal-card-im rounded-2xl p-7 border border-indigo-500/30 flex flex-col justify-between relative overflow-hidden group">
+          <!-- Ambient Glow -->
+          <div class="absolute -right-16 -top-16 w-48 h-48 bg-indigo-600/15 rounded-2xl blur-3xl pointer-events-none group-hover:bg-indigo-600/25 transition"></div>
 
-        <!-- DB Card 1: Relationale Algebra -->
-        <div class="module-card db glass-card rounded-xl p-5 border border-indigo-500/40 flex flex-col justify-between relative">
-          <div class="space-y-3">
+          <div class="space-y-5 relative">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-indigo-400 font-bold">Informationsmanagement</span>
-              <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">⋈ Joins</span>
+              <span class="px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-mono font-bold">
+                Fachbereich 1
+              </span>
+              <span class="text-3xl">🗄️</span>
             </div>
 
-            <h3 class="text-lg font-bold text-white">Relationale Algebra Explorer</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Equi-, Outer-, Semi- und Anti-Joins mit Live-Tupelberechnung, GROUP BY &amp; Aggregationen ($\gamma$), Klausur-Trainer und Quiz.
-            </p>
+            <div>
+              <h3 class="text-2xl font-black text-white group-hover:text-indigo-300 transition">
+                Informationsmanagement
+              </h3>
+              <p class="text-xs font-medium text-indigo-400/80 mt-1">Relationale Datenbanken &amp; SQL</p>
+              <p class="text-xs text-slate-300 mt-3 leading-relaxed">
+                Umfassende Simulatoren für relationale Algebra, Operatorbaum-Optimierung, Attributhüllen &amp; Normalisierung (1NF–BCNF), B+-Bäume sowie ACID-Transaktionen mit 2PL Locking.
+              </p>
+            </div>
 
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Joins</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Aggregation γ</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">KaTeX</span>
+            <!-- Contained Tools List -->
+            <div class="space-y-2 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-indigo-400">✓</span> Relationale Algebra &amp; Join Explorer
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-indigo-400">✓</span> SQL Query Optimizer &amp; AST
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-indigo-400">✓</span> Normalisierungs-Coach &amp; Bernstein
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-indigo-400">✓</span> B+ Tree &amp; Indexing Playground
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-indigo-400">✓</span> Transaktionen &amp; 2PL Scheduler
+              </div>
             </div>
           </div>
 
-          <div class="mt-5 pt-3 border-t border-slate-800">
+          <div class="pt-6 mt-6 border-t border-slate-800">
             <a 
-              href="./relationale-algebra/" 
-              class="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-600/30"
+              href="./informationsmanagement/" 
+              class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-indigo-600/30 group-hover:scale-[1.02]"
             >
-              <span>🚀</span> Simulator öffnen
+              <span>🚀</span> Fachbereich öffnen &rarr;
             </a>
           </div>
         </div>
 
-        <!-- DB Card 2: SQL Query Optimizer & AST -->
-        <div class="module-card db glass-card rounded-xl p-5 border border-indigo-500/40 flex flex-col justify-between relative">
-          <div class="space-y-3">
+        <!-- Category 2: Algorithmen & Datenstrukturen -->
+        <div class="portal-card portal-card-aud rounded-2xl p-7 border border-amber-500/30 flex flex-col justify-between relative overflow-hidden group">
+          <!-- Ambient Glow -->
+          <div class="absolute -right-16 -top-16 w-48 h-48 bg-amber-600/15 rounded-2xl blur-3xl pointer-events-none group-hover:bg-amber-600/25 transition"></div>
+
+          <div class="space-y-5 relative">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-indigo-400 font-bold">Informationsmanagement</span>
-              <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">🌳 AST</span>
+              <span class="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold">
+                Fachbereich 2
+              </span>
+              <span class="text-3xl">⚡</span>
             </div>
 
-            <h3 class="text-lg font-bold text-white">SQL Query Optimizer &amp; AST</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Interaktive Visualisierung von logischen Operatorbäumen, Pushdown von Selektionen ($\sigma$) &amp; Projektionen ($\pi$) und Kostenkalkulation.
-            </p>
-
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Query Trees</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Pushdown</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Heuristiken</span>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-3 border-t border-slate-800">
-            <a 
-              href="./query-optimizer/" 
-              class="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-600/30"
-            >
-              <span>🚀</span> Optimizer starten
-            </a>
-          </div>
-        </div>
-
-        <!-- DB Card 3: Normalisierung & Dekomposition -->
-        <div class="module-card db glass-card rounded-xl p-5 border border-indigo-500/40 flex flex-col justify-between relative">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-indigo-400 font-bold">Informationsmanagement</span>
-              <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">📐 NF</span>
+            <div>
+              <h3 class="text-2xl font-black text-white group-hover:text-amber-300 transition">
+                Algorithmen &amp; Datenstrukturen
+              </h3>
+              <p class="text-xs font-medium text-amber-400/80 mt-1">Graphen, Bäume &amp; Komplexität</p>
+              <p class="text-xs text-slate-300 mt-3 leading-relaxed">
+                Interaktive visuelle Labore für Kürzeste-Wege-Algorithmen (Dijkstra), selbstbalancierende AVL-Bäume mit allen 4 Rotationen, Sortierverfahren und asymptotische Master-Theorem Analyse.
+              </p>
             </div>
 
-            <h3 class="text-lg font-bold text-white">Normalisierungs-Coach</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Attributhüllen ($X^+$), Minimalüberdeckung ($F_c$), 1NF/2NF/3NF/BCNF Prüfung und 3NF-Synthesealgorithmus nach Bernstein.
-            </p>
-
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">1NF-BCNF</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">FD-Closure</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Synthese</span>
+            <!-- Contained Tools List -->
+            <div class="space-y-2 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-amber-400">✓</span> Dijkstra Kürzeste-Wege Graph-Explorer
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-amber-400">✓</span> AVL-Baum Selbstbalancierung (LL/RR/LR/RL)
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-amber-400">✓</span> Quicksort vs. Bubble-Sort Rekursions-Lab
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-amber-400">✓</span> Master-Theorem Fall-Analysator
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-amber-400">✓</span> Asymptotik- &amp; Klausur-Quiz
+              </div>
             </div>
           </div>
 
-          <div class="mt-5 pt-3 border-t border-slate-800">
-            <a 
-              href="./normalisierung/" 
-              class="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-600/30"
-            >
-              <span>🚀</span> Coach öffnen
-            </a>
-          </div>
-        </div>
-
-        <!-- DB Card 4: B-Tree & Indexing Playground -->
-        <div class="module-card db glass-card rounded-xl p-5 border border-indigo-500/40 flex flex-col justify-between relative">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-indigo-400 font-bold">Informationsmanagement</span>
-              <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">🌲 B+ Tree</span>
-            </div>
-
-            <h3 class="text-lg font-bold text-white">B+ Tree &amp; Indexing Playground</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Interaktives Einfügen, Splitten und Suchen in $B^+$-Bäumen. Vergleich von Index-Seek ($O(\log N)$) und Full-Table-Scan ($O(N)$).
-            </p>
-
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">B+ Trees</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">I/O Costs</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Range Scan</span>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-3 border-t border-slate-800">
-            <a 
-              href="./b-tree/" 
-              class="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-600/30"
-            >
-              <span>🚀</span> Playground öffnen
-            </a>
-          </div>
-        </div>
-
-        <!-- DB Card 5: Transaktionen & 2PL Scheduler -->
-        <div class="module-card db glass-card rounded-xl p-5 border border-indigo-500/40 flex flex-col justify-between relative">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-indigo-400 font-bold">Informationsmanagement</span>
-              <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">🔒 ACID</span>
-            </div>
-
-            <h3 class="text-lg font-bold text-white">Transaktionen &amp; 2PL Scheduler</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Konfliktgraphen-Prüfung, Zyklenerkennung, Dirty Reads, Phantoms, 2-Phasen-Sperrprotokoll (2PL) und Deadlock-Visualisierung.
-            </p>
-
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">ACID</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Konfliktgraph</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">2PL Locking</span>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-3 border-t border-slate-800">
-            <a 
-              href="./transaktionen/" 
-              class="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-indigo-600/30"
-            >
-              <span>🚀</span> Scheduler öffnen
-            </a>
-          </div>
-        </div>
-
-        <!-- AuD Card: Algorithmen & Datenstrukturen Suite -->
-        <div class="module-card aud glass-card rounded-xl p-5 border border-amber-500/40 flex flex-col justify-between relative">
-          <div class="space-y-3">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-amber-400 font-bold">Algorithmen &amp; Datenstrukturen</span>
-              <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">🕸️ Graphen &amp; Bäume</span>
-            </div>
-
-            <h3 class="text-lg font-bold text-white">AuD Labor: Dijkstra &amp; AVL-Baum</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              Schrittweiser Dijkstra-Kürzeste-Wege Algorithmus auf interaktiven Graphen, AVL-Baum Selbstbalancierung (LL, RR, LR, RL) und Sortiervergleiche.
-            </p>
-
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Dijkstra</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">AVL Rotationen</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Master-Theorem</span>
-            </div>
-          </div>
-
-          <div class="mt-5 pt-3 border-t border-slate-800">
+          <div class="pt-6 mt-6 border-t border-slate-800">
             <a 
               href="./algorithmen-datenstrukturen/" 
-              class="w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-amber-600/30"
+              class="w-full py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-amber-600/30 group-hover:scale-[1.02]"
             >
-              <span>⚡</span> AuD Labor öffnen
+              <span>⚡</span> Fachbereich öffnen &rarr;
             </a>
           </div>
         </div>
 
-        <!-- RO Card: Rechnerorganisation & RISC-V -->
-        <div class="module-card ro glass-card rounded-xl p-5 border border-emerald-500/40 flex flex-col justify-between relative">
-          <div class="space-y-3">
+        <!-- Category 3: Rechnerorganisation -->
+        <div class="portal-card portal-card-ro rounded-2xl p-7 border border-emerald-500/30 flex flex-col justify-between relative overflow-hidden group">
+          <!-- Ambient Glow -->
+          <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-600/15 rounded-2xl blur-3xl pointer-events-none group-hover:bg-emerald-600/25 transition"></div>
+
+          <div class="space-y-5 relative">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-mono text-emerald-400 font-bold">Rechnerorganisation</span>
-              <span class="text-xs bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">⚙️ RISC-V Pipeline</span>
+              <span class="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold">
+                Fachbereich 3
+              </span>
+              <span class="text-3xl">⚙️</span>
             </div>
 
-            <h3 class="text-lg font-bold text-white">RO Labor: Pipeline &amp; Cache-Simulator</h3>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              5-Stufen RISC-V Pipeline (IF, ID, EX, MEM, WB) mit Daten-/Steuerungskonflikten &amp; Forwarding, CPU Cache Simulator und IEEE-754 Gleitkomma-Labor.
-            </p>
+            <div>
+              <h3 class="text-2xl font-black text-white group-hover:text-emerald-300 transition">
+                Rechnerorganisation
+              </h3>
+              <p class="text-xs font-medium text-emerald-400/80 mt-1">Architektur, Pipeline &amp; Speicher</p>
+              <p class="text-xs text-slate-300 mt-3 leading-relaxed">
+                Architektur-Visualisierungen: 5-Stufen RISC-V Pipeline mit Hazards &amp; Forwarding, CPU Cache-Simulator (Direct / 2-Way) mit Hit/Miss-Statistik, IEEE-754 Bit-Labor und Amdahl's Law.
+              </p>
+            </div>
 
-            <div class="flex flex-wrap gap-1.5 pt-1">
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">5-Stage Pipeline</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">Cache Direct/Set</span>
-              <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded font-mono">IEEE-754</span>
+            <!-- Contained Tools List -->
+            <div class="space-y-2 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-emerald-400">✓</span> 5-Stufen RISC-V Pipeline Simulator
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-emerald-400">✓</span> Data &amp; Control Hazard Behandlung
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-emerald-400">✓</span> CPU Cache Simulator (Tag/Index/Offset)
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-emerald-400">✓</span> IEEE-754 32-Bit Gleitkomma-Labor
+              </div>
+              <div class="flex items-center gap-2 font-medium">
+                <span class="text-emerald-400">✓</span> Amdahl'sches Gesetz Speedup-Rechner
+              </div>
             </div>
           </div>
 
-          <div class="mt-5 pt-3 border-t border-slate-800">
+          <div class="pt-6 mt-6 border-t border-slate-800">
             <a 
               href="./rechnerorganisation/" 
-              class="w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow-md shadow-emerald-600/30"
+              class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/30 group-hover:scale-[1.02]"
             >
-              <span>⚙️</span> RO Labor öffnen
-            </a>
-          </div>
-        </div>
-
-        <!-- Feedback Card -->
-        <div class="glass-card rounded-xl p-5 border-dashed border-indigo-500/30 flex flex-col justify-between text-center bg-indigo-950/20">
-          <div class="space-y-2 py-4">
-            <span class="text-3xl block">💡</span>
-            <h3 class="text-base font-bold text-white">Neues Modul vorschlagen</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              Vermissen Sie ein Thema oder möchten Sie ein weiteres Modul für Ihre Lehrveranstaltung ergänzen?
-            </p>
-          </div>
-
-          <div class="pt-3">
-            <a 
-              href="/#contact" 
-              class="w-full py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300 hover:text-white font-semibold text-xs inline-flex items-center justify-center gap-1.5 transition"
-            >
-              <span>✉️</span> Vorschlag senden
+              <span>⚙️</span> Fachbereich öffnen &rarr;
             </a>
           </div>
         </div>
@@ -473,7 +338,7 @@
       <div class="flex flex-wrap justify-center gap-4 pt-2 text-slate-400">
         <a href="/" class="hover:text-white transition">🏠 Portfolio</a>
         <span>•</span>
-        <a href="./relationale-algebra/" class="hover:text-indigo-300 transition">🗄️ Informationsmanagement</a>
+        <a href="./informationsmanagement/" class="hover:text-indigo-300 transition">🗄️ Informationsmanagement</a>
         <span>•</span>
         <a href="./algorithmen-datenstrukturen/" class="hover:text-amber-300 transition">⚡ Algorithmen &amp; Datenstrukturen</a>
         <span>•</span>
@@ -483,67 +348,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- Filter & Menu Script -->
-  <script>
-    const TITLES = {
-      'all': '<span>📚</span> Alle Module',
-      'db': '<span>🗄️</span> Informationsmanagement & Datenbanken',
-      'aud': '<span>⚡</span> Algorithmen & Datenstrukturen',
-      'ro': '<span>⚙️</span> Rechnerorganisation & Rechnerarchitektur'
-    };
-
-    const COUNTS = {
-      'all': '7 interaktive Werkzeuge',
-      'db': '5 relationale Datenbank-Werkzeuge',
-      'aud': '1 umfassendes AuD Labor (Dijkstra, AVL, Sortieren)',
-      'ro': '1 umfassendes RO Labor (Pipeline, Cache, IEEE-754)'
-    };
-
-    function filterModules(category) {
-      const cards = document.querySelectorAll('.module-card');
-      const catButtons = document.querySelectorAll('.nav-category-btn');
-      const topMenuButtons = document.querySelectorAll('.top-menu-btn');
-
-      // Update Category Grid Buttons
-      catButtons.forEach(btn => {
-        btn.classList.remove('active');
-        btn.classList.remove('border-indigo-500', 'bg-indigo-600', 'text-white');
-      });
-      const activeCatBtn = document.getElementById(`cat-btn-${category}`);
-      if (activeCatBtn) {
-        activeCatBtn.classList.add('active');
-      }
-
-      // Update Top Nav Header Buttons
-      topMenuButtons.forEach(btn => {
-        btn.classList.remove('text-indigo-300', 'bg-slate-800');
-        btn.classList.add('text-slate-300');
-      });
-      const activeTopBtn = document.getElementById(`top-nav-${category}`);
-      if (activeTopBtn) {
-        activeTopBtn.classList.add('text-indigo-300', 'bg-slate-800');
-        activeTopBtn.classList.remove('text-slate-300');
-      }
-
-      // Update Section Header
-      if (TITLES[category]) {
-        document.getElementById('current-section-title').innerHTML = TITLES[category];
-      }
-      if (COUNTS[category]) {
-        document.getElementById('results-count').innerText = COUNTS[category];
-      }
-
-      // Show / Hide Cards
-      cards.forEach(card => {
-        if (category === 'all' || card.classList.contains(category)) {
-          card.style.display = 'flex';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-    }
-  </script>
 
 </body>
 </html>
