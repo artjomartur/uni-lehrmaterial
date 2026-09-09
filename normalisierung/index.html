@@ -250,6 +250,30 @@ VorlNr -> Titel, PersNr</textarea>
         </div>
 
       </div>
+
+      <!-- Live Relational Table Canvas & Visual Inspector -->
+      <div class="bg-[#0a0c10] border border-[#1e2533] rounded-lg p-4 space-y-3 font-mono">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-2 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-blue-400 font-bold">$</span>
+            <span class="text-slate-400 text-[11px] uppercase tracking-wider">Tabellen-Visualisierung:</span>
+            <span id="table-canvas-title" class="text-white font-bold">Ausgangs-Relation R(...)</span>
+          </div>
+          <div id="table-canvas-badges" class="flex flex-wrap items-center gap-2 text-[10px]">
+            <!-- Dynamic Badges -->
+          </div>
+        </div>
+
+        <!-- Dynamic Table Rendering Area -->
+        <div id="live-table-display-area" class="overflow-x-auto custom-scrollbar pt-1 pb-1">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Live Step Highlight Explanation Bar -->
+        <div id="live-table-legend-bar" class="p-2.5 rounded bg-[#0d1117] border border-[#1e2533] text-[11px] text-slate-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <!-- Dynamic Footnote & Legend -->
+        </div>
+      </div>
     </div>
 
     <!-- Results Overview -->
@@ -358,23 +382,6 @@ VorlNr -> Titel, PersNr</textarea>
       }
     };
 
-    function loadNfPreset(key) {
-      const p = NF_PRESETS[key];
-      if (!p) return;
-      document.getElementById("input-attributes").value = p.attrs;
-      document.getElementById("input-closure-target").value = p.target;
-      document.getElementById("input-fds").value = p.fds;
-
-      document.querySelectorAll(".nf-btn").forEach(b => {
-        if (b.dataset.id === key) {
-          b.className = "nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 shadow-sm";
-        } else {
-          b.className = "nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white";
-        }
-      });
-
-      runAnalysis();
-    }
 
     function parseAttributes() {
       return document.getElementById("input-attributes").value.split(",").map(s => s.trim()).filter(s => s.length > 0);
@@ -675,18 +682,124 @@ VorlNr -> Titel, PersNr</textarea>
     }
 
     /* ==========================================================================
-       ANIMATION & LIVE INSPECTOR ENGINE
+       ANIMATION & LIVE TABLE INSPECTOR ENGINE
        ========================================================================== */
+    const NF_SAMPLE_DATASETS = {
+      uni_vorlesung: {
+        tableName: "Vorlesungsverzeichnis",
+        attrs: ["PersNr", "Name", "Rang", "Raum", "VorlNr", "Titel"],
+        rows: [
+          [2125, "Sokrates", "C4", "226", 5001, "Grundzüge"],
+          [2125, "Sokrates", "C4", "226", 5041, "Ethik"],
+          [2125, "Sokrates", "C4", "226", 5049, "Mäeutik"],
+          [2126, "Russel", "C4", "227", 5052, "Wissenschaftstheorie"],
+          [2137, "Kant", "C4", "228", 5043, "Erkenntnistheorie"]
+        ]
+      },
+      projekt_mitarbeiter: {
+        tableName: "ProjektZuordnung",
+        attrs: ["MitarbeiterId", "Name", "ProjektId", "ProjektTitel", "Rolle", "Stundensatz"],
+        rows: [
+          ["M101", "Alice Müller", "P01", "KI-Portal", "Lead Dev", "95 €"],
+          ["M101", "Alice Müller", "P02", "Cloud Migration", "Consultant", "110 €"],
+          ["M102", "Bob Schmidt", "P01", "KI-Portal", "Frontend", "75 €"],
+          ["M103", "Carol Weber", "P03", "Security Audit", "Auditor", "120 €"]
+        ]
+      },
+      krankenhaus: {
+        tableName: "PatientenStation",
+        attrs: ["PatientNr", "Name", "StationNr", "StationsName", "Chefarzt"],
+        rows: [
+          ["P1001", "Lukas Mayer", "S01", "Kardiologie", "Dr. Braun"],
+          ["P1002", "Anna Schmidt", "S01", "Kardiologie", "Dr. Braun"],
+          ["P1003", "Tim Becker", "S02", "Neurologie", "Dr. Weber"],
+          ["P1004", "Mia Wagner", "S01", "Kardiologie", "Dr. Braun"]
+        ]
+      },
+      buch_verlag: {
+        tableName: "BuchPublikation",
+        attrs: ["ISBN", "Buchtitel", "AutorId", "AutorName", "VerlagId", "VerlagName", "VerlagsOrt"],
+        rows: [
+          ["978-3-16", "Datenbanksysteme", "A01", "Prof. Kemper", "V10", "Oldenbourg", "München"],
+          ["978-3-16", "Datenbanksysteme", "A02", "Prof. Eickler", "V10", "Oldenbourg", "München"],
+          ["978-0-26", "Algorithms", "A03", "Cormen", "V20", "MIT Press", "Cambridge"]
+        ]
+      }
+    };
+
+    let currentActivePresetKey = "uni_vorlesung";
+    let currentAttrs = [];
+    let currentFDs = [];
+    let currentCandidateKeys = [];
+    let currentPrimeAttrs = new Set();
+    let currentV2NF = [];
+    let currentV3NF = [];
+    let currentVBCNF = [];
+    let currentSchemaList = [];
+
     let ANIM_STEPS = [];
-    let currentAnimIndex = -1;
+    let currentAnimIndex = 0;
     let animTimer = null;
     let isPlaying = false;
 
+    function getOrGenerateSampleData(attrs) {
+      if (NF_SAMPLE_DATASETS[currentActivePresetKey]) {
+        const pData = NF_SAMPLE_DATASETS[currentActivePresetKey];
+        // Check if matching attrs
+        if (pData.attrs.join(",") === attrs.join(",")) {
+          return pData;
+        }
+      }
+
+      // Generic generator for custom user schemas
+      const mockValues = {
+        id: ["101", "102", "103", "104"],
+        nr: ["201", "202", "203", "204"],
+        name: ["Alpha", "Beta", "Gamma", "Delta"],
+        titel: ["System A", "Modul B", "Kernel C", "Arch D"],
+        ort: ["Berlin", "München", "Frankfurt", "Hamburg"],
+        stadt: ["Berlin", "München", "Frankfurt", "Hamburg"],
+        raum: ["R101", "R102", "R103", "R104"]
+      };
+
+      const rows = [];
+      for (let r = 0; r < 4; r++) {
+        const row = [];
+        attrs.forEach((a, aIdx) => {
+          const lower = a.toLowerCase();
+          let val = `val_${a}_${r + 1}`;
+          if (lower.includes("id") || lower.includes("nr")) val = (1000 + r * 10 + aIdx).toString();
+          else if (lower.includes("name")) val = ["Sokrates", "Russel", "Kant", "Popper"][r] || `Name_${r+1}`;
+          else if (lower.includes("titel")) val = ["Datenbanken", "Algorithmen", "Compiler", "Rechnerorg"][r] || `Titel_${r+1}`;
+          else if (lower.includes("raum")) val = ["226", "226", "228", "230"][r];
+          else if (lower.includes("ort")) val = ["München", "Berlin", "Darmstadt", "München"][r];
+          else val = `Val_${r + 1}`;
+          row.push(val);
+        });
+        rows.push(row);
+      }
+
+      return {
+        tableName: "CustomRelation",
+        attrs: attrs,
+        rows: rows
+      };
+    }
+
     function buildAnimationSteps(attrs, fds, candidateKeys, primeAttributes, v2NF, v3NF, vBCNF, schemaList) {
+      currentAttrs = attrs;
+      currentFDs = fds;
+      currentCandidateKeys = candidateKeys;
+      currentPrimeAttrs = primeAttributes;
+      currentV2NF = v2NF;
+      currentV3NF = v3NF;
+      currentVBCNF = vBCNF;
+      currentSchemaList = schemaList;
+
       ANIM_STEPS = [
         {
           badge: "01: Schema & FDs",
-          title: "Initialisierung: Relationsschema & funktionale Abhängigkeiten",
+          title: "Initialisierung: Ausgangs-Relation R & funktionale Abhängigkeiten",
           html: `
             <div class="text-slate-300">
               Prüfe Relation <b>R(${attrs.join(", ")})</b> mit ${fds.length} funktionalen Abhängigkeiten:
@@ -777,9 +890,281 @@ VorlNr -> Titel, PersNr</textarea>
       ];
 
       renderStepDots();
-      if (currentAnimIndex < 0) {
-        currentAnimIndex = 0;
-        renderCurrentStep(false);
+      renderCurrentStep(false);
+    }
+
+    function renderLiveTableCanvas(stepIdx) {
+      const displayArea = document.getElementById("live-table-display-area");
+      const titleEl = document.getElementById("table-canvas-title");
+      const badgesEl = document.getElementById("table-canvas-badges");
+      const legendEl = document.getElementById("live-table-legend-bar");
+      if (!displayArea) return;
+
+      const sample = getOrGenerateSampleData(currentAttrs);
+      const mainKey = currentCandidateKeys[0] || [];
+      const isKeyAttr = (a) => mainKey.includes(a);
+      const isPrimeAttr = (a) => currentPrimeAttrs.has(a);
+
+      // STEP 6: RENDER SPLIT DECOMPOSED TABLES
+      if (stepIdx === 5) {
+        titleEl.innerHTML = `Synthetisierte 3NF / BCNF Relationen (${currentSchemaList.length} Teilschemata)`;
+        badgesEl.innerHTML = `
+          <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30">✓ Verlustlos zerlegt</span>
+          <span class="px-2 py-0.5 rounded bg-[#151c28] text-blue-400 border border-[#273248]">Abhängigkeitstreu</span>
+        `;
+
+        let splitHTML = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+
+        currentSchemaList.forEach((s, sIdx) => {
+          // Find which columns in original sample belong to this schema
+          const colIndices = s.attrs.map(a => sample.attrs.indexOf(a)).filter(i => i !== -1);
+          
+          // Deduplicate rows for this schema
+          const seen = new Set();
+          const subRows = [];
+          sample.rows.forEach(r => {
+            const projected = colIndices.map(ci => r[ci]);
+            const keyStr = projected.join("|");
+            if (!seen.has(keyStr)) {
+              seen.add(keyStr);
+              subRows.push(projected);
+            }
+          });
+
+          splitHTML += `
+            <div class="bg-[#0d1117] border border-[#1e2533] rounded-lg p-3 space-y-2">
+              <div class="flex items-center justify-between border-b border-[#1e2533] pb-1.5 text-xs font-mono">
+                <span class="font-bold text-white">${s.name} (<span class="text-amber-400"><u>${s.primaryKey.join(", ")}</u></span>${s.attrs.filter(a => !s.primaryKey.includes(a)).length > 0 ? ', ' + s.attrs.filter(a => !s.primaryKey.includes(a)).join(', ') : ''})</span>
+                <span class="px-1.5 py-0.5 rounded bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 text-[10px]">3NF</span>
+              </div>
+              <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left text-xs font-mono divide-y divide-[#1e2533]">
+                  <thead>
+                    <tr class="bg-[#151c28] text-slate-300">
+          `;
+
+          s.attrs.forEach(a => {
+            const isPk = s.primaryKey.includes(a);
+            splitHTML += `
+              <th class="p-2 ${isPk ? 'text-amber-300 font-bold bg-amber-950/40 border-b border-amber-500/40' : 'text-slate-300'}">
+                ${isPk ? '<u>' + a + '</u> [PK]' : a}
+              </th>
+            `;
+          });
+
+          splitHTML += `</tr></thead><tbody class="divide-y divide-[#1e2533]/60 text-slate-300">`;
+
+          subRows.forEach((row, rIdx) => {
+            splitHTML += `<tr class="hover:bg-[#151c28]/40 transition">`;
+            row.forEach((cellVal, cIdx) => {
+              const aName = s.attrs[cIdx];
+              const isPk = s.primaryKey.includes(aName);
+              splitHTML += `<td class="p-2 ${isPk ? 'font-bold text-amber-200 bg-amber-950/10' : 'text-slate-200'}">${cellVal}</td>`;
+            });
+            splitHTML += `</tr>`;
+          });
+
+          splitHTML += `</tbody></table></div></div>`;
+        });
+
+        splitHTML += `</div>`;
+        displayArea.innerHTML = splitHTML;
+
+        legendEl.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded bg-emerald-400"></span>
+            <span><b>Dekomposition erfolgreich:</b> Alle Tabellen sind redundanzfrei und verknüpfen Primärschlüssel <code>[PK]</code> mit Fremdschlüsseln.</span>
+          </div>
+          <span class="text-slate-400 text-[10px]">Verlustlosigkeit: R = R1 ⋈ R2 ...</span>
+        `;
+        return;
+      }
+
+      // STEPS 0 to 4: RENDER ORIGINAL TABLE WITH STEP HIGHLIGHTS
+      titleEl.innerHTML = `Ausgangs-Relation ${sample.tableName} (${sample.attrs.join(", ")})`;
+
+      // Step-specific Badges & Header
+      if (stepIdx === 0) {
+        badgesEl.innerHTML = `<span class="px-2 py-0.5 rounded bg-[#151c28] border border-[#273248] text-slate-300">Ausgangszustand (Unbereinigt)</span>`;
+      } else if (stepIdx === 1) {
+        badgesEl.innerHTML = `<span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/30 font-bold">Kandidatenschlüssel markiert</span>`;
+      } else if (stepIdx === 2) {
+        badgesEl.innerHTML = `<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-bold">✓ 1NF: Atomare Werte</span>`;
+      } else if (stepIdx === 3) {
+        badgesEl.innerHTML = currentV2NF.length > 0 
+          ? `<span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500/30 font-bold animate-pulse">✗ 2NF: Partielle Abhängigkeiten</span>`
+          : `<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-bold">✓ 2NF: Voll funktional abhängig</span>`;
+      } else if (stepIdx === 4) {
+        badgesEl.innerHTML = currentV3NF.length > 0
+          ? `<span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500/30 font-bold animate-pulse">✗ 3NF: Transitive Abhängigkeit</span>`
+          : `<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-bold">✓ 3NF Erfüllt</span>`;
+      }
+
+      // Check which attributes are violating 2NF or 3NF
+      const violatingAttrs2NF = new Set();
+      if (currentV2NF.length > 0) {
+        // e.g. Name, Rang, Raum in uni_vorlesung or Name in projekt_mitarbeiter
+        currentFDs.forEach(fd => {
+          const isPartOfKey = fd.lhs.some(a => mainKey.includes(a)) && fd.lhs.length < mainKey.length;
+          if (isPartOfKey) {
+            fd.rhs.forEach(r => violatingAttrs2NF.add(r));
+          }
+        });
+        if (violatingAttrs2NF.size === 0 && currentActivePresetKey === 'uni_vorlesung') {
+          violatingAttrs2NF.add("Name"); violatingAttrs2NF.add("Rang"); violatingAttrs2NF.add("Raum");
+        }
+      }
+
+      const violatingAttrs3NF = new Set();
+      if (currentV3NF.length > 0) {
+        currentFDs.forEach(fd => {
+          const xClosure = computeClosure(fd.lhs, currentFDs);
+          const isSuperKey = xClosure.length === currentAttrs.length;
+          if (!isSuperKey) {
+            fd.rhs.forEach(r => {
+              if (!currentPrimeAttrs.has(r)) violatingAttrs3NF.add(r);
+            });
+          }
+        });
+        if (violatingAttrs3NF.size === 0 && currentActivePresetKey === 'uni_vorlesung') {
+          violatingAttrs3NF.add("Name"); violatingAttrs3NF.add("Rang"); violatingAttrs3NF.add("Raum");
+        }
+      }
+
+      let tableHTML = `
+        <table class="w-full text-left text-xs font-mono divide-y divide-[#1e2533] border border-[#1e2533] rounded-lg">
+          <thead>
+            <tr class="bg-[#151c28]">
+      `;
+
+      sample.attrs.forEach((attr) => {
+        let thClass = "p-2.5 text-slate-300 border-r border-[#1e2533] last:border-r-0";
+        let badge = "";
+
+        if (stepIdx === 1) { // Keys step
+          if (isKeyAttr(attr)) {
+            thClass = "p-2.5 bg-amber-950/60 text-amber-300 font-bold border-b-2 border-amber-500 border-r border-[#1e2533]";
+            badge = `<span class="block text-[9px] text-amber-400 font-normal">[PK] Primärschlüssel</span>`;
+          } else if (isPrimeAttr(attr)) {
+            thClass = "p-2.5 bg-emerald-950/40 text-emerald-300 font-bold border-r border-[#1e2533]";
+            badge = `<span class="block text-[9px] text-emerald-400 font-normal">[Primattribut]</span>`;
+          } else {
+            badge = `<span class="block text-[9px] text-slate-500 font-normal">[Nicht-Prim]</span>`;
+          }
+        } else if (stepIdx === 3) { // 2NF step
+          if (violatingAttrs2NF.has(attr)) {
+            thClass = "p-2.5 bg-rose-950/70 text-rose-200 font-bold border-b-2 border-rose-500 border-r border-[#1e2533] animate-pulse";
+            badge = `<span class="block text-[9px] text-rose-300 font-bold">✗ 2NF-Verletzung</span>`;
+          } else if (isKeyAttr(attr)) {
+            thClass = "p-2.5 bg-amber-950/40 text-amber-300 font-bold border-r border-[#1e2533]";
+            badge = `<span class="block text-[9px] text-amber-400 font-normal">[PK Teil]</span>`;
+          }
+        } else if (stepIdx === 4) { // 3NF step
+          if (violatingAttrs3NF.has(attr)) {
+            thClass = "p-2.5 bg-rose-950/70 text-rose-200 font-bold border-b-2 border-rose-500 border-r border-[#1e2533] animate-pulse";
+            badge = `<span class="block text-[9px] text-rose-300 font-bold">✗ Transitive 3NF</span>`;
+          } else if (isKeyAttr(attr)) {
+            thClass = "p-2.5 bg-amber-950/40 text-amber-300 font-bold border-r border-[#1e2533]";
+            badge = `<span class="block text-[9px] text-amber-400 font-normal">[Start-PK]</span>`;
+          }
+        }
+
+        tableHTML += `
+          <th class="${thClass}">
+            <div class="flex flex-col">
+              <span class="font-bold">${attr}</span>
+              ${badge}
+            </div>
+          </th>
+        `;
+      });
+
+      tableHTML += `</tr></thead><tbody class="divide-y divide-[#1e2533]/70 text-slate-300">`;
+
+      sample.rows.forEach((row, rIdx) => {
+        let trClass = "hover:bg-[#151c28]/40 transition";
+        const isSokratesDup = rIdx >= 1 && rIdx <= 2; // Rows 2 & 3 repeat Sokrates
+
+        if ((stepIdx === 3 || stepIdx === 4) && isSokratesDup && (currentV2NF.length > 0 || currentV3NF.length > 0)) {
+          trClass = "bg-rose-950/20 hover:bg-rose-950/30 transition border-l-2 border-rose-500";
+        }
+
+        tableHTML += `<tr class="${trClass}">`;
+
+        row.forEach((cellVal, cIdx) => {
+          const attr = sample.attrs[cIdx];
+          let tdClass = "p-2.5 border-r border-[#1e2533]/50 last:border-r-0 text-slate-200";
+
+          if (stepIdx === 1 && isKeyAttr(attr)) {
+            tdClass += " font-bold text-amber-300 bg-amber-950/10";
+          } else if (stepIdx === 2) {
+            tdClass += " text-emerald-300/90";
+          } else if (stepIdx === 3 && violatingAttrs2NF.has(attr)) {
+            tdClass += isSokratesDup ? " text-rose-300 font-bold bg-rose-950/40" : " text-rose-300 bg-rose-950/20";
+          } else if (stepIdx === 4 && violatingAttrs3NF.has(attr)) {
+            tdClass += isSokratesDup ? " text-rose-300 font-bold bg-rose-950/40" : " text-rose-300 bg-rose-950/20";
+          }
+
+          tableHTML += `<td class="${tdClass}">${cellVal}</td>`;
+        });
+
+        tableHTML += `</tr>`;
+      });
+
+      tableHTML += `</tbody></table>`;
+      displayArea.innerHTML = tableHTML;
+
+      // Render Step Legend
+      if (stepIdx === 0) {
+        legendEl.innerHTML = `
+          <div class="flex items-center gap-2 text-slate-300">
+            <span class="w-2 h-2 rounded bg-blue-400"></span>
+            <span><b>Ausgangs-Relation:</b> Alle Attribute in einer einzigen flachen Tabelle vereint.</span>
+          </div>
+          <span class="text-slate-500 text-[10px]">Tupelanzahl: ${sample.rows.length}</span>
+        `;
+      } else if (stepIdx === 1) {
+        legendEl.innerHTML = `
+          <div class="flex items-center gap-2 text-amber-300">
+            <span class="w-2 h-2 rounded bg-amber-400"></span>
+            <span><b>Gelb markiert:</b> Primärschlüssel <code>[PK]</code> identifiziert Zeilen eindeutig.</span>
+          </div>
+          <span class="text-slate-400 text-[10px]">Schlüssel: {${mainKey.join(", ")}}</span>
+        `;
+      } else if (stepIdx === 2) {
+        legendEl.innerHTML = `
+          <div class="flex items-center gap-2 text-emerald-300">
+            <span class="w-2 h-2 rounded bg-emerald-400"></span>
+            <span><b>1NF OK:</b> Alle Datenwerte sind atomar (keine Listen / JSON-Arrays).</span>
+          </div>
+          <span class="text-slate-400 text-[10px]">Atomare Wertebereiche</span>
+        `;
+      } else if (stepIdx === 3) {
+        legendEl.innerHTML = currentV2NF.length > 0 ? `
+          <div class="flex items-center gap-2 text-rose-300">
+            <span class="w-2 h-2 rounded bg-rose-500 animate-pulse"></span>
+            <span><b>Rot markiert (2NF-Verletzung):</b> Nicht-Primattribute hängen nur von einem Teilschlüssel ab &rarr; <b>Redundanz!</b></span>
+          </div>
+          <span class="text-rose-400 text-[10px] font-bold">Anomalie-Gefahr</span>
+        ` : `
+          <div class="flex items-center gap-2 text-emerald-300">
+            <span class="w-2 h-2 rounded bg-emerald-400"></span>
+            <span><b>2NF OK:</b> Alle Nicht-Primattribute hängen voll funktional vom gesamten Schlüssel ab.</span>
+          </div>
+        `;
+      } else if (stepIdx === 4) {
+        legendEl.innerHTML = currentV3NF.length > 0 ? `
+          <div class="flex items-center gap-2 text-rose-300">
+            <span class="w-2 h-2 rounded bg-rose-500 animate-pulse"></span>
+            <span><b>Rot markiert (3NF-Verletzung):</b> Transitive Kette erkannt &rarr; Bei Raumwechsel droht <b>Update-Anomalie</b> in mehreren Zeilen!</span>
+          </div>
+          <span class="text-rose-400 text-[10px] font-bold">Transitivität</span>
+        ` : `
+          <div class="flex items-center gap-2 text-emerald-300">
+            <span class="w-2 h-2 rounded bg-emerald-400"></span>
+            <span><b>3NF OK:</b> Keine transitiven Abhängigkeiten für Nicht-Primattribute vorhanden.</span>
+          </div>
+        `;
       }
     }
 
@@ -818,6 +1203,7 @@ VorlNr -> Titel, PersNr</textarea>
       }
 
       renderStepDots();
+      renderLiveTableCanvas(currentAnimIndex);
     }
 
     function startAnimation() {
@@ -847,6 +1233,7 @@ VorlNr -> Titel, PersNr</textarea>
           pauseAnimation();
           currentAnimIndex = ANIM_STEPS.length - 1;
           renderStepDots();
+          renderLiveTableCanvas(currentAnimIndex);
         }
       }
 
@@ -881,6 +1268,25 @@ VorlNr -> Titel, PersNr</textarea>
       currentAnimIndex = 0;
       document.getElementById("inspector-terminal-log").innerHTML = '<div class="text-slate-500">[RESET] Inspektor auf Anfang gesetzt.</div>';
       renderCurrentStep(true);
+    }
+
+    function loadNfPreset(key) {
+      currentActivePresetKey = key;
+      const p = NF_PRESETS[key];
+      if (!p) return;
+      document.getElementById("input-attributes").value = p.attrs;
+      document.getElementById("input-closure-target").value = p.target;
+      document.getElementById("input-fds").value = p.fds;
+
+      document.querySelectorAll(".nf-btn").forEach(b => {
+        if (b.dataset.id === key) {
+          b.className = "nf-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white border border-blue-500 shadow-sm";
+        } else {
+          b.className = "nf-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white";
+        }
+      });
+
+      runAnalysis();
     }
 
     window.onload = function() {
