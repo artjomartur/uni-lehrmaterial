@@ -162,16 +162,26 @@ const printStyle = document.createElement('style');
 printStyle.innerHTML = `
   @media print {
     body { background: white !important; color: black !important; }
-    header, footer, button, .hidden-print, #app-header, #app-footer { display: none !important; }
-    .cs-card, .bg-[#0b0e26], .bg-[#070919], .bg-[#0d1117] { 
+    header, footer, button, select, nav, .hidden-print, #app-header, #app-footer, .sticky { display: none !important; }
+    
+    /* Force all background classes to white and text classes to black */
+    [class*="bg-"] { 
       background: white !important; 
-      border: 1px solid #ddd !important; 
-      color: black !important;
+      background-color: white !important;
       box-shadow: none !important;
-      break-inside: avoid;
     }
-    .text-slate-200, .text-slate-300, .text-slate-400, .text-white { color: black !important; }
-    .border-indigo-950, .border-[#1e2533] { border-color: #ddd !important; }
+    [class*="text-white"], [class*="text-slate-"], [class*="text-indigo-"], [class*="text-blue-"], [class*="text-emerald-"], [class*="text-amber-"], [class*="text-rose-"], [class*="text-purple-"] { 
+      color: black !important; 
+    }
+    [class*="border-"] {
+      border-color: #ccc !important;
+    }
+    
+    .cs-card {
+      break-inside: avoid;
+      margin-bottom: 20px;
+    }
+    
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   }
 `;
