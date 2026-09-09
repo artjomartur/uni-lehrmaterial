@@ -81,6 +81,9 @@
           <a href="./rechnerorganisation/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
             03_rechnerorganisation
           </a>
+          <a href="./moses/" class="text-purple-400 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            04_moses
+          </a>
         </nav>
       </div>
 
@@ -92,56 +95,44 @@
     </div>
   </header>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
     
-    <!-- Hero Header (Simple, Technical, Monospace Accents, NO Gradient) -->
-    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 sm:p-8 space-y-4">
+    <!-- Hero Section (Simple, Technical, Monospace Accents, Zero Color Gradient) -->
+    <section class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 sm:p-8 space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
         <div class="flex items-center gap-2">
-          <span class="text-emerald-400 font-bold">$</span>
-          <span>cat /etc/unisuite/curriculum.info</span>
+          <span class="text-blue-400 font-bold">$</span>
+          <span>unisuite-cli --list-portals --all --tu-darmstadt</span>
         </div>
         <div class="text-[11px] text-slate-500">
-          TU Darmstadt • Informatik Lehre
+          Informatik-Lehrplan TU Darmstadt
         </div>
       </div>
 
-      <div class="space-y-2 pt-1">
-        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white font-heading">
-          Interaktives Informatik-Lehrmaterial
+      <div class="space-y-2 pt-2">
+        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white font-heading">
+          Interaktive Informatik-Labore &amp; Lehrmaterialien
         </h1>
-        <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
-          Kuratierte interaktive Visualisierungen, Algorithmen-Simulatoren und Klausur-Trainer für relationale Datenbanksysteme, Algorithmen &amp; Datenstrukturen und Rechnerorganisation.
+        <p class="text-slate-300 max-w-3xl text-sm sm:text-base leading-relaxed">
+          Open-Source Simulationsumgebungen und Visualisierungen für Kernfächer des Informatik-Studiums. Wählen Sie unten einen Fachbereich, um in die jeweiligen interaktiven Übungstools und Simulatoren zu navigieren.
         </p>
       </div>
+    </section>
 
-      <!-- Quick Command Status Bar -->
-      <div class="pt-2 flex flex-wrap gap-2 text-xs font-mono">
-        <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248] text-slate-300">
-          Fachbereiche: 3
-        </span>
-        <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248] text-slate-300">
-          Simulatoren: 12
-        </span>
-        <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248] text-slate-300">
-          Framework: KaTeX + SVG Simulatoren
-        </span>
-      </div>
-    </div>
-
-    <!-- 3 Core Fachbereiche (Überkategorien Portale) -->
-    <section class="space-y-4">
-      <div class="flex items-center justify-between border-b border-[#1e2533] pb-2">
-        <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-          <span>[+]</span> Fachbereiche wählen
-        </h2>
-        <span class="text-xs font-mono text-slate-500">3 Hauptmodule</span>
+    <!-- 4 Main Portals Grid (Replaces old card listing on startpage) -->
+    <section class="space-y-6">
+      <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+        <div class="flex items-center gap-2 font-mono text-xs text-slate-300">
+          <span class="text-blue-400 font-bold">&gt;</span>
+          <span class="font-bold uppercase tracking-wider">Fachbereiche &amp; Modul-Katalog:</span>
+        </div>
+        <span class="text-xs font-mono text-slate-500">4 Fachbereiche verfügbar</span>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Category 1: Informationsmanagement & Datenbanken -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+
+        <!-- Category 1: Informationsmanagement -->
         <div class="cs-card rounded-xl p-6 flex flex-col justify-between group">
           <div class="space-y-4">
             <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
@@ -149,7 +140,7 @@
                 01_informationsmanagement
               </span>
               <span class="text-xs font-mono text-slate-400 bg-[#151c28] px-2 py-0.5 rounded border border-[#273248]">
-                DB &amp; SQL
+                DB &amp; Info
               </span>
             </div>
 
@@ -158,23 +149,23 @@
                 Informationsmanagement
               </h3>
               <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                Relationale Algebra, logische Operatorbäume, Attributhüllen &amp; Normalisierung (1NF–BCNF), B+-Bäume sowie ACID-Transaktionen mit 2PL Locking.
+                Relationales Datenmodell, deklarative Algebra, SQL Optimierungs-Pipelines, B+ Baum Indexstrukturen, Normalisierung und 2-Phasen-Sperrprotokolle (2PL).
               </p>
             </div>
 
             <!-- Contained Tools List -->
             <div class="space-y-1.5 pt-2 border-t border-[#1e2533] text-xs font-mono text-slate-300">
               <div class="flex items-center gap-2">
-                <span class="text-blue-400 font-bold">&gt;</span> Relationale Algebra &amp; Joins
+                <span class="text-blue-400 font-bold">&gt;</span> Relationale Algebra Explorer
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-blue-400 font-bold">&gt;</span> SQL Query Optimizer (AST)
+                <span class="text-blue-400 font-bold">&gt;</span> SQL Query Optimizer &amp; AST
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-blue-400 font-bold">&gt;</span> Normalisierungs-Coach (1NF-BCNF)
+                <span class="text-blue-400 font-bold">&gt;</span> Normalisierungs-Coach (1NF - BCNF)
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-blue-400 font-bold">&gt;</span> B+ Tree &amp; Indexing Playground
+                <span class="text-blue-400 font-bold">&gt;</span> B+ Baum Simulator &amp; Range Seek
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-blue-400 font-bold">&gt;</span> Transaktionen &amp; 2PL Scheduler
@@ -210,7 +201,7 @@
                 Algorithmen &amp; Datenstrukturen
               </h3>
               <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                Interaktive visuelle Labore für Kürzeste-Wege-Algorithmen (Dijkstra), selbstbalancierende AVL-Bäume mit allen 4 Rotationen, Sortierverfahren und asymptotische Master-Theorem Analyse.
+                Interaktive visuelle Labore für Kürzeste-Wege-Algorithmen (Dijkstra), selbstbalancierende AVL-Bäume mit allen 4 Rotationen, Sortierverfahren und Master-Theorem.
               </p>
             </div>
 
@@ -220,16 +211,13 @@
                 <span class="text-amber-400 font-bold">&gt;</span> Dijkstra Graph-Explorer
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-amber-400 font-bold">&gt;</span> AVL-Baum Rotationen (LL/RR/LR/RL)
+                <span class="text-amber-400 font-bold">&gt;</span> AVL-Baum Rotationen
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-amber-400 font-bold">&gt;</span> Quicksort vs. Bubblesort Labor
+                <span class="text-amber-400 font-bold">&gt;</span> Sortier-Visualisierung
               </div>
               <div class="flex items-center gap-2">
                 <span class="text-amber-400 font-bold">&gt;</span> Master-Theorem Analysator
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-amber-400 font-bold">&gt;</span> Asymptotik &amp; O-Notation Quiz
               </div>
             </div>
           </div>
@@ -262,26 +250,23 @@
                 Rechnerorganisation
               </h3>
               <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                Architektur-Visualisierungen: 5-Stufen RISC-V Pipeline mit Hazards &amp; Forwarding, CPU Cache-Simulator (Direct / 2-Way) mit Hit/Miss-Statistik, IEEE-754 Bit-Labor und Amdahl's Law.
+                Architektur-Visualisierungen: 5-Stufen RISC-V Pipeline mit Hazards &amp; Forwarding, CPU Cache-Simulator (Direct / N-Way Set), IEEE-754 Bit-Labor und Amdahl's Law.
               </p>
             </div>
 
             <!-- Contained Tools List -->
             <div class="space-y-1.5 pt-2 border-t border-[#1e2533] text-xs font-mono text-slate-300">
               <div class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">&gt;</span> 5-Stufen RISC-V Pipeline
+                <span class="text-emerald-400 font-bold">&gt;</span> RISC-V Pipeline
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">&gt;</span> Data Hazards &amp; Forwarding
+                <span class="text-emerald-400 font-bold">&gt;</span> CPU Cache Simulator
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">&gt;</span> CPU Cache Simulator (Tag/Index)
+                <span class="text-emerald-400 font-bold">&gt;</span> IEEE-754 Labor
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">&gt;</span> IEEE-754 32-Bit Gleitkomma
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-emerald-400 font-bold">&gt;</span> Amdahl's Law Speedup Rechner
+                <span class="text-emerald-400 font-bold">&gt;</span> Amdahl's Law Rechner
               </div>
             </div>
           </div>
@@ -293,6 +278,58 @@
             >
               <span>Fachbereich öffnen</span>
               <span class="text-emerald-400">&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Category 4: MoSeS (Heiko Mantel) -->
+        <div class="cs-card rounded-xl p-6 flex flex-col justify-between group">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+              <span class="text-xs font-mono font-bold text-purple-400">
+                04_moses
+              </span>
+              <span class="text-xs font-mono text-slate-400 bg-[#151c28] px-2 py-0.5 rounded border border-[#273248]">
+                MAIS • Mantel
+              </span>
+            </div>
+
+            <div>
+              <h3 class="text-xl font-bold text-white group-hover:text-purple-400 transition font-heading">
+                MoSeS (Prof. Mantel)
+              </h3>
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                Modellierung, Spezifikation &amp; Semantik: Hoare-Kalkül $\{P\}\,c\,\{Q\}$, Weakest Precondition $wp$, Big-Step Semantik ($\Downarrow$), LTL/CTL Model Checking und Resolution.
+              </p>
+            </div>
+
+            <!-- Contained Tools List -->
+            <div class="space-y-1.5 pt-2 border-t border-[#1e2533] text-xs font-mono text-slate-300">
+              <div class="flex items-center gap-2">
+                <span class="text-purple-400 font-bold">&gt;</span> Hoare-Tripel &amp; Invarianten
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-purple-400 font-bold">&gt;</span> Weakest Precondition ($wp$)
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-purple-400 font-bold">&gt;</span> Big-Step Ableitungsbaum ($\Downarrow$)
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-purple-400 font-bold">&gt;</span> LTL/CTL Kripke Model Checking
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-purple-400 font-bold">&gt;</span> Resolutions-Widerlegung &amp; DPLL
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-6 mt-4 border-t border-[#1e2533]">
+            <a 
+              href="./moses/" 
+              class="w-full py-2.5 px-4 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] hover:border-purple-500 text-slate-100 hover:text-white font-mono font-semibold text-xs flex items-center justify-between transition"
+            >
+              <span>Fachbereich öffnen</span>
+              <span class="text-purple-400">&rarr;</span>
             </a>
           </div>
         </div>
@@ -314,6 +351,7 @@
         <a href="./informationsmanagement/" class="hover:text-slate-200 transition">~/informationsmanagement</a>
         <a href="./algorithmen-datenstrukturen/" class="hover:text-slate-200 transition">~/algorithmen_und_datenstrukturen</a>
         <a href="./rechnerorganisation/" class="hover:text-slate-200 transition">~/rechnerorganisation</a>
+        <a href="./moses/" class="hover:text-slate-200 transition">~/moses</a>
         <a href="./disclaimer/" class="hover:text-slate-200 transition">~/disclaimer</a>
       </div>
     </div>

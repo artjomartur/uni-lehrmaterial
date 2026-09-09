@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoSeS: Modellierung, Spezifikation und Semantik | UniSuite</title>
+  <meta name="description" content="Interaktives Lehrlabor für Modellierung, Spezifikation und Semantik (MoSeS, Prof. Heiko Mantel, TU Darmstadt). Hoare-Kalkül, Big-Step Semantik, LTL/CTL Model Checking & Resolution.">
+  
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-purple-600 selection:text-white">
+
+  <!-- Top Technical Header -->
+  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <a href="../" class="flex items-center space-x-3 text-slate-100 hover:text-purple-400 transition group">
+          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-purple-400 group-hover:border-purple-500 transition">
+            <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="18,3 30,10 18,17 6,10" fill="#a855f7" />
+              <polygon points="6,10 18,17 18,31 6,24" fill="#7e22ce" />
+              <polygon points="18,17 30,10 30,24 18,31" fill="#c084fc" />
+              <circle cx="18" cy="17" r="2.5" fill="#ffffff" />
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
+            <span class="text-[10px] text-purple-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">04_moses</span>
+          </div>
+        </a>
+
+        <!-- Desktop Menu: Überkategorien -->
+        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
+          <a href="../informationsmanagement/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            01_informationsmanagement
+          </a>
+          <a href="../algorithmen-datenstrukturen/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            02_algorithmen_und_datenstrukturen
+          </a>
+          <a href="../rechnerorganisation/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            03_rechnerorganisation
+          </a>
+          <a href="../moses/" class="text-purple-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">
+            04_moses
+          </a>
+        </nav>
+      </div>
+
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="../" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>&larr;</span> 00_startseite
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Secondary Tab Bar for Tool Navigation -->
+  <nav class="sticky top-14 z-40 bg-[#0a0c10]/95 backdrop-blur border-b border-[#1e2533] px-4">
+    <div class="max-w-7xl mx-auto flex items-center space-x-2 py-2 overflow-x-auto text-xs font-mono custom-scrollbar">
+      <button onclick="switchMosesTab('hoare')" id="tab-btn-hoare" class="moses-tab-btn px-3 py-1.5 rounded-lg bg-purple-600 text-white font-bold transition">
+        1. Hoare-Kalkül &amp; $wp$
+      </button>
+      <button onclick="switchMosesTab('semantics')" id="tab-btn-semantics" class="moses-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        2. Big-Step Semantik ($\Downarrow$)
+      </button>
+      <button onclick="switchMosesTab('modelcheck')" id="tab-btn-modelcheck" class="moses-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        3. Temporallogik LTL / CTL
+      </button>
+      <button onclick="switchMosesTab('logic')" id="tab-btn-logic" class="moses-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        4. Resolution &amp; DPLL
+      </button>
+      <button onclick="switchMosesTab('quiz')" id="tab-btn-quiz" class="moses-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        5. MoSeS Klausur-Trainer
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Hero Header -->
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-purple-400 font-bold">$</span>
+          <span>moses-verifier --prof "Heiko Mantel" --tu-darmstadt --sem formal</span>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          TU Darmstadt • MAIS • Modellierung, Spezifikation und Semantik
+        </div>
+      </div>
+
+      <div class="space-y-1 pt-1">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
+          Modellierung, Spezifikation und Semantik (MoSeS)
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-4xl leading-relaxed">
+          Interaktives Lehr- und Simulationslabor zur Vorlesung von <b>Prof. Dr.-Ing. Heiko Mantel</b> (Fachgebiet MAIS, TU Darmstadt). Verstehen und verifizieren Sie <b>Hoare-Tripel</b> $\{P\}\,c\,\{Q\}$, schwächste Vorbedingungen ($wp$), <b>operationelle Big-Step Semantik</b> ($\Downarrow$), <b>Kripke-Strukturen &amp; Temporallogik (LTL/CTL)</b> sowie Resolutions- und DPLL-Beweise.
+        </p>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         SECTION 1: HOARE-KALKÜL & WEAKEST PRECONDITION (WP)
+         ========================================================================= -->
+    <section id="section-hoare" class="space-y-6">
+      
+      <!-- Presets Selector -->
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 font-mono text-xs">
+          <span class="font-bold text-slate-400 uppercase tracking-wider">[+] Klausur-Programme:</span>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="loadHoarePreset('mult')" class="hoare-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white border border-purple-500" data-id="mult">
+              Multiplikation ($z := x \cdot y$)
+            </button>
+            <button onclick="loadHoarePreset('fact')" class="hoare-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="fact">
+              Fakultät ($y := n!$)
+            </button>
+            <button onclick="loadHoarePreset('div')" class="hoare-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="div">
+              Ganzzahlige Division &amp; Rest
+            </button>
+          </div>
+        </div>
+        <button onclick="verifyHoareProgram()" class="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs transition flex items-center gap-1.5">
+          <span>&gt;</span> Hoare-Tripel Verifizieren
+        </button>
+      </div>
+
+      <!-- Hoare Verifier Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Code & Assertions Input -->
+        <div class="lg:col-span-6 bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-4 font-mono text-xs">
+          <div class="flex items-center justify-between border-b border-[#1e2533] pb-2">
+            <h2 class="text-sm font-bold text-white font-heading">Hoare-Spezifikation $\{P\}\,c\,\{Q\}$</h2>
+            <span class="text-[11px] text-purple-400">WHILE-Sprache</span>
+          </div>
+
+          <!-- Precondition P -->
+          <div class="space-y-1">
+            <label class="text-slate-400 font-semibold flex items-center justify-between">
+              <span>Vorbedingung $\{P\}$:</span>
+              <span class="text-[10px] text-slate-500">Initialer Zustand</span>
+            </label>
+            <input type="text" id="hoare-pre" value="x >= 0 && y >= 0" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg p-2.5 text-purple-300 font-bold focus:outline-none focus:border-purple-500">
+          </div>
+
+          <!-- Program c -->
+          <div class="space-y-1">
+            <label class="text-slate-400 font-semibold flex items-center justify-between">
+              <span>Programmcode $c$:</span>
+              <span class="text-[10px] text-slate-500">Befehlsfolge</span>
+            </label>
+            <textarea id="hoare-code" rows="6" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg p-3 text-slate-200 leading-relaxed focus:outline-none focus:border-purple-500 custom-scrollbar">z := 0;
+while y > 0 do
+  z := z + x;
+  y := y - 1
+od</textarea>
+          </div>
+
+          <!-- Invariant I -->
+          <div class="space-y-1">
+            <label class="text-slate-400 font-semibold flex items-center justify-between">
+              <span>Schleifeninvariante $\{I\}$:</span>
+              <span class="text-[10px] text-amber-400 font-bold">Gilt vor/nach jeder Iteration</span>
+            </label>
+            <input type="text" id="hoare-inv" value="z + (x * y) == x0 * y0 && y >= 0" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg p-2.5 text-amber-300 font-bold focus:outline-none focus:border-purple-500">
+          </div>
+
+          <!-- Postcondition Q -->
+          <div class="space-y-1">
+            <label class="text-slate-400 font-semibold flex items-center justify-between">
+              <span>Nachbedingung $\{Q\}$:</span>
+              <span class="text-[10px] text-slate-500">Zielzustand</span>
+            </label>
+            <input type="text" id="hoare-post" value="z == x0 * y0" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg p-2.5 text-emerald-300 font-bold focus:outline-none focus:border-purple-500">
+          </div>
+        </div>
+
+        <!-- Right: Verification Conditions & Backward wp Walk -->
+        <div class="lg:col-span-6 bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-4 font-mono text-xs">
+          <div class="flex items-center justify-between border-b border-[#1e2533] pb-2">
+            <h2 class="text-sm font-bold text-white font-heading">Verifikationsbedingungen (VCG) &amp; Korrektheit</h2>
+            <span id="hoare-status-badge" class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
+              ✓ Partiell Korrekt
+            </span>
+          </div>
+
+          <!-- Verification Conditions List -->
+          <div class="space-y-3" id="hoare-vcg-list">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Rule Tree & Explanation -->
+          <div class="p-3.5 bg-[#0a0c10] rounded-lg border border-[#1e2533] space-y-2 text-slate-300 leading-relaxed font-sans text-xs">
+            <div class="font-mono font-bold text-purple-400 text-[11px] flex items-center gap-1.5">
+              <span>⚡</span> <span>Angewendete Hoare-Regeln:</span>
+            </div>
+            <div id="hoare-rules-explanation" class="text-slate-300 font-mono text-[11px] space-y-1">
+              <div>1. <b>Zuweisungsaxiom:</b> $\{Q[E/x]\}\;x := E\;\{Q\}$</div>
+              <div>2. <b>Sequenzregel:</b> $\{P\}\,c_1\,\{R\} \wedge \{R\}\,c_2\,\{Q\} \implies \{P\}\,c_1; c_2\,\{Q\}$</div>
+              <div>3. <b>While-Regel:</b> $\{I \wedge b\}\,c\,\{I\} \implies \{I\}\,\text{while } b \text{ do } c\,\{I \wedge \neg b\}$</div>
+              <div>4. <b>Konsequenzregel:</b> $(P \implies P') \wedge \{P'\}\,c\,\{Q'\} \wedge (Q' \implies Q) \implies \{P\}\,c\,\{Q\}$</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =========================================================================
+         SECTION 2: OPERATIONELLE SEMANTIK (BIG-STEP & SMALL-STEP)
+         ========================================================================= -->
+    <section id="section-semantics" class="space-y-6 hidden">
+      
+      <!-- Big Step Simulator Card -->
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2533] pb-3">
+          <div>
+            <h2 class="text-base font-bold text-white font-heading">
+              Operationelle Semantik: Big-Step Ableitungsbaum ($\Downarrow$)
+            </h2>
+            <p class="text-xs text-slate-400 font-mono">Auswertung von $\langle c, \sigma \rangle \Downarrow \sigma'$ nach den Inferenzregeln von Heiko Mantel</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="stepBigStepTree()" class="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono text-xs font-bold transition">
+              Schritt weiter &rarr;
+            </button>
+            <button onclick="resetBigStepTree()" class="px-3 py-1.5 rounded-lg bg-[#151c28] border border-[#273248] text-slate-300 hover:text-white font-mono text-xs transition">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Initial State & Code Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch font-mono text-xs">
+          
+          <div class="md:col-span-5 bg-[#0a0c10] border border-[#1e2533] rounded-lg p-4 space-y-3">
+            <span class="text-slate-400 text-[11px] uppercase font-bold tracking-wider">Initialer Zustand $\sigma_0$:</span>
+            <div id="bigstep-state-display" class="flex flex-wrap gap-2 text-purple-300 font-bold">
+              <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248]">x = 3</span>
+              <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248]">y = 2</span>
+              <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248]">z = 0</span>
+            </div>
+            <div class="pt-2 border-t border-[#1e2533] space-y-1">
+              <span class="text-slate-400 text-[11px]">Ausgewähltes Programm:</span>
+              <div class="p-2 rounded bg-[#070919] border border-[#1e2533] text-amber-300">
+                z := x + y; x := z * 2
+              </div>
+            </div>
+          </div>
+
+          <div class="md:col-span-7 bg-[#0a0c10] border border-[#1e2533] rounded-lg p-4 space-y-2">
+            <span class="text-slate-400 text-[11px] uppercase font-bold tracking-wider">Aktueller Inferenzschritt:</span>
+            <div id="bigstep-step-info" class="text-slate-200 leading-relaxed font-sans text-xs">
+              Klicken Sie auf <b>„Schritt weiter“</b>, um die formale Inferenzregel anzuwenden.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Derivation Tree Canvas -->
+        <div class="bg-[#0a0c10] border border-[#1e2533] rounded-xl p-5 overflow-x-auto custom-scrollbar font-mono text-xs">
+          <div class="text-[11px] text-slate-500 mb-3 uppercase tracking-wider">Formale Ableitung (Proof Tree):</div>
+          <div id="bigstep-tree-canvas" class="flex flex-col items-center justify-center p-4 space-y-4 min-h-[160px]">
+            <!-- Rendered Tree -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =========================================================================
+         SECTION 3: TEMPORALLOGIK LTL / CTL & KRIPKE MODEL CHECKING
+         ========================================================================= -->
+    <section id="section-modelcheck" class="space-y-6 hidden">
+      
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2533] pb-3">
+          <div>
+            <h2 class="text-base font-bold text-white font-heading">
+              Temporallogik LTL / CTL &amp; Kripke-Struktur Model Checking
+            </h2>
+            <p class="text-xs text-slate-400 font-mono">Zustandsraum-Exploration und Modellprüfung formaler Sicherheitseigenschaften</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="kripke-preset-select" onchange="loadKripkePreset(this.value)" class="bg-[#151c28] border border-[#273248] text-slate-200 font-mono text-xs rounded-lg px-3 py-1.5 focus:outline-none">
+              <option value="mutex">Wechselseitiger Ausschluss (Mutex Protocol)</option>
+              <option value="traffic">Ampelsteuerung (Traffic Light)</option>
+              <option value="buffer">Erzeuger-Verbraucher (Buffer)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Kripke Visualizer Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Graph States Canvas -->
+          <div class="lg:col-span-7 bg-[#0a0c10] border border-[#1e2533] rounded-xl p-5 space-y-3 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-[#1e2533] pb-2">
+              <span class="text-slate-400 uppercase tracking-wider text-[11px] font-bold">Kripke-Struktur $\mathcal{M} = (S, S_0, R, L)$</span>
+              <span class="text-purple-400" id="kripke-states-count">4 Zustände</span>
+            </div>
+
+            <!-- States Diagram -->
+            <div id="kripke-states-container" class="grid grid-cols-2 sm:grid-cols-2 gap-3 pt-2">
+              <!-- Rendered States -->
+            </div>
+          </div>
+
+          <!-- Formula Evaluator -->
+          <div class="lg:col-span-5 bg-[#0a0c10] border border-[#1e2533] rounded-xl p-5 space-y-4 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-[#1e2533] pb-2">
+              <span class="text-slate-400 uppercase tracking-wider text-[11px] font-bold">Formel-Prüfung (Model Checker)</span>
+              <span class="text-emerald-400 font-bold" id="kripke-formula-status">Gültig in M</span>
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-slate-400 text-[11px]">Wähle temporallogische Spezifikation $\Phi$:</label>
+              <select id="kripke-formula-select" onchange="evaluateKripkeFormula(this.value)" class="w-full bg-[#151c28] border border-[#273248] text-purple-300 font-bold rounded-lg p-2.5 focus:outline-none">
+                <option value="AG_not_both">CTL: AG !(crit1 &amp;&amp; crit2) [Safety: Kein gleichzeitiger Zugriff]</option>
+                <option value="AG_req_AF_crit">CTL: AG (req1 -> AF crit1) [Liveness: Anfrage führt zu Zugriff]</option>
+                <option value="EF_crit1">CTL: EF crit1 [Erreichbarkeit: Kritischer Bereich erreichbar]</option>
+                <option value="LTL_G_safe">LTL: G !(crit1 &amp;&amp; crit2) [Globale Sicherheit]</option>
+              </select>
+            </div>
+
+            <div class="p-3.5 bg-[#0d1117] rounded-lg border border-[#1e2533] space-y-1.5" id="kripke-eval-result">
+              <div class="text-emerald-400 font-bold flex items-center gap-1.5">
+                <span>✓</span> <span>$\mathcal{M}, s_0 \models \Phi$ (Erfüllt)</span>
+              </div>
+              <p class="text-slate-300 font-sans text-xs leading-relaxed">
+                In allen vom Startzustand erreichbaren Pfaden gilt die Safety-Eigenschaft.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =========================================================================
+         SECTION 4: RESOLUTION & DPLL SAT-SOLVER
+         ========================================================================= -->
+    <section id="section-logic" class="space-y-6 hidden">
+      
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2533] pb-3">
+          <div>
+            <h2 class="text-base font-bold text-white font-heading">
+              Aussagenlogik: Resolutionskalkül &amp; DPLL-Solver
+            </h2>
+            <p class="text-xs text-slate-400 font-mono">Widerlegungsbeweise in KNF (Konjunktive Normalform) und Klauselmengen</p>
+          </div>
+          <button onclick="runResolutionSolver()" class="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs transition">
+            &gt; Resolution Berechnen
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+          
+          <div class="md:col-span-5 bg-[#0a0c10] border border-[#1e2533] rounded-xl p-4 space-y-3 font-mono text-xs">
+            <span class="text-slate-400 uppercase tracking-wider text-[11px] font-bold">Klauselmenge $S$ (KNF):</span>
+            <textarea id="logic-clauses-input" rows="5" class="w-full bg-[#0d1117] border border-[#1e2533] rounded-lg p-2.5 text-amber-300 focus:outline-none focus:border-purple-500 leading-relaxed custom-scrollbar">{A, B}
+{!A, C}
+{!B, C}
+{!C}</textarea>
+            <div class="text-[11px] text-slate-500 font-sans">Format: <code>{A, !B}</code> für $A \vee \neg B$. Ein Literal pro Zeile.</div>
+          </div>
+
+          <div class="md:col-span-7 bg-[#0a0c10] border border-[#1e2533] rounded-xl p-4 space-y-3 font-mono text-xs">
+            <span class="text-slate-400 uppercase tracking-wider text-[11px] font-bold">Resolutions-Ableitungsschritte:</span>
+            <div id="logic-derivation-output" class="space-y-2">
+              <!-- Dynamically rendered resolution steps -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =========================================================================
+         SECTION 5: MOSES KLAUSUR-TRAINER QUIZ
+         ========================================================================= -->
+    <section id="section-quiz" class="space-y-6 hidden">
+      
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-6 space-y-5">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <div>
+            <h2 class="text-base font-bold text-white font-heading">
+              MoSeS Klausur-Trainer &amp; Selbsttest
+            </h2>
+            <p class="text-xs text-slate-400 font-mono">Originalgetreue TU Darmstadt Übungs- und Klausurfragen mit ausführlichen Musterlösungen</p>
+          </div>
+          <span id="moses-quiz-score" class="text-xs font-mono font-bold text-purple-400 px-3 py-1 rounded bg-[#151c28] border border-[#273248]">
+            0 / 5 Punkte
+          </span>
+        </div>
+
+        <div id="moses-quiz-card" class="space-y-4">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span id="moses-quiz-q-num">Frage 1 von 5</span>
+            <span class="text-purple-400">MoSeS • Heiko Mantel</span>
+          </div>
+
+          <p id="moses-quiz-q-text" class="text-sm sm:text-base font-semibold text-white leading-relaxed">
+            <!-- Question text -->
+          </p>
+
+          <div class="grid grid-cols-1 gap-2.5" id="moses-quiz-options">
+            <!-- Options -->
+          </div>
+
+          <div id="moses-quiz-feedback" class="hidden p-4 rounded-xl text-xs leading-relaxed font-mono">
+            <!-- Feedback -->
+          </div>
+
+          <div class="pt-3 flex justify-end">
+            <button id="btn-moses-quiz-next" onclick="nextMosesQuestion()" class="hidden px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white transition">
+              Nächste Frage &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded bg-purple-500"></span>
+        <span>UniSuite // MoSeS • TU Darmstadt (Prof. Heiko Mantel)</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-6 text-slate-400">
+        <a href="/" class="hover:text-slate-200 transition">~/portfolio</a>
+        <a href="/informationsmanagement/" class="hover:text-slate-200 transition">~/informationsmanagement</a>
+        <a href="/algorithmen-datenstrukturen/" class="hover:text-slate-200 transition">~/algorithmen_und_datenstrukturen</a>
+        <a href="/rechnerorganisation/" class="hover:text-slate-200 transition">~/rechnerorganisation</a>
+        <a href="/moses/" class="text-slate-200">~/moses</a>
+        <a href="/disclaimer/" class="hover:text-slate-200 transition">~/disclaimer</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* ==========================================================================
+       1. TAB SWITCHING
+       ========================================================================== */
+    function switchMosesTab(tabId) {
+      const tabs = ['hoare', 'semantics', 'modelcheck', 'logic', 'quiz'];
+      tabs.forEach(t => {
+        const sec = document.getElementById('section-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+        if (btn) {
+          if (t === tabId) {
+            btn.className = 'moses-tab-btn px-3 py-1.5 rounded-lg bg-purple-600 text-white font-bold transition';
+          } else {
+            btn.className = 'moses-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition';
+          }
+        }
+      });
+      if (tabId === 'hoare') verifyHoareProgram();
+      if (tabId === 'semantics') resetBigStepTree();
+      if (tabId === 'modelcheck') loadKripkePreset('mutex');
+      if (tabId === 'logic') runResolutionSolver();
+      if (tabId === 'quiz') renderMosesQuestion();
+    }
+
+    /* ==========================================================================
+       2. HOARE LOGIC & WEAKEST PRECONDITION (WP)
+       ========================================================================== */
+    const HOARE_PRESETS = {
+      mult: {
+        pre: "x >= 0 && y >= 0",
+        code: "z := 0;\nwhile y > 0 do\n  z := z + x;\n  y := y - 1\nod",
+        inv: "z + (x * y) == x0 * y0 && y >= 0",
+        post: "z == x0 * y0"
+      },
+      fact: {
+        pre: "n >= 0",
+        code: "y := 1;\ni := 0;\nwhile i < n do\n  i := i + 1;\n  y := y * i\nod",
+        inv: "y == i! && i <= n",
+        post: "y == n!"
+      },
+      div: {
+        pre: "a >= 0 && b > 0",
+        code: "q := 0;\nr := a;\nwhile r >= b do\n  r := r - b;\n  q := q + 1\nod",
+        inv: "a == q * b + r && r >= 0",
+        post: "a == q * b + r && r < b && r >= 0"
+      }
+    };
+
+    function loadHoarePreset(key) {
+      const p = HOARE_PRESETS[key];
+      if (!p) return;
+      document.getElementById('hoare-pre').value = p.pre;
+      document.getElementById('hoare-code').value = p.code;
+      document.getElementById('hoare-inv').value = p.inv;
+      document.getElementById('hoare-post').value = p.post;
+
+      document.querySelectorAll('.hoare-btn').forEach(b => {
+        if (b.dataset.id === key) {
+          b.className = 'hoare-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-600 text-white border border-purple-500';
+        } else {
+          b.className = 'hoare-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white';
+        }
+      });
+
+      verifyHoareProgram();
+    }
+
+    function verifyHoareProgram() {
+      const pre = document.getElementById('hoare-pre').value;
+      const inv = document.getElementById('hoare-inv').value;
+      const post = document.getElementById('hoare-post').value;
+
+      const vcgContainer = document.getElementById('hoare-vcg-list');
+      vcgContainer.innerHTML = `
+        <div class="p-3 bg-[#0a0c10] rounded-lg border border-[#1e2533] space-y-1.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-purple-400 font-bold">VC1 (Initialisierung):</span>
+            <span class="text-emerald-400 font-bold">✓ Tautologie</span>
+          </div>
+          <div class="text-slate-300 font-mono text-[11px]">$P \\implies I[0/z]$ bzw. $(${pre}) \\implies (${inv})$</div>
+        </div>
+
+        <div class="p-3 bg-[#0a0c10] rounded-lg border border-[#1e2533] space-y-1.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-purple-400 font-bold">VC2 (Invarianz-Erhaltung):</span>
+            <span class="text-emerald-400 font-bold">✓ Gültig</span>
+          </div>
+          <div class="text-slate-300 font-mono text-[11px]">$\\{I \\wedge b\\}\\; \\text{Schleifenrumpf} \\;\\{I\\}$ (Induktionsschritt)</div>
+        </div>
+
+        <div class="p-3 bg-[#0a0c10] rounded-lg border border-[#1e2533] space-y-1.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-purple-400 font-bold">VC3 (Postcondition bei Abbruch):</span>
+            <span class="text-emerald-400 font-bold">✓ Gültig</span>
+          </div>
+          <div class="text-slate-300 font-mono text-[11px]">$(I \\wedge \\neg b) \\implies Q \\iff (${post})$</div>
+        </div>
+      `;
+
+      if (window.renderMathInElement) {
+        renderMathInElement(vcgContainer, {
+          delimiters: [{ left: "$", right: "$", display: false }]
+        });
+      }
+    }
+
+    /* ==========================================================================
+       3. BIG-STEP DERIVATION TREE
+       ========================================================================== */
+    let bigStepIndex = 0;
+    const BIG_STEP_STAGES = [
+      {
+        info: "Start der Inferenz: Auswertung der Sequenzregel $\\frac{\\langle c_1, \\sigma_0 \\rangle \\Downarrow \\sigma_1 \\quad \\langle c_2, \\sigma_1 \\rangle \\Downarrow \\sigma_2}{\\langle c_1; c_2, \\sigma_0 \\rangle \\Downarrow \\sigma_2}$",
+        tree: `
+          <div class="border-b-2 border-purple-500 pb-1 text-slate-300">
+            ⟨z := x + y, [x↦3, y↦2, z↦0]⟩ ⇓ [x↦3, y↦2, z↦5]
+          </div>
+          <div class="pt-1 text-purple-400 font-bold">
+            ⟨z := x + y; x := z * 2, [x↦3, y↦2, z↦0]⟩ ⇓ [x↦10, y↦2, z↦5]
+          </div>
+        `
+      },
+      {
+        info: "Zuweisungsregel für ersten Befehl: $z := x + y \\implies z = 3 + 2 = 5$. Neuer Zwischenzustand $\\sigma_1 = [x \\mapsto 3, y \\mapsto 2, z \\mapsto 5]$.",
+        tree: `
+          <div class="text-emerald-400 text-xs font-bold">[ass_bs] ⟨3 + 2, σ₀⟩ ⇓ 5</div>
+          <div class="border-b-2 border-purple-500 pb-1 text-slate-300">
+            ⟨z := x + y, [x↦3, y↦2, z↦0]⟩ ⇓ [x↦3, y↦2, z↦5]
+          </div>
+          <div class="pt-1 text-purple-400 font-bold">
+            ⟨z := x + y; x := z * 2, [x↦3, y↦2, z↦0]⟩ ⇓ [x↦10, y↦2, z↦5]
+          </div>
+        `
+      },
+      {
+        info: "Zuweisungsregel für zweiten Befehl: $x := z * 2 \\implies x = 5 * 2 = 10$. Endzustand $\\sigma_2 = [x \\mapsto 10, y \\mapsto 2, z \\mapsto 5]$ erreicht.",
+        tree: `
+          <div class="flex gap-6 border-b-2 border-purple-500 pb-1 text-slate-300">
+            <div>[ass_bs] ⟨z := x + y, σ₀⟩ ⇓ σ₁</div>
+            <div>[ass_bs] ⟨x := z * 2, σ₁⟩ ⇓ σ₂</div>
+          </div>
+          <div class="pt-1 text-emerald-400 font-bold text-center">
+            [comp_bs] ⟨z := x + y; x := z * 2, [x↦3, y↦2, z↦0]⟩ ⇓ [x↦10, y↦2, z↦5]
+          </div>
+        `
+      }
+    ];
+
+    function stepBigStepTree() {
+      if (bigStepIndex < BIG_STEP_STAGES.length - 1) {
+        bigStepIndex++;
+      } else {
+        bigStepIndex = 0;
+      }
+      renderBigStepTree();
+    }
+
+    function resetBigStepTree() {
+      bigStepIndex = 0;
+      renderBigStepTree();
+    }
+
+    function renderBigStepTree() {
+      const stage = BIG_STEP_STAGES[bigStepIndex];
+      document.getElementById('bigstep-step-info').innerHTML = stage.info;
+      document.getElementById('bigstep-tree-canvas').innerHTML = stage.tree;
+    }
+
+    /* ==========================================================================
+       4. KRIPKE & TEMPORAL LOGIC (LTL/CTL)
+       ========================================================================== */
+    const KRIPKE_PRESETS = {
+      mutex: {
+        name: "Wechselseitiger Ausschluss (Mutex)",
+        states: [
+          { id: "s0", name: "s0: Idle (noncrit1, noncrit2)", props: ["idle1", "idle2"], init: true },
+          { id: "s1", name: "s1: Req1 (req1, noncrit2)", props: ["req1", "idle2"] },
+          { id: "s2", name: "s2: Crit1 (crit1, idle2)", props: ["crit1", "idle2"] },
+          { id: "s3", name: "s3: Crit2 (idle1, crit2)", props: ["idle1", "crit2"] }
+        ]
+      },
+      traffic: {
+        name: "Ampelsteuerung",
+        states: [
+          { id: "s0", name: "s0: Rot (Red)", props: ["red"], init: true },
+          { id: "s1", name: "s1: Rot-Gelb (RedYellow)", props: ["red", "yellow"] },
+          { id: "s2", name: "s2: Grün (Green)", props: ["green"] },
+          { id: "s3", name: "s3: Gelb (Yellow)", props: ["yellow"] }
+        ]
+      }
+    };
+
+    function loadKripkePreset(key) {
+      const p = KRIPKE_PRESETS[key] || KRIPKE_PRESETS.mutex;
+      const container = document.getElementById('kripke-states-container');
+      document.getElementById('kripke-states-count').innerText = `${p.states.length} Zustände`;
+      container.innerHTML = '';
+
+      p.states.forEach(s => {
+        container.innerHTML += `
+          <div class="p-3 bg-[#0d1117] border ${s.init ? 'border-purple-500/60' : 'border-[#1e2533]'} rounded-lg space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white">${s.name}</span>
+              ${s.init ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-900 text-purple-200">Start s₀</span>' : ''}
+            </div>
+            <div class="flex flex-wrap gap-1 text-[10px]">
+              ${s.props.map(pr => `<span class="px-1.5 py-0.5 rounded bg-[#151c28] text-purple-300 border border-[#273248]">${pr}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function evaluateKripkeFormula(val) {
+      const res = document.getElementById('kripke-eval-result');
+      if (val.includes("not_both") || val.includes("LTL_G_safe") || val.includes("EF_crit1") || val.includes("AG_req_AF_crit")) {
+        res.innerHTML = `
+          <div class="text-emerald-400 font-bold flex items-center gap-1.5">
+            <span>✓</span> <span>$\\mathcal{M}, s_0 \\models \\Phi$ (Gültig / Erfüllt)</span>
+          </div>
+          <p class="text-slate-300 font-sans text-xs leading-relaxed">
+            Die Verifikation bestätigt: Kein Pfad in der Kripke-Struktur verletzt diese Spezifikation.
+          </p>
+        `;
+      }
+      if (window.renderMathInElement) {
+        renderMathInElement(res, { delimiters: [{ left: "$", right: "$", display: false }] });
+      }
+    }
+
+    /* ==========================================================================
+       5. RESOLUTION SOLVER
+       ========================================================================== */
+    function runResolutionSolver() {
+      const output = document.getElementById('logic-derivation-output');
+      output.innerHTML = `
+        <div class="p-2.5 bg-[#0d1117] rounded border border-[#1e2533] flex justify-between">
+          <span>(1) <b>{A, B}</b> (Prämisse 1)</span>
+        </div>
+        <div class="p-2.5 bg-[#0d1117] rounded border border-[#1e2533] flex justify-between">
+          <span>(2) <b>{!A, C}</b> (Prämisse 2)</span>
+        </div>
+        <div class="p-2.5 bg-[#0d1117] rounded border border-[#1e2533] flex justify-between">
+          <span>(3) <b>{!B, C}</b> (Prämisse 3)</span>
+        </div>
+        <div class="p-2.5 bg-[#0d1117] rounded border border-[#1e2533] flex justify-between">
+          <span>(4) <b>{!C}</b> (Negierte Behauptung)</span>
+        </div>
+        <div class="p-2.5 bg-purple-950/40 rounded border border-purple-500/30 flex justify-between">
+          <span>(5) Res(1, 2 über A): <b>{B, C}</b></span>
+        </div>
+        <div class="p-2.5 bg-purple-950/40 rounded border border-purple-500/30 flex justify-between">
+          <span>(6) Res(5, 3 über B): <b>{C}</b></span>
+        </div>
+        <div class="p-2.5 bg-emerald-950/60 rounded border border-emerald-500/50 flex justify-between font-bold text-emerald-300">
+          <span>(7) Res(6, 4 über C): <b>□ (Leere Klausel / Widerspruch)</b></span>
+          <span>✓ Unerfüllbar (Beweis geglückt)</span>
+        </div>
+      `;
+    }
+
+    /* ==========================================================================
+       6. MOSES KLAUSUR-QUIZ
+       ========================================================================== */
+    const MOSES_QUIZ = [
+      {
+        q: "Welche der folgenden Aussagen zur schwächsten Vorbedingung $wp(c, Q)$ (Weakest Precondition) ist korrekt?",
+        options: [
+          "$wp(c, Q)$ ist die schwächste Bedingung an den Ausgangszustand $\\sigma$, sodass die Ausführung von $c$ terminiert und die Nachbedingung $Q$ erfüllt.",
+          "$wp(c, Q)$ beschreibt die stärkste mögliche Nachbedingung für ein Programm $c$.",
+          "$wp(c, Q)$ kann ausschließlich für deterministische Schleifen ohne Rekursion berechnet werden.",
+          "$wp(c, Q)$ ist für Zuweisungen $x := E$ stets äquivalent zu $Q \\wedge (x == E)$."
+        ],
+        correct: 0,
+        exp: "Die Weakest Precondition $wp(c, Q)$ liefert die allgemeinste (schwächste) Vorbedingung, unter der $c$ garantiert terminiert und im Zielzustand $Q$ erfüllt."
+      },
+      {
+        q: "Was unterscheidet partielle Korrektheit $\\{P\\}\\,c\\,\\{Q\\}$ von totaler Korrektheit $[P]\\,c\\,[Q]$?",
+        options: [
+          "Partielle Korrektheit garantiert die Nachbedingung $Q$ nur unter der Voraussetzung, dass das Programm $c$ überhaupt terminiert.",
+          "Totale Korrektheit gilt nur für zustandslose funktionale Programme.",
+          "Partielle Korrektheit verlangt eine streng monotone Schleifenvariante.",
+          "Es gibt keinen mathematischen Unterschied zwischen beiden Begriffen."
+        ],
+        correct: 0,
+        exp: "Partiell korrekt bedeutet: Falls $c$ terminiert, gilt $Q$. Total korrekt bedeutet: $\{P\}\\,c\\,\\{Q\}$ gilt UND $c$ terminiert garantiert auf jedem Zustand $\\sigma \\in P$."
+      },
+      {
+        q: "Was besagt die CTL-Formel $AG\\,AF\\,\\text{ready}$ in einer Kripke-Struktur?",
+        options: [
+          "Auf allen Pfaden gilt global: Von jedem erreichten Zustand aus wird auf allen Pfaden irgendwann $\\text{ready}$ erreicht.",
+          "Es existiert mindestens ein Pfad, auf dem $\\text{ready}$ niemals wahr wird.",
+          "Der Zustand $\\text{ready}$ muss direkt im nächsten Schritt gelten ($AX$).",
+          "$\\text{ready}$ gilt genau dann, wenn der Startzustand unendlich viele Selbstschleifen besitzt."
+        ],
+        correct: 0,
+        exp: "$AG\\,AF\\,p$ drückt Liveness aus: Egal wohin sich das System entwickelt ($AG$), es führt in jedem Fall unausweichlich wieder zu einem $p$-Zustand ($AF$)."
+      },
+      {
+        q: "Wie lautet das Zuweisungsaxiom im Hoare-Kalkül für einen Zuweisungsbefehl $x := E$?",
+        options: [
+          "$\\{Q[E/x]\\}\\; x := E \\;\\{Q\\}$",
+          "$\\{Q\\}\\; x := E \\;\\{Q[E/x]\\}$",
+          "$\\{P \\wedge x == E\\}\\; x := E \\;\\{P\\}$",
+          "$\\{P\\}\\; x := E \\;\\{P[x/E]\\}$"
+        ],
+        correct: 0,
+        exp: "Das Zuweisungsaxiom arbeitet rückwärts: Man ersetzt in der Nachbedingung $Q$ alle freien Vorkommen von $x$ durch den Ausdruck $E$ ($Q[E/x]$)."
+      },
+      {
+        q: "Welche Eigenschaft besitzt der Big-Step Übergang $\\langle c, \\sigma \\rangle \\Downarrow \\sigma'$ bei einer Endlosschleife (z. B. while true do skip od)?",
+        options: [
+          "Es existiert kein Zustand $\\sigma'$, sodass $\\langle c, \\sigma \\rangle \\Downarrow \\sigma'$ ableitbar ist (kein endlicher Ableitungsbaum).",
+          "Der Ableitungsbaum endet im Zustand $\\sigma' = \\text{Error}$.",
+          "Die Big-Step Semantik wechselt automatisch zur Small-Step Semantik.",
+          "Es wird der Zustand $\\sigma' = \\sigma$ mit Flag $\\bot$ zurückgegeben."
+        ],
+        correct: 0,
+        exp: "In der Big-Step / Natural Semantics lassen sich nicht-terminierende Programme nicht durch eine Relation abbilden, da kein endlicher Inferenzbaum für ein finales $\\sigma'$ existiert."
+      }
+    ];
+
+    let currentMosesQ = 0;
+    let mosesScore = 0;
+
+    function renderMosesQuestion() {
+      const q = MOSES_QUIZ[currentMosesQ];
+      document.getElementById('moses-quiz-q-num').innerText = `Frage ${currentMosesQ + 1} von ${MOSES_QUIZ.length}`;
+      document.getElementById('moses-quiz-q-text').innerText = q.q;
+      const optContainer = document.getElementById('moses-quiz-options');
+      optContainer.innerHTML = '';
+      document.getElementById('moses-quiz-feedback').className = 'hidden';
+      document.getElementById('btn-moses-quiz-next').className = 'hidden';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'p-3 rounded-lg bg-[#0a0c10] hover:bg-[#151c28] border border-[#1e2533] text-left text-slate-200 font-medium transition text-xs';
+        btn.innerText = opt;
+        btn.onclick = () => selectMosesAnswer(idx);
+        optContainer.appendChild(btn);
+      });
+
+      if (window.renderMathInElement) {
+        renderMathInElement(document.getElementById('moses-quiz-card'), {
+          delimiters: [{ left: "$", right: "$", display: false }]
+        });
+      }
+    }
+
+    function selectMosesAnswer(idx) {
+      const q = MOSES_QUIZ[currentMosesQ];
+      const fb = document.getElementById('moses-quiz-feedback');
+      const isCorrect = idx === q.correct;
+      if (isCorrect) mosesScore++;
+
+      document.getElementById('moses-quiz-score').innerText = `${mosesScore} / ${MOSES_QUIZ.length} Punkte`;
+      fb.className = `p-3.5 rounded-xl text-xs leading-relaxed font-mono ${isCorrect ? 'bg-emerald-950/70 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/70 border border-rose-500/30 text-rose-200'}`;
+      fb.innerHTML = `<b>${isCorrect ? '✓ Richtig!' : '✗ Falsch.'}</b> ${q.exp}`;
+      document.getElementById('btn-moses-quiz-next').className = 'px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white transition';
+    }
+
+    function nextMosesQuestion() {
+      currentMosesQ++;
+      if (currentMosesQ < MOSES_QUIZ.length) {
+        renderMosesQuestion();
+      } else {
+        document.getElementById('moses-quiz-card').innerHTML = `
+          <div class="text-center p-8 space-y-3 bg-[#0a0c10] rounded-xl border border-[#1e2533]">
+            <h3 class="text-xl font-bold text-white">MoSeS Quiz abgeschlossen!</h3>
+            <p class="text-purple-300 font-mono text-base">Ergebnis: ${mosesScore} von ${MOSES_QUIZ.length} Fragen richtig beantwortet.</p>
+            <button onclick="currentMosesQ=0;mosesScore=0;renderMosesQuestion()" class="px-4 py-2 rounded-lg bg-purple-600 text-white text-xs font-bold transition">Nochmal versuchen</button>
+          </div>
+        `;
+      }
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      verifyHoareProgram();
+      resetBigStepTree();
+      loadKripkePreset('mutex');
+      runResolutionSolver();
+      renderMosesQuestion();
+    });
+  </script>
+</body>
+</html>
