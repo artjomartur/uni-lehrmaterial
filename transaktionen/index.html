@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
@@ -16,6 +16,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+  </script>
 
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -352,23 +356,31 @@
       document.getElementById("stat-serializable").className = isSerial ? "text-base font-bold text-emerald-400" : "text-base font-bold text-rose-400";
       document.getElementById("stat-serial-order").textContent = serialOrder;
 
-      // Render Graph HTML
-      let graphHTML = `<div class="flex items-center justify-center gap-8 flex-wrap">`;
+      // Render Graph using Mermaid
+      let graphHTML = `<div class="mermaid flex justify-center">\ngraph TD;\n`;
+      let hasEdges = false;
       transactions.forEach(t => {
         const targets = Array.from(adj[t]);
-        graphHTML += `
-          <div class="flex flex-col items-center bg-[#0d1028] border border-indigo-500/40 p-4 rounded-2xl shadow-xl min-w-[120px]">
-            <span class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400 flex items-center justify-center font-bold text-white text-base">
-              T${t}
-            </span>
-            <div class="mt-2 text-[10px] text-slate-400">
-              ${targets.length > 0 ? `➔ Zeigt auf: <b class="text-amber-400">${targets.map(x => `T${x}`).join(", ")}</b>` : 'Keine ausgehenden Kanten'}
-            </div>
-          </div>
-        `;
+        graphHTML += `  T${t}((T${t}));\n`;
+        targets.forEach(target => {
+          graphHTML += `  T${t} --> T${target};\n`;
+          hasEdges = true;
+        });
       });
+      if (!hasEdges && transactions.length > 0) {
+        graphHTML += `  classDef default fill:#151c28,stroke:#3b82f6,stroke-width:2px,color:#fff;\n`;
+      } else {
+        graphHTML += `  classDef default fill:#151c28,stroke:#3b82f6,stroke-width:2px,color:#fff;\n  linkStyle default stroke:#818cf8,stroke-width:2px;\n`;
+      }
       graphHTML += `</div>`;
-      document.getElementById("graph-visual-canvas").innerHTML = graphHTML;
+      
+      const canvas = document.getElementById("graph-visual-canvas");
+      canvas.innerHTML = graphHTML;
+      
+      // Re-render mermaid
+      if (window.mermaid) {
+        mermaid.init(undefined, canvas.querySelectorAll('.mermaid'));
+      }
 
       // Conflicts Detail
       if (conflicts.length === 0) {
