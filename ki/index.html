@@ -39,23 +39,239 @@
             Einführung in die Künstliche Intelligenz
           </h1>
           <p class="text-sm text-slate-400 mt-1">
-            Plattform-Modul für interaktive Lerntools.
+            Plattform-Modul für interaktive Lerntools und Übungen.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Placeholder Tool -->
-    <div class="cs-card rounded-xl p-6 flex flex-col items-center justify-center min-h-[300px] text-center space-y-4">
-      <div class="text-4xl opacity-50">🧠</div>
-      <h2 class="text-xl font-bold text-white font-heading">Neuronales Netz Visualisierer</h2>
-      <p class="text-sm text-slate-400 max-w-md">
-        Dieses Modul befindet sich aktuell im Aufbau. Ein interaktiver Simulator oder Visualisierer für diesen Fachbereich wird in Kürze von einem Subagenten generiert.
-      </p>
+    <!-- Tabs -->
+    <div class="border-b border-[#1e2533]">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button id="tab-lerntool" class="tab-btn border-blue-500 text-blue-400 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" onclick="switchTab('lerntool')">Lern-Tool</button>
+        <button id="tab-aufgaben" class="tab-btn border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" onclick="switchTab('aufgaben')">Übungsaufgaben</button>
+        <button id="tab-klausur" class="tab-btn border-transparent text-slate-400 hover:text-slate-300 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" onclick="switchTab('klausur')">Übungsklausur</button>
+      </nav>
     </div>
+
+    <!-- Content: Lern-Tool -->
+    <div id="content-lerntool" class="tab-content block">
+      <div class="cs-card rounded-xl p-6 flex flex-col gap-6">
+        <h2 class="text-xl font-bold text-white font-heading">Neuronales Netz (Perzeptron) Gewichts-Demo</h2>
+        <p class="text-sm text-slate-400">
+          Spiele mit den Eingaben, Gewichten und dem Bias, um zu verstehen, wie ein einfaches künstliches Neuron (Perzeptron) funktioniert.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Eingabe 1 (x1): <span id="val-x1">0</span></label>
+                    <input type="range" min="0" max="1" step="1" value="0" id="in-x1" class="w-full cursor-pointer" oninput="updateNN()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Eingabe 2 (x2): <span id="val-x2">0</span></label>
+                    <input type="range" min="0" max="1" step="1" value="0" id="in-x2" class="w-full cursor-pointer" oninput="updateNN()">
+                </div>
+                <hr class="border-[#1e2533]">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Gewicht 1 (w1): <span id="val-w1">0.5</span></label>
+                    <input type="range" min="-2" max="2" step="0.1" value="0.5" id="in-w1" class="w-full cursor-pointer" oninput="updateNN()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Gewicht 2 (w2): <span id="val-w2">0.5</span></label>
+                    <input type="range" min="-2" max="2" step="0.1" value="0.5" id="in-w2" class="w-full cursor-pointer" oninput="updateNN()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Bias (b): <span id="val-b">-0.5</span></label>
+                    <input type="range" min="-2" max="2" step="0.1" value="-0.5" id="in-b" class="w-full cursor-pointer" oninput="updateNN()">
+                </div>
+            </div>
+            <div class="flex flex-col items-center justify-center p-6 bg-[#0a0c10] border border-[#1e2533] rounded-xl relative">
+                <div class="text-center mb-4">
+                    <p class="text-sm text-slate-400">Netzeingabe: z = x1·w1 + x2·w2 + b</p>
+                    <p class="font-mono text-lg text-blue-400 my-2" id="val-z">-0.50</p>
+                </div>
+                <div class="w-24 h-24 rounded-full border-4 flex items-center justify-center text-3xl font-bold transition-colors duration-300" id="neuron-out">
+                    0
+                </div>
+                <div class="text-center mt-4">
+                    <p class="text-sm text-slate-400">Ausgabe: f(z) = 1 wenn z > 0, sonst 0</p>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content: Übungsaufgaben -->
+    <div id="content-aufgaben" class="tab-content hidden space-y-6">
+      <div class="cs-card rounded-xl p-6">
+        <h3 class="text-lg font-bold text-white mb-2">1. A* Algorithmus</h3>
+        <p class="text-sm text-slate-300 mb-4">Wann ist der A* Algorithmus optimal?</p>
+        <div class="space-y-2">
+            <details class="bg-[#0a0c10] border border-[#1e2533] rounded-lg p-3">
+                <summary class="cursor-pointer font-medium text-slate-200">Lösung anzeigen</summary>
+                <div class="mt-2 text-sm text-slate-400 border-t border-[#1e2533] pt-2">
+                    A* ist optimal, wenn die Heuristik <strong>zulässig</strong> (admissible) ist. Das bedeutet, dass sie die tatsächlichen Kosten bis zum Ziel niemals überschätzt. Bei Graphensuchen (mit geschlossener Liste) muss sie zudem <strong>konsistent</strong> (monoton) sein.
+                </div>
+            </details>
+        </div>
+      </div>
+      <div class="cs-card rounded-xl p-6">
+        <h3 class="text-lg font-bold text-white mb-2">2. Aussagenlogik</h3>
+        <p class="text-sm text-slate-300 mb-4">Überführe die Formel <code>A ⇒ B</code> in KNF (Konjunktive Normalform).</p>
+        <div class="space-y-2">
+            <details class="bg-[#0a0c10] border border-[#1e2533] rounded-lg p-3">
+                <summary class="cursor-pointer font-medium text-slate-200">Lösung anzeigen</summary>
+                <div class="mt-2 text-sm text-slate-400 border-t border-[#1e2533] pt-2">
+                    Die Implikation <code>A ⇒ B</code> ist äquivalent zu <code>¬A ∨ B</code>. Da dies bereits eine Disjunktion von Literalen ist (also eine Klausel), ist dies auch die KNF.
+                </div>
+            </details>
+        </div>
+      </div>
+      <div class="cs-card rounded-xl p-6">
+        <h3 class="text-lg font-bold text-white mb-2">3. Maschinelles Lernen</h3>
+        <p class="text-sm text-slate-300 mb-4">Was ist Overfitting (Überanpassung) und wie kann man es vermeiden?</p>
+        <div class="space-y-2">
+            <details class="bg-[#0a0c10] border border-[#1e2533] rounded-lg p-3">
+                <summary class="cursor-pointer font-medium text-slate-200">Lösung anzeigen</summary>
+                <div class="mt-2 text-sm text-slate-400 border-t border-[#1e2533] pt-2">
+                    Overfitting passiert, wenn ein Modell die Trainingsdaten "auswendig" lernt, anstatt Muster zu generalisieren. Vermeidungsstrategien: Regularisierung, mehr Trainingsdaten, Early Stopping, Cross-Validation oder einfachere Modelle.
+                </div>
+            </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content: Übungsklausur -->
+    <div id="content-klausur" class="tab-content hidden">
+      <div class="cs-card rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white font-heading mb-4">KI-Klausur-Quiz</h2>
+        <div id="quiz-container" class="space-y-6">
+            <div class="quiz-question" data-answer="1">
+                <p class="font-medium text-slate-200 mb-3">1. Welche Eigenschaft beschreibt den Minimax-Algorithmus?</p>
+                <div class="space-y-2">
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#1a212d] cursor-pointer">
+                        <input type="radio" name="q1" value="0" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                        <span class="text-sm text-slate-300">Er findet immer den kürzesten Pfad in einem ungewichteten Graphen.</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#1a212d] cursor-pointer">
+                        <input type="radio" name="q1" value="1" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                        <span class="text-sm text-slate-300">Er wählt den optimalen Zug in endlichen Zwei-Personen-Nullsummenspielen.</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#1a212d] cursor-pointer">
+                        <input type="radio" name="q1" value="2" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                        <span class="text-sm text-slate-300">Er nutzt Backpropagation, um Gewichte zu optimieren.</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="quiz-question" data-answer="0">
+                <p class="font-medium text-slate-200 mb-3">2. Was versteht man unter dem Begriff "Heuristik" bei der Suche?</p>
+                <div class="space-y-2">
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#1a212d] cursor-pointer">
+                        <input type="radio" name="q2" value="0" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                        <span class="text-sm text-slate-300">Eine Schätzfunktion, die die verbleibenden Kosten zum Ziel bewertet.</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#1a212d] cursor-pointer">
+                        <input type="radio" name="q2" value="1" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                        <span class="text-sm text-slate-300">Eine Regel, die besagt, dass immer der am weitesten links stehende Knoten expandiert wird.</span>
+                    </label>
+                    <label class="flex items-center space-x-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#1a212d] cursor-pointer">
+                        <input type="radio" name="q2" value="2" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                        <span class="text-sm text-slate-300">Die Aktivierungsfunktion eines Neurons.</span>
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="evaluateQuiz()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                Auswerten
+            </button>
+            <div id="quiz-result" class="hidden mt-4 p-4 rounded-lg bg-[#0a0c10] border border-[#1e2533] text-center font-medium"></div>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <div id="app-footer"></div>
   <script>renderFooter("../");</script>
+  
+  <script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => {
+            el.classList.add('hidden');
+            el.classList.remove('block');
+        });
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            el.classList.remove('border-blue-500', 'text-blue-400');
+            el.classList.add('border-transparent', 'text-slate-400');
+        });
+        
+        document.getElementById('content-' + tabId).classList.remove('hidden');
+        document.getElementById('content-' + tabId).classList.add('block');
+        
+        const activeBtn = document.getElementById('tab-' + tabId);
+        activeBtn.classList.remove('border-transparent', 'text-slate-400');
+        activeBtn.classList.add('border-blue-500', 'text-blue-400');
+    }
+
+    function updateNN() {
+        const x1 = parseFloat(document.getElementById('in-x1').value);
+        const x2 = parseFloat(document.getElementById('in-x2').value);
+        const w1 = parseFloat(document.getElementById('in-w1').value);
+        const w2 = parseFloat(document.getElementById('in-w2').value);
+        const b = parseFloat(document.getElementById('in-b').value);
+
+        document.getElementById('val-x1').textContent = x1;
+        document.getElementById('val-x2').textContent = x2;
+        document.getElementById('val-w1').textContent = w1.toFixed(1);
+        document.getElementById('val-w2').textContent = w2.toFixed(1);
+        document.getElementById('val-b').textContent = b.toFixed(1);
+
+        const z = (x1 * w1) + (x2 * w2) + b;
+        document.getElementById('val-z').textContent = z.toFixed(2);
+
+        const out = z > 0 ? 1 : 0;
+        const neuronEl = document.getElementById('neuron-out');
+        neuronEl.textContent = out;
+        
+        if (out === 1) {
+            neuronEl.classList.remove('border-slate-600', 'text-slate-600', 'bg-transparent');
+            neuronEl.classList.add('border-green-500', 'text-green-500', 'bg-green-500/10');
+        } else {
+            neuronEl.classList.add('border-slate-600', 'text-slate-600', 'bg-transparent');
+            neuronEl.classList.remove('border-green-500', 'text-green-500', 'bg-green-500/10');
+        }
+    }
+    updateNN();
+
+    function evaluateQuiz() {
+        let score = 0;
+        const questions = document.querySelectorAll('.quiz-question');
+        let allAnswered = true;
+
+        questions.forEach((q, i) => {
+            const correctAns = q.getAttribute('data-answer');
+            const selected = q.querySelector(`input[name="q${i+1}"]:checked`);
+            if (!selected) {
+                allAnswered = false;
+            } else if (selected.value === correctAns) {
+                score++;
+            }
+        });
+
+        const resultEl = document.getElementById('quiz-result');
+        resultEl.classList.remove('hidden');
+
+        if (!allAnswered) {
+            resultEl.textContent = 'Bitte beantworte alle Fragen!';
+            resultEl.classList.remove('text-green-400');
+            resultEl.classList.add('text-red-400');
+        } else {
+            resultEl.textContent = `Du hast ${score} von ${questions.length} Fragen richtig beantwortet!`;
+            resultEl.classList.remove('text-red-400');
+            resultEl.classList.add('text-green-400');
+        }
+    }
+  </script>
 </body>
 </html>

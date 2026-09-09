@@ -20,6 +20,24 @@
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+    
+    .tab-active {
+      border-bottom-color: #3b82f6;
+      color: #ffffff;
+    }
+    .tab-inactive {
+      border-bottom-color: transparent;
+      color: #94a3b8;
+    }
+    .tab-inactive:hover {
+      color: #e2e8f0;
+      border-bottom-color: #475569;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body class="min-h-full flex flex-col custom-scrollbar selection:bg-blue-600 selection:text-white">
@@ -45,17 +63,297 @@
       </div>
     </div>
 
-    <!-- Placeholder Tool -->
-    <div class="cs-card rounded-xl p-6 flex flex-col items-center justify-center min-h-[300px] text-center space-y-4">
-      <div class="text-4xl opacity-50">☕</div>
-      <h2 class="text-xl font-bold text-white font-heading">Java/UML Playground</h2>
-      <p class="text-sm text-slate-400 max-w-md">
-        Dieses Modul befindet sich aktuell im Aufbau. Ein interaktiver Simulator oder Visualisierer für diesen Fachbereich wird in Kürze von einem Subagenten generiert.
-      </p>
+    <!-- TABS NAVIGATION -->
+    <div class="flex border-b border-[#1e2533] space-x-6">
+      <button class="tab-btn pb-2 border-b-2 font-medium text-sm transition-colors tab-active" data-target="tab-tool">Lern-Tool</button>
+      <button class="tab-btn pb-2 border-b-2 font-medium text-sm transition-colors tab-inactive" data-target="tab-tasks">Übungsaufgaben</button>
+      <button class="tab-btn pb-2 border-b-2 font-medium text-sm transition-colors tab-inactive" data-target="tab-quiz">Übungsklausur</button>
+    </div>
+
+    <!-- TAB CONTENTS -->
+    
+    <!-- Tab: Lern-Tool -->
+    <div id="tab-tool" class="tab-content block space-y-6">
+      <div class="cs-card rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white font-heading mb-4">Java Stack & Heap Visualizer</h2>
+        <p class="text-sm text-slate-400 mb-6">Simuliere die Objekterstellung und Referenzzuweisung in Java. Klicke auf die Buttons, um Objekte im Heap zu erzeugen und Referenzen im Stack anzulegen.</p>
+        
+        <div class="flex flex-wrap gap-4 mb-6">
+          <button onclick="addPrimitive()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-blue-900/20">
+            int x = 42;
+          </button>
+          <button onclick="addObject()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-lg shadow-emerald-900/20">
+            Person p = new Person();
+          </button>
+          <button onclick="resetMem()" class="bg-[#151c28] hover:bg-[#1e2533] border border-[#273248] text-slate-300 px-4 py-2 rounded-lg text-sm font-medium transition ml-auto">
+            Reset
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Stack -->
+          <div class="bg-[#0c1017] border border-[#1e2533] rounded-xl p-4">
+            <h3 class="text-lg font-bold text-slate-200 mb-3 border-b border-[#1e2533] pb-2 flex items-center justify-between">
+              <span>Stack</span>
+              <span class="text-xs font-normal text-slate-500">(LIFO)</span>
+            </h3>
+            <div id="stack-container" class="space-y-2 flex flex-col-reverse min-h-[200px] justify-start">
+              <!-- Stack Items go here -->
+              <div id="stack-empty" class="text-sm text-slate-600 text-center py-8">Stack ist leer</div>
+            </div>
+          </div>
+          
+          <!-- Heap -->
+          <div class="bg-[#0c1017] border border-[#1e2533] rounded-xl p-4">
+            <h3 class="text-lg font-bold text-slate-200 mb-3 border-b border-[#1e2533] pb-2 flex items-center justify-between">
+              <span>Heap</span>
+              <span class="text-xs font-normal text-slate-500">(Dynamic Memory)</span>
+            </h3>
+            <div id="heap-container" class="flex flex-wrap gap-4 min-h-[200px] content-start">
+              <!-- Heap Items go here -->
+              <div id="heap-empty" class="text-sm text-slate-600 text-center w-full py-8">Heap ist leer</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Übungsaufgaben -->
+    <div id="tab-tasks" class="tab-content hidden space-y-6">
+      <div class="cs-card rounded-xl p-6 space-y-6">
+        <h2 class="text-xl font-bold text-white font-heading">Interaktive Übungsaufgaben</h2>
+        
+        <!-- Aufgabe 1 -->
+        <div class="bg-[#0c1017] border border-[#1e2533] rounded-xl p-5">
+          <h3 class="text-lg font-bold text-blue-400 mb-2">Aufgabe 1: Streams & Lambdas</h3>
+          <p class="text-sm text-slate-300 mb-4">
+            Gegeben ist eine Liste von Strings <code class="text-rose-400 font-mono text-xs bg-[#151c28] px-1.5 py-0.5 rounded border border-[#273248]">List&lt;String&gt; names</code>.
+            Schreiben Sie einen Ausdruck, der alle Namen herausfiltert, die mit "A" beginnen, diese in Großbuchstaben umwandelt und in einer neuen Liste sammelt.
+          </p>
+          <details class="group border border-[#273248] rounded-lg bg-[#151c28] overflow-hidden">
+            <summary class="cursor-pointer text-sm font-medium text-slate-300 hover:text-white transition flex items-center p-3 select-none">
+              <span class="group-open:rotate-90 transition-transform mr-2 text-slate-500">▶</span>
+              Musterlösung anzeigen
+            </summary>
+            <div class="p-4 bg-[#0a0c10] border-t border-[#273248]">
+              <pre class="text-xs font-mono text-slate-300 overflow-x-auto"><code>List&lt;String&gt; result = names.stream()
+    .filter(n -> n.startsWith("A"))
+    .map(String::toUpperCase)
+    .collect(Collectors.toList());</code></pre>
+            </div>
+          </details>
+        </div>
+
+        <!-- Aufgabe 2 -->
+        <div class="bg-[#0c1017] border border-[#1e2533] rounded-xl p-5">
+          <h3 class="text-lg font-bold text-emerald-400 mb-2">Aufgabe 2: Polymorphie</h3>
+          <p class="text-sm text-slate-300 mb-4">
+            Erkläre in 1-2 Sätzen den Unterschied zwischen statischem (Compile-time) und dynamischem (Run-time) Typ einer Variable in Java. Warum ist das für Überschreiben (Overriding) wichtig?
+          </p>
+          <details class="group border border-[#273248] rounded-lg bg-[#151c28] overflow-hidden">
+            <summary class="cursor-pointer text-sm font-medium text-slate-300 hover:text-white transition flex items-center p-3 select-none">
+              <span class="group-open:rotate-90 transition-transform mr-2 text-slate-500">▶</span>
+              Musterlösung anzeigen
+            </summary>
+            <div class="p-4 bg-[#0a0c10] border-t border-[#273248] text-sm text-slate-300 space-y-2">
+              <p>Der <strong>statischen Typ</strong> ist der bei der Deklaration angegebene Typ, der <strong>dynamische Typ</strong> ist der Typ des tatsächlichen Objekts im Heap, das zur Laufzeit referenziert wird.</p>
+              <p>Beim Methodenaufruf wird dynamische Bindung verwendet: Es wird die überschriebene Methode des <em>dynamischen</em> Typs aufgerufen, unabhängig vom statischen Typ der Referenzvariable.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Übungsklausur -->
+    <div id="tab-quiz" class="tab-content hidden space-y-6">
+      <div class="cs-card rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white font-heading mb-6">Übungsklausur (Multiple-Choice)</h2>
+        
+        <div class="space-y-8" id="quiz-container">
+          <!-- Question 1 -->
+          <div class="quiz-question" data-correct="2">
+            <p class="font-medium text-slate-200 mb-3">1. Welche der folgenden Aussagen zu Interfaces in Java 8+ ist korrekt?</p>
+            <div class="space-y-2">
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#273248] bg-[#0c1017] hover:bg-[#151c28] cursor-pointer transition">
+                <input type="radio" name="q1" value="0" class="mt-1 text-blue-500 bg-slate-800 border-slate-600 focus:ring-blue-500">
+                <span class="text-sm text-slate-300">Interfaces können Konstruktoren enthalten.</span>
+              </label>
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#273248] bg-[#0c1017] hover:bg-[#151c28] cursor-pointer transition">
+                <input type="radio" name="q1" value="1" class="mt-1 text-blue-500 bg-slate-800 border-slate-600 focus:ring-blue-500">
+                <span class="text-sm text-slate-300">Interfaces können Zustandsvariablen (Instanzvariablen) haben.</span>
+              </label>
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#273248] bg-[#0c1017] hover:bg-[#151c28] cursor-pointer transition">
+                <input type="radio" name="q1" value="2" class="mt-1 text-blue-500 bg-slate-800 border-slate-600 focus:ring-blue-500">
+                <span class="text-sm text-slate-300">Interfaces können 'default' und 'static' Methoden mit Implementierung enthalten.</span>
+              </label>
+            </div>
+            <div class="feedback hidden mt-2 text-sm font-medium px-1"></div>
+          </div>
+
+          <!-- Question 2 -->
+          <div class="quiz-question" data-correct="0">
+            <p class="font-medium text-slate-200 mb-3">2. Was passiert, wenn eine Lambda-Expression auf lokale Variablen zugreift?</p>
+            <div class="space-y-2">
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#273248] bg-[#0c1017] hover:bg-[#151c28] cursor-pointer transition">
+                <input type="radio" name="q2" value="0" class="mt-1 text-blue-500 bg-slate-800 border-slate-600 focus:ring-blue-500">
+                <span class="text-sm text-slate-300">Die Variablen müssen 'final' oder 'effectively final' sein.</span>
+              </label>
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#273248] bg-[#0c1017] hover:bg-[#151c28] cursor-pointer transition">
+                <input type="radio" name="q2" value="1" class="mt-1 text-blue-500 bg-slate-800 border-slate-600 focus:ring-blue-500">
+                <span class="text-sm text-slate-300">Die Lambda-Expression erstellt eine tiefe Kopie aller referenzierten Objekte.</span>
+              </label>
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-[#273248] bg-[#0c1017] hover:bg-[#151c28] cursor-pointer transition">
+                <input type="radio" name="q2" value="2" class="mt-1 text-blue-500 bg-slate-800 border-slate-600 focus:ring-blue-500">
+                <span class="text-sm text-slate-300">Die Variablen werden implizit 'static' gemacht.</span>
+              </label>
+            </div>
+            <div class="feedback hidden mt-2 text-sm font-medium px-1"></div>
+          </div>
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-[#1e2533] flex items-center gap-4">
+          <button onclick="checkQuiz()" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition shadow-lg shadow-blue-900/20">
+            Klausur auswerten
+          </button>
+          <div id="quiz-result" class="text-sm font-bold hidden bg-[#151c28] border border-[#273248] px-4 py-2 rounded-lg"></div>
+        </div>
+      </div>
     </div>
   </main>
 
   <div id="app-footer"></div>
   <script>renderFooter("../");</script>
+
+  <!-- Interactive Scripts -->
+  <script>
+    // 1. Tabs Logic
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Hide all contents
+        tabContents.forEach(content => {
+          content.classList.add('hidden');
+          content.classList.remove('block');
+        });
+        
+        // Reset button styles
+        tabButtons.forEach(btn => {
+          btn.classList.remove('tab-active');
+          btn.classList.add('tab-inactive');
+        });
+
+        // Show target content
+        const targetId = button.getAttribute('data-target');
+        const targetContent = document.getElementById(targetId);
+        targetContent.classList.remove('hidden');
+        targetContent.classList.add('block');
+
+        // Set active button style
+        button.classList.add('tab-active');
+        button.classList.remove('tab-inactive');
+      });
+    });
+
+    // 2. Stack & Heap Visualizer Logic
+    let primitiveCount = 0;
+    let objectCount = 0;
+    
+    function addPrimitive() {
+      primitiveCount++;
+      const stack = document.getElementById('stack-container');
+      const emptyMsg = document.getElementById('stack-empty');
+      if(emptyMsg) emptyMsg.style.display = 'none';
+
+      const item = document.createElement('div');
+      item.className = 'bg-[#151c28] border border-blue-900/50 p-3 rounded-lg text-xs font-mono text-blue-300 flex justify-between items-center shadow-md animate-[fadeIn_0.3s_ease-out]';
+      item.innerHTML = \`<span class="text-slate-400">int x\${primitiveCount}</span> <span class="bg-blue-900/30 px-2 py-1 rounded text-blue-200">42</span>\`;
+      stack.appendChild(item);
+    }
+    
+    function addObject() {
+      objectCount++;
+      const stack = document.getElementById('stack-container');
+      const heap = document.getElementById('heap-container');
+      const stackEmptyMsg = document.getElementById('stack-empty');
+      const heapEmptyMsg = document.getElementById('heap-empty');
+      
+      if(stackEmptyMsg) stackEmptyMsg.style.display = 'none';
+      if(heapEmptyMsg) heapEmptyMsg.style.display = 'none';
+
+      // Generate random mock memory address
+      const refId = "0x" + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
+      
+      // Add to Stack (Reference)
+      const stackItem = document.createElement('div');
+      stackItem.className = 'bg-[#151c28] border border-emerald-900/50 p-3 rounded-lg text-xs font-mono text-emerald-300 flex justify-between items-center shadow-md animate-[fadeIn_0.3s_ease-out]';
+      stackItem.innerHTML = \`<span class="text-slate-400">Person p\${objectCount}</span> <span class="bg-emerald-900/30 px-2 py-1 rounded text-emerald-200">\${refId}</span>\`;
+      stack.appendChild(stackItem);
+
+      // Add to Heap (Object)
+      const heapItem = document.createElement('div');
+      heapItem.className = 'bg-[#151c28] border border-emerald-900/30 p-4 rounded-xl flex flex-col items-center justify-center min-w-[120px] shadow-lg animate-[fadeIn_0.3s_ease-out] relative overflow-hidden group';
+      heapItem.innerHTML = \`
+        <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500/50"></div>
+        <span class="text-[10px] font-mono text-emerald-400/70 mb-2 bg-[#0c1017] px-1.5 rounded">\${refId}</span>
+        <span class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">Person</span>
+        <span class="text-xs text-slate-500 mt-1">Object</span>
+      \`;
+      heap.appendChild(heapItem);
+    }
+
+    function resetMem() {
+      const stack = document.getElementById('stack-container');
+      const heap = document.getElementById('heap-container');
+      
+      stack.innerHTML = '<div id="stack-empty" class="text-sm text-slate-600 text-center py-8">Stack ist leer</div>';
+      heap.innerHTML = '<div id="heap-empty" class="text-sm text-slate-600 text-center w-full py-8">Heap ist leer</div>';
+      
+      primitiveCount = 0;
+      objectCount = 0;
+    }
+
+    // 3. Quiz Logic
+    function checkQuiz() {
+      let score = 0;
+      const questions = document.querySelectorAll('.quiz-question');
+      
+      questions.forEach((q) => {
+        const correctVal = q.getAttribute('data-correct');
+        const selected = q.querySelector('input[type="radio"]:checked');
+        const feedback = q.querySelector('.feedback');
+        
+        feedback.classList.remove('hidden', 'text-emerald-400', 'text-rose-400', 'text-amber-400');
+        
+        if (!selected) {
+          feedback.textContent = '⚠️ Bitte wähle eine Antwort aus.';
+          feedback.classList.add('text-amber-400');
+          feedback.classList.remove('hidden');
+        } else if (selected.value === correctVal) {
+          score++;
+          feedback.textContent = '✅ Richtig!';
+          feedback.classList.add('text-emerald-400');
+          feedback.classList.remove('hidden');
+        } else {
+          feedback.textContent = '❌ Falsch.';
+          feedback.classList.add('text-rose-400');
+          feedback.classList.remove('hidden');
+        }
+      });
+
+      const res = document.getElementById('quiz-result');
+      res.classList.remove('hidden');
+      res.textContent = \`Ergebnis: \${score} von \${questions.length} richtig!\`;
+      
+      if (score === questions.length) {
+        res.classList.add('text-emerald-400', 'border-emerald-900/50', 'bg-emerald-900/10');
+        res.classList.remove('text-rose-400', 'border-rose-900/50', 'bg-rose-900/10');
+      } else {
+        res.classList.add('text-rose-400', 'border-rose-900/50', 'bg-rose-900/10');
+        res.classList.remove('text-emerald-400', 'border-emerald-900/50', 'bg-emerald-900/10');
+      }
+    }
+  </script>
 </body>
 </html>

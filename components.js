@@ -205,3 +205,82 @@ printStyle.innerHTML = `
 `;
 document.head.appendChild(printStyle);
 
+
+  // ==========================================
+  // Bug Reporter
+  // ==========================================
+  const bugReporterHTML = \
+    <div id="bug-reporter-widget" class="hidden-print">
+      <!-- Floating Button -->
+      <button onclick="document.getElementById('bug-modal').classList.remove('hidden')" class="fixed bottom-6 right-6 z-50 bg-rose-600 hover:bg-rose-500 text-white p-3 rounded-full shadow-[0_0_15px_rgba(225,29,72,0.4)] transition flex items-center justify-center group" title="Bug melden">
+        <span class="text-xl">🐞</span>
+        <span class="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-2 whitespace-nowrap transition-all duration-300 ease-in-out font-bold text-sm">Fehler melden</span>
+      </button>
+
+      <!-- Modal -->
+      <div id="bug-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-[#0f131a] border border-[#1e2533] rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative">
+          <h3 class="text-xl font-bold text-white font-heading flex items-center gap-2">
+            <span>🐞</span> Fehlerbericht einreichen
+          </h3>
+          <p class="text-sm text-slate-400">Markiere Fehler oder schreibe, was im aktuellen Modul nicht funktioniert. Artjom kann das später beheben.</p>
+          
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Modul / URL</label>
+            <input type="text" id="bug-url" readonly value="\" class="w-full bg-[#151c28] border border-[#273248] rounded px-3 py-2 text-xs text-slate-300 font-mono">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Fehlerbeschreibung</label>
+            <textarea id="bug-desc" rows="4" placeholder="Was genau funktioniert nicht?" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500 transition"></textarea>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button onclick="document.getElementById('bug-modal').classList.add('hidden')" class="px-4 py-2 text-sm font-bold text-slate-400 hover:text-white transition">Abbrechen</button>
+            <button onclick="saveBugReport()" class="px-4 py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-lg transition shadow-lg">Speichern</button>
+          </div>
+          
+          <!-- Bug List Download -->
+          <div class="mt-4 pt-4 border-t border-[#1e2533] flex items-center justify-between">
+            <span class="text-xs text-slate-500" id="bug-count">0 Fehler gespeichert</span>
+            <button onclick="downloadBugs()" class="text-xs text-blue-400 hover:text-blue-300 transition flex items-center gap-1">
+              <span>⬇️</span> Alle Bugs exportieren (.json)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  \;
+  document.body.insertAdjacentHTML('beforeend', bugReporterHTML);
+
+  window.saveBugReport = function() {
+    const desc = document.getElementById('bug-desc').value.trim();
+    if(!desc) return;
+    const url = document.getElementById('bug-url').value;
+    const bugs = JSON.parse(localStorage.getItem('unisuite_bugs')) || [];
+    bugs.push({ date: new Date().toISOString(), url, desc, status: 'open' });
+    localStorage.setItem('unisuite_bugs', JSON.stringify(bugs));
+    document.getElementById('bug-desc').value = '';
+    document.getElementById('bug-modal').classList.add('hidden');
+    updateBugCount();
+    alert('Fehler erfolgreich gespeichert!');
+  };
+
+  window.downloadBugs = function() {
+    const bugs = localStorage.getItem('unisuite_bugs') || '[]';
+    const blob = new Blob([JSON.stringify(JSON.parse(bugs), null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = "unisuite_bug_reports.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  function updateBugCount() {
+    const bugs = JSON.parse(localStorage.getItem('unisuite_bugs')) || [];
+    const countEl = document.getElementById('bug-count');
+    if(countEl) countEl.textContent = bugs.length + ' Fehler gespeichert';
+  }
+  updateBugCount();
+

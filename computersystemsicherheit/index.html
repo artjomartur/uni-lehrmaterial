@@ -20,6 +20,10 @@
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+    .tab-btn { border-bottom-width: 2px; border-color: transparent; }
+    .tab-btn.active { border-color: #3b82f6; color: #3b82f6; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
   </style>
 </head>
 <body class="min-h-full flex flex-col custom-scrollbar selection:bg-blue-600 selection:text-white">
@@ -39,23 +43,150 @@
             Computersystemsicherheit
           </h1>
           <p class="text-sm text-slate-400 mt-1">
-            Plattform-Modul für interaktive Lerntools.
+            Plattform-Modul für interaktive Lerntools und Aufgaben.
           </p>
         </div>
       </div>
     </div>
 
-    <!-- Placeholder Tool -->
-    <div class="cs-card rounded-xl p-6 flex flex-col items-center justify-center min-h-[300px] text-center space-y-4">
-      <div class="text-4xl opacity-50">🔐</div>
-      <h2 class="text-xl font-bold text-white font-heading">Kryptografie RSA/AES Demo</h2>
-      <p class="text-sm text-slate-400 max-w-md">
-        Dieses Modul befindet sich aktuell im Aufbau. Ein interaktiver Simulator oder Visualisierer für diesen Fachbereich wird in Kürze von einem Subagenten generiert.
-      </p>
+    <!-- Tabs -->
+    <div class="border-b border-[#1e2533]">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button onclick="switchTab('tool')" id="tab-btn-tool" class="tab-btn active whitespace-nowrap py-4 px-1 font-medium text-sm">
+          Lern-Tool
+        </button>
+        <button onclick="switchTab('exercises')" id="tab-btn-exercises" class="tab-btn whitespace-nowrap py-4 px-1 font-medium text-sm text-slate-400 hover:text-slate-300">
+          Übungsaufgaben
+        </button>
+        <button onclick="switchTab('exam')" id="tab-btn-exam" class="tab-btn whitespace-nowrap py-4 px-1 font-medium text-sm text-slate-400 hover:text-slate-300">
+          Übungsklausur
+        </button>
+      </nav>
     </div>
+
+    <!-- Tab Contents -->
+    <div id="tab-tool" class="tab-content active space-y-4">
+      <div class="cs-card rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white font-heading mb-4">Hashing & Salting Visualisierer</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Passwort (Eingabe)</label>
+              <input type="text" id="hash-input" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500" placeholder="z.B. secret123" oninput="updateHash()">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Salt (optional)</label>
+              <input type="text" id="salt-input" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-3 py-2 text-white placeholder-slate-600 focus:outline-none focus:border-blue-500" placeholder="z.B. randomSalt89" oninput="updateHash()">
+            </div>
+          </div>
+          <div class="space-y-4 flex flex-col justify-center">
+            <div>
+              <label class="block text-sm font-medium text-slate-400 mb-1">Simulierter SHA-256 Hash</label>
+              <div class="bg-[#0a0c10] border border-[#1e2533] rounded-lg p-4 break-all font-mono text-sm text-green-400 min-h-[4rem] flex items-center" id="hash-output">
+                e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-exercises" class="tab-content space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="cs-card rounded-xl p-6 hover:border-blue-500/50 transition-colors">
+          <h3 class="font-bold text-white mb-2">Cross-Site Scripting (XSS)</h3>
+          <p class="text-sm text-slate-400 mb-4">Finde die Schwachstelle im Eingabefeld und füge ein Payload ein, das einen Alert-Dialog auslöst.</p>
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Aufgabe starten</button>
+        </div>
+        <div class="cs-card rounded-xl p-6 hover:border-blue-500/50 transition-colors">
+          <h3 class="font-bold text-white mb-2">SQL-Injection</h3>
+          <p class="text-sm text-slate-400 mb-4">Umghe den Login-Mechanismus, indem du eine geschickte SQL-Injection über das Benutzerfeld nutzt.</p>
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Aufgabe starten</button>
+        </div>
+        <div class="cs-card rounded-xl p-6 hover:border-blue-500/50 transition-colors">
+          <h3 class="font-bold text-white mb-2">Zertifikate & PKI</h3>
+          <p class="text-sm text-slate-400 mb-4">Analysiere ein bereitgestelltes X.509-Zertifikat und identifiziere den Aussteller und die Gültigkeit.</p>
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Aufgabe starten</button>
+        </div>
+        <div class="cs-card rounded-xl p-6 hover:border-blue-500/50 transition-colors">
+          <h3 class="font-bold text-white mb-2">Buffer Overflow</h3>
+          <p class="text-sm text-slate-400 mb-4">Lerne, wie Stack-basierte Buffer Overflows funktionieren, indem du den Instruction Pointer überschreibst.</p>
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">Aufgabe starten</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-exam" class="tab-content space-y-4">
+      <div class="cs-card rounded-xl p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-bold text-white font-heading">Quiz zur IT-Sec-Klausur</h2>
+          <span class="text-sm bg-[#151c28] px-3 py-1 rounded-full text-slate-300 border border-[#273248]">Beispielquiz</span>
+        </div>
+        <div class="space-y-6">
+          <div class="space-y-3">
+            <h3 class="text-lg font-medium text-slate-200">Frage 1: Was ist das Hauptziel einer Denial-of-Service (DoS) Attacke?</h3>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#151c28] cursor-pointer transition-colors">
+                <input type="radio" name="q1" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                <span class="text-sm">Stehlen sensibler Benutzerdaten</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#151c28] cursor-pointer transition-colors">
+                <input type="radio" name="q1" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                <span class="text-sm">Eskalation von Privilegien auf Root-Ebene</span>
+              </label>
+              <label class="flex items-center gap-3 p-3 rounded-lg border border-[#1e2533] hover:bg-[#151c28] cursor-pointer transition-colors">
+                <input type="radio" name="q1" class="text-blue-600 bg-[#0a0c10] border-[#273248] focus:ring-blue-600">
+                <span class="text-sm">Verfügbarkeit eines Systems beeinträchtigen</span>
+              </label>
+            </div>
+          </div>
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors">Nächste Frage</button>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <div id="app-footer"></div>
   <script>renderFooter("../");</script>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active', 'text-blue-500');
+        btn.classList.add('text-slate-400');
+      });
+      const activeBtn = document.getElementById('tab-btn-' + tabId);
+      activeBtn.classList.add('active');
+      activeBtn.classList.remove('text-slate-400');
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    async function updateHash() {
+      const input = document.getElementById('hash-input').value;
+      const salt = document.getElementById('salt-input').value;
+      const combined = input + salt;
+      
+      if (!combined) {
+        document.getElementById('hash-output').innerText = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+        return;
+      }
+
+      const encoder = new TextEncoder();
+      const data = encoder.encode(combined);
+      try {
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        document.getElementById('hash-output').innerText = hashHex;
+      } catch(e) {
+        document.getElementById('hash-output').innerText = 'Error generating hash';
+      }
+    }
+  </script>
 </body>
 </html>
