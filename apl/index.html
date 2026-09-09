@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
@@ -32,34 +32,9 @@
 </head>
 <body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-purple-600 selection:text-white">
 
-  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-      <div class="flex items-center space-x-6">
-        <a href="../" class="flex items-center space-x-3 text-slate-100 hover:text-purple-400 transition group">
-          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-purple-400 group-hover:border-purple-500 transition">
-            <span class="text-lg">L</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
-            <span class="text-[10px] text-purple-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">06_apl</span>
-          </div>
-        </a>
-
-        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
-          <a href="../moses/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">04_moses</a>
-          <a href="../afe/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">05_afe</a>
-          <a href="../apl/" class="text-purple-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">06_apl</a>
-          <a href="../mathe-1/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">07_mathe_1</a>
-        </nav>
-      </div>
-
-      <div class="flex items-center space-x-4 text-xs font-mono">
-        <a href="../" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
-          <span>&larr;</span> 00_startseite
-        </a>
-      </div>
-    </div>
-  </header>
+  <div id="app-header"></div>
+  <script src="../components.js"></script>
+  <script>renderHeader("../");</script>
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 space-y-3">
@@ -82,36 +57,294 @@
 
     <section class="space-y-6">
       <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
-        <h2 class="text-base font-bold text-white font-heading">Resolutions-Beweiser</h2>
-        <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg text-slate-300 text-sm space-y-2">
-          <p>Klauselform und Unifikations-Algorithmus</p>
-          <div class="text-xs text-purple-400 font-mono mt-4">[Inhalte für APL in Entwicklung...]</div>
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <h2 class="text-base font-bold text-white font-heading">Wahrheitstabellen-Generator</h2>
+          <span class="text-[10px] font-mono text-purple-400 bg-purple-900/30 px-2 py-0.5 rounded border border-purple-500/30">Aussagenlogik</span>
+        </div>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="text-xs font-mono text-slate-400 block mb-1">Logische Formel $F$ eingeben:</label>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="text" id="input-formula" value="(A => B) & (B => C) => (A => C)" class="flex-1 bg-[#0a0c10] border border-[#1e2533] rounded-lg px-4 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-purple-500 transition placeholder-slate-600" placeholder="z.B. (A | B) & !C">
+              <button onclick="generateTruthTable()" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-mono font-bold transition flex items-center justify-center gap-2">
+                <span>Tabelle generieren</span>
+              </button>
+            </div>
+            <div class="mt-2 text-[11px] font-mono text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
+              <span><b>UND:</b> &amp; / &amp;&amp; / and</span>
+              <span><b>ODER:</b> | / || / or</span>
+              <span><b>NICHT:</b> ! / ~ / not</span>
+              <span><b>IMPLIKATION:</b> =&gt; / -&gt;</span>
+              <span><b>ÄQUIVALENZ:</b> &lt;=&gt; / &lt;-&gt;</span>
+            </div>
+          </div>
+
+          <div id="truth-table-error" class="hidden p-3 rounded-lg bg-rose-950/30 border border-rose-500/30 text-rose-400 text-xs font-mono"></div>
+
+          <div class="overflow-x-auto custom-scrollbar border border-[#1e2533] rounded-lg bg-[#0a0c10]">
+            <table class="w-full text-left text-xs font-mono whitespace-nowrap">
+              <thead class="bg-[#151c28] text-slate-300 border-b border-[#1e2533]" id="tt-head">
+                <!-- Headers rendered dynamically -->
+              </thead>
+              <tbody class="text-slate-400 divide-y divide-[#1e2533]" id="tt-body">
+                <!-- Rows rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="tt-summary" class="hidden p-3 rounded-lg bg-[#151c28] border border-[#273248] text-sm text-slate-300 font-mono flex items-center justify-between">
+            <span id="tt-status"></span>
+            <span class="text-[10px] text-slate-500" id="tt-rows-count"></span>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded bg-purple-500"></span>
-        <span>UniSuite // APL</span>
-      </div>
-      <div class="flex flex-wrap items-center gap-6 text-slate-400">
-        <a href="../" class="hover:text-slate-200 transition">~/portfolio</a>
-        <a href="../moses/" class="hover:text-slate-200 transition">~/moses</a>
-        <a href="../afe/" class="hover:text-slate-200 transition">~/afe</a>
-        <a href="../apl/" class="text-slate-200">~/apl</a>
-      </div>
-    </div>
-  </footer>
+  <div id="app-footer"></div>
+  <script>renderFooter("../");</script>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       if (window.renderMathInElement) {
         renderMathInElement(document.body, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
       }
+      generateTruthTable(); // auto-generate on load
     });
+
+    // --- Logic Parser & Evaluator ---
+    function tokenize(expr) {
+      const tokens = [];
+      let i = 0;
+      while (i < expr.length) {
+        const c = expr[i];
+        if (/\s/.test(c)) { i++; continue; }
+        
+        if (c === '(' || c === ')') {
+          tokens.push(c);
+          i++;
+        } else if (c === '!' || c === '~') {
+          tokens.push('NOT');
+          i++;
+        } else if (c === '&') {
+          if (expr[i+1] === '&') i++;
+          tokens.push('AND');
+          i++;
+        } else if (c === '|') {
+          if (expr[i+1] === '|') i++;
+          tokens.push('OR');
+          i++;
+        } else if (c === '=') {
+          if (expr[i+1] === '>') { tokens.push('IMPLIES'); i+=2; }
+          else { tokens.push(c); i++; }
+        } else if (c === '-') {
+          if (expr[i+1] === '>') { tokens.push('IMPLIES'); i+=2; }
+          else { tokens.push(c); i++; }
+        } else if (c === '<') {
+          if (expr.substring(i, i+3) === '<=>') { tokens.push('IFF'); i+=3; }
+          else if (expr.substring(i, i+3) === '<->') { tokens.push('IFF'); i+=3; }
+          else { tokens.push(c); i++; }
+        } else if (/[a-zA-Z]/.test(c)) {
+          let str = "";
+          while (i < expr.length && /[a-zA-Z0-9_]/.test(expr[i])) {
+            str += expr[i];
+            i++;
+          }
+          const upper = str.toUpperCase();
+          if (upper === 'AND' || upper === 'OR' || upper === 'NOT' || upper === 'IFF' || upper === 'IMPLIES') {
+            tokens.push(upper);
+          } else {
+            tokens.push({ type: 'VAR', name: str });
+          }
+        } else {
+          throw new Error("Unerwartetes Zeichen: " + c);
+        }
+      }
+      return tokens;
+    }
+
+    function parse(tokens) {
+      let pos = 0;
+
+      function parseIff() {
+        let node = parseImplies();
+        while (pos < tokens.length && tokens[pos] === 'IFF') {
+          pos++;
+          node = { type: 'IFF', left: node, right: parseImplies() };
+        }
+        return node;
+      }
+
+      function parseImplies() {
+        let node = parseOr();
+        while (pos < tokens.length && tokens[pos] === 'IMPLIES') {
+          pos++;
+          node = { type: 'IMPLIES', left: node, right: parseOr() };
+        }
+        return node;
+      }
+
+      function parseOr() {
+        let node = parseAnd();
+        while (pos < tokens.length && tokens[pos] === 'OR') {
+          pos++;
+          node = { type: 'OR', left: node, right: parseAnd() };
+        }
+        return node;
+      }
+
+      function parseAnd() {
+        let node = parseNot();
+        while (pos < tokens.length && tokens[pos] === 'AND') {
+          pos++;
+          node = { type: 'AND', left: node, right: parseNot() };
+        }
+        return node;
+      }
+
+      function parseNot() {
+        if (pos < tokens.length && tokens[pos] === 'NOT') {
+          pos++;
+          return { type: 'NOT', child: parseNot() };
+        }
+        return parsePrimary();
+      }
+
+      function parsePrimary() {
+        if (pos >= tokens.length) throw new Error("Unerwartetes Ende der Formel");
+        const t = tokens[pos++];
+        if (t === '(') {
+          const node = parseIff();
+          if (pos >= tokens.length || tokens[pos++] !== ')') {
+            throw new Error("Fehlende schließende Klammer ')'");
+          }
+          return node;
+        } else if (t.type === 'VAR') {
+          return t;
+        } else {
+          throw new Error("Unerwartetes Token: " + JSON.stringify(t));
+        }
+      }
+
+      const ast = parseIff();
+      if (pos < tokens.length) {
+        throw new Error("Überflüssige Zeichen am Ende der Formel");
+      }
+      return ast;
+    }
+
+    function getVars(ast, vars = new Set()) {
+      if (!ast) return vars;
+      if (ast.type === 'VAR') vars.add(ast.name);
+      else if (ast.type === 'NOT') getVars(ast.child, vars);
+      else {
+        getVars(ast.left, vars);
+        getVars(ast.right, vars);
+      }
+      return vars;
+    }
+
+    function evaluate(ast, env) {
+      if (ast.type === 'VAR') return env[ast.name];
+      if (ast.type === 'NOT') return !evaluate(ast.child, env);
+      if (ast.type === 'AND') return evaluate(ast.left, env) && evaluate(ast.right, env);
+      if (ast.type === 'OR') return evaluate(ast.left, env) || evaluate(ast.right, env);
+      if (ast.type === 'IMPLIES') return !evaluate(ast.left, env) || evaluate(ast.right, env);
+      if (ast.type === 'IFF') return evaluate(ast.left, env) === evaluate(ast.right, env);
+      return false;
+    }
+
+    function formatAst(ast) {
+      if (ast.type === 'VAR') return ast.name;
+      if (ast.type === 'NOT') return "¬" + formatAst(ast.child);
+      if (ast.type === 'AND') return "(" + formatAst(ast.left) + " ∧ " + formatAst(ast.right) + ")";
+      if (ast.type === 'OR') return "(" + formatAst(ast.left) + " ∨ " + formatAst(ast.right) + ")";
+      if (ast.type === 'IMPLIES') return "(" + formatAst(ast.left) + " ⇒ " + formatAst(ast.right) + ")";
+      if (ast.type === 'IFF') return "(" + formatAst(ast.left) + " ⇔ " + formatAst(ast.right) + ")";
+      return "";
+    }
+
+    function generateTruthTable() {
+      const input = document.getElementById("input-formula").value;
+      const errBox = document.getElementById("truth-table-error");
+      const summary = document.getElementById("tt-summary");
+      errBox.classList.add("hidden");
+      summary.classList.add("hidden");
+      
+      if (!input.trim()) return;
+
+      try {
+        const tokens = tokenize(input);
+        const ast = parse(tokens);
+        const vars = Array.from(getVars(ast)).sort();
+        
+        if (vars.length > 8) {
+          throw new Error("Zu viele Variablen (Max. 8 für Browser-Performance)");
+        }
+
+        const head = document.getElementById("tt-head");
+        const body = document.getElementById("tt-body");
+        
+        const formattedAst = formatAst(ast);
+
+        // Header
+        let th = "<tr>";
+        vars.forEach(v => th += `<th class="px-4 py-3 bg-[#0d1117] font-bold text-blue-400">${v}</th>`);
+        th += `<th class="px-4 py-3 border-l border-[#1e2533] text-purple-400 font-bold w-full">${formattedAst}</th></tr>`;
+        head.innerHTML = th;
+
+        // Body
+        let rowsHtml = "";
+        const n = vars.length;
+        const totalRows = 1 << n;
+        
+        let allTrue = true;
+        let allFalse = true;
+
+        for (let i = 0; i < totalRows; i++) {
+          const env = {};
+          let tr = "<tr class='hover:bg-[#151c28] transition'>";
+          for (let j = 0; j < n; j++) {
+            // bits from left (most significant) to right
+            const val = (i & (1 << (n - 1 - j))) !== 0;
+            env[vars[j]] = val;
+            const display = val ? "1" : "0";
+            const color = val ? "text-emerald-400" : "text-rose-400";
+            tr += `<td class="px-4 py-2 ${color}">${display}</td>`;
+          }
+          
+          const result = evaluate(ast, env);
+          if (!result) allTrue = false;
+          if (result) allFalse = false;
+          
+          const rDisplay = result ? "1" : "0";
+          const rColor = result ? "text-emerald-400 font-bold bg-emerald-950/20" : "text-rose-400 font-bold bg-rose-950/20";
+          
+          tr += `<td class="px-4 py-2 border-l border-[#1e2533] ${rColor}">${rDisplay}</td></tr>`;
+          rowsHtml += tr;
+        }
+        
+        body.innerHTML = rowsHtml;
+
+        // Summary
+        summary.classList.remove("hidden");
+        document.getElementById("tt-rows-count").innerText = `${totalRows} Zeilen generiert`;
+        
+        const statusEl = document.getElementById("tt-status");
+        if (allTrue) {
+          statusEl.innerHTML = `<span class="text-emerald-400">Tautologie (Allgemeingültig)</span>`;
+        } else if (allFalse) {
+          statusEl.innerHTML = `<span class="text-rose-400">Kontradiktion (Unerfüllbar)</span>`;
+        } else {
+          statusEl.innerHTML = `<span class="text-amber-400">Kontingent (Erfüllbar)</span>`;
+        }
+
+      } catch (e) {
+        errBox.innerText = "Fehler: " + e.message;
+        errBox.classList.remove("hidden");
+      }
+    }
   </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
@@ -33,40 +33,9 @@
 <body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-rose-600 selection:text-white">
 
   <!-- Top Technical Header -->
-  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-      <div class="flex items-center space-x-6">
-        <a href="../" class="flex items-center space-x-3 text-slate-100 hover:text-rose-400 transition group">
-          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-rose-400 group-hover:border-rose-500 transition">
-            <span class="text-lg">∑</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
-            <span class="text-[10px] text-rose-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">07_mathe_3_promi</span>
-          </div>
-        </a>
-
-        <!-- Desktop Menu: Überkategorien -->
-        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
-          <a href="../mathe-1/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
-            05_mathe_1
-          </a>
-          <a href="../mathe-2/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
-            06_mathe_2
-          </a>
-          <a href="../mathe-3/" class="text-rose-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">
-            07_mathe_3_promi
-          </a>
-        </nav>
-      </div>
-
-      <div class="flex items-center space-x-4 text-xs font-mono">
-        <a href="../" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
-          <span>&larr;</span> 00_startseite
-        </a>
-      </div>
-    </div>
-  </header>
+  <div id="app-header"></div>
+  <script src="../components.js"></script>
+  <script>renderHeader("../");</script>
 
   <!-- Main Content Area -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -104,20 +73,8 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded bg-rose-500"></span>
-        <span>UniSuite // Mathe 3 &amp; ProMi</span>
-      </div>
-      <div class="flex flex-wrap items-center gap-6 text-slate-400">
-        <a href="../" class="hover:text-slate-200 transition">~/portfolio</a>
-        <a href="../mathe-1/" class="hover:text-slate-200 transition">~/mathe_1</a>
-        <a href="../mathe-2/" class="hover:text-slate-200 transition">~/mathe_2</a>
-        <a href="../mathe-3/" class="text-slate-200">~/mathe_3_promi</a>
-      </div>
-    </div>
-  </footer>
+  <div id="app-footer"></div>
+  <script>renderFooter("../");</script>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
