@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APL | UniSuite</title>
+  <meta name="description" content="Interaktives Lehrlabor für Aussagen- und Prädikatenlogik (APL).">
+  
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-purple-600 selection:text-white">
+
+  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <a href="../" class="flex items-center space-x-3 text-slate-100 hover:text-purple-400 transition group">
+          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-purple-400 group-hover:border-purple-500 transition">
+            <span class="text-lg">L</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
+            <span class="text-[10px] text-purple-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">06_apl</span>
+          </div>
+        </a>
+
+        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
+          <a href="../moses/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">04_moses</a>
+          <a href="../afe/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">05_afe</a>
+          <a href="../apl/" class="text-purple-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">06_apl</a>
+          <a href="../mathe-1/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">07_mathe_1</a>
+        </nav>
+      </div>
+
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="../" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>&larr;</span> 00_startseite
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-purple-400 font-bold">$</span>
+          <span>unisuite-cs --module apl</span>
+        </div>
+      </div>
+
+      <div class="space-y-1 pt-1">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
+          Aussagen- und Prädikatenlogik (APL)
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-4xl leading-relaxed">
+          Syntax und Semantik von PL1, Resolution, Unifikation, Herbrand-Theorie und Logikprogrammierung (Prolog).
+        </p>
+      </div>
+    </div>
+
+    <section class="space-y-6">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <h2 class="text-base font-bold text-white font-heading">Resolutions-Beweiser</h2>
+        <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg text-slate-300 text-sm space-y-2">
+          <p>Klauselform und Unifikations-Algorithmus</p>
+          <div class="text-xs text-purple-400 font-mono mt-4">[Inhalte für APL in Entwicklung...]</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded bg-purple-500"></span>
+        <span>UniSuite // APL</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-6 text-slate-400">
+        <a href="../" class="hover:text-slate-200 transition">~/portfolio</a>
+        <a href="../moses/" class="hover:text-slate-200 transition">~/moses</a>
+        <a href="../afe/" class="hover:text-slate-200 transition">~/afe</a>
+        <a href="../apl/" class="text-slate-200">~/apl</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
+      }
+    });
+  </script>
+</body>
+</html>
