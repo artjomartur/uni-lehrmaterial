@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html lang="de" class="h-full bg-slate-950 text-slate-100">
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UniSuite • Interaktives Informatik Lehrmaterial &amp; Simulatoren</title>
-  <meta name="description" content="Interaktive Hochschul-Lehrmaterialien, Simulatoren und Visualisierungswerkzeuge für Informationsmanagement, Algorithmen &amp; Datenstrukturen und Rechnerorganisation.">
+  <title>UniSuite • Informatik Lehrmaterial &amp; Simulatoren</title>
+  <meta name="description" content="Kuratierte Hochschul-Lehrmaterialien, interaktive Simulatoren und Visualisierungswerkzeuge für Informationsmanagement, Algorithmen &amp; Datenstrukturen und Rechnerorganisation.">
   
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Google Fonts: Inter, Outfit, JetBrains Mono -->
+  <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
 
   <style>
     body {
@@ -26,301 +26,273 @@
     .font-mono {
       font-family: 'JetBrains Mono', monospace;
     }
-    .glass-panel {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
+      transition: all 0.2s ease;
     }
-    .portal-card {
-      background: rgba(30, 41, 59, 0.45);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .portal-card:hover {
-      background: rgba(30, 41, 59, 0.8);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5);
-    }
-    .portal-card-im:hover {
-      border-color: rgba(99, 102, 241, 0.5);
-      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 30px -5px rgba(99, 102, 241, 0.25);
-    }
-    .portal-card-aud:hover {
-      border-color: rgba(245, 158, 11, 0.5);
-      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 30px -5px rgba(245, 158, 11, 0.25);
-    }
-    .portal-card-ro:hover {
-      border-color: rgba(16, 185, 129, 0.5);
-      box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.5), 0 0 30px -5px rgba(16, 185, 129, 0.25);
-    }
-    .gradient-text {
-      background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #38bdf8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .cs-card:hover {
+      background: #131822;
+      border-color: #3b82f6;
+      transform: translateY(-2px);
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #020617;
+      background: #0a0c10;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #334155;
+      background: #1e2533;
       border-radius: 4px;
     }
   </style>
 </head>
-<body class="min-h-full flex flex-col bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-100 antialiased custom-scrollbar">
+<body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-blue-600 selection:text-white">
 
-  <!-- Top Navigation Bar -->
-  <header class="sticky top-0 z-50 glass-panel border-b border-slate-800/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+  <!-- Top Technical Header -->
+  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
       <div class="flex items-center space-x-6">
-        <a href="./" class="flex items-center space-x-2.5 text-indigo-400 hover:text-white transition group">
-          <!-- UniSuite Isometric Matrix Logo -->
-          <div class="w-9 h-9 rounded-lg bg-slate-900/90 border border-indigo-500/40 p-1 flex items-center justify-center group-hover:scale-105 group-hover:border-indigo-400 group-hover:shadow-[0_0_20px_rgba(99,102,241,0.5)] transition duration-200">
+        <a href="./" class="flex items-center space-x-3 text-slate-100 hover:text-blue-400 transition group">
+          <!-- Geometric Tech Icon -->
+          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-blue-400 group-hover:border-blue-500 transition">
             <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="18,3 30,10 18,17 6,10" fill="url(#idxLogoTop)" />
-              <polygon points="6,10 18,17 18,31 6,24" fill="url(#idxLogoLeft)" />
-              <polygon points="18,17 30,10 30,24 18,31" fill="url(#idxLogoRight)" />
-              <line x1="18" y1="3" x2="18" y2="31" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.4" />
-              <line x1="6" y1="10" x2="30" y2="24" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3" />
-              <line x1="30" y1="10" x2="6" y2="24" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3" />
-              <circle cx="18" cy="17" r="2.2" fill="#ffffff" />
-              <circle cx="18" cy="17" r="4.5" fill="#38bdf8" fill-opacity="0.35" />
-              <circle cx="18" cy="6" r="1.2" fill="#38bdf8" />
-              <circle cx="26" cy="15" r="1.2" fill="#34d399" />
-              <circle cx="10" cy="15" r="1.2" fill="#818cf8" />
-              <circle cx="18" cy="27" r="1.2" fill="#10b981" />
-              <defs>
-                <linearGradient id="idxLogoTop" x1="6" y1="3" x2="30" y2="17" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#38bdf8"/>
-                  <stop offset="1" stop-color="#6366f1"/>
-                </linearGradient>
-                <linearGradient id="idxLogoLeft" x1="6" y1="10" x2="18" y2="31" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#6366f1"/>
-                  <stop offset="1" stop-color="#312e81"/>
-                </linearGradient>
-                <linearGradient id="idxLogoRight" x1="18" y1="17" x2="30" y2="31" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#06b6d4"/>
-                  <stop offset="1" stop-color="#10b981"/>
-                </linearGradient>
-              </defs>
+              <polygon points="18,3 30,10 18,17 6,10" fill="#3b82f6" />
+              <polygon points="6,10 18,17 18,31 6,24" fill="#1e40af" />
+              <polygon points="18,17 30,10 30,24 18,31" fill="#0284c7" />
+              <circle cx="18" cy="17" r="2.5" fill="#ffffff" />
             </svg>
           </div>
           <div class="flex items-center gap-2">
-            <span class="font-heading font-black text-xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-400 tracking-tight">UniSuite</span>
-            <span class="hidden md:inline-block text-[10px] text-slate-400 font-mono px-2 py-0.5 rounded bg-slate-900/80 border border-slate-800">CS Learning Hub</span>
+            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
+            <span class="text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">v2.4.0</span>
           </div>
         </a>
 
         <!-- Desktop Menu: Überkategorien -->
-        <nav class="hidden lg:flex items-center space-x-1 border-l border-slate-800 pl-6 text-xs font-semibold">
-          <a href="./informationsmanagement/" class="text-slate-300 hover:text-indigo-300 px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
-            🗄️ Informationsmanagement
+        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
+          <a href="./informationsmanagement/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            01_informationsmanagement
           </a>
-          <a href="./algorithmen-datenstrukturen/" class="text-slate-300 hover:text-amber-300 px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
-            ⚡ Algorithmen &amp; Datenstrukturen
+          <a href="./algorithmen-datenstrukturen/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            02_algorithmen_und_datenstrukturen
           </a>
-          <a href="./rechnerorganisation/" class="text-slate-300 hover:text-emerald-300 px-3 py-1.5 rounded-md hover:bg-slate-800/60 transition">
-            ⚙️ Rechnerorganisation
+          <a href="./rechnerorganisation/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            03_rechnerorganisation
           </a>
         </nav>
       </div>
 
-      <div class="flex items-center space-x-4">
-        <a href="/" class="text-xs sm:text-sm font-medium text-slate-300 hover:text-white flex items-center gap-1.5 transition">
-          <span>←</span> Portfolio
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="/" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>&larr;</span> portfolio
         </a>
       </div>
     </div>
   </header>
 
   <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
     
-    <!-- Hero Header -->
-    <div class="text-center space-y-4 max-w-3xl mx-auto pt-4">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-xs font-mono font-semibold text-indigo-300">
-        <span>◈</span> TU Darmstadt • Informatik Lehrmaterialien
+    <!-- Hero Header (Simple, Technical, Monospace Accents, NO Gradient) -->
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 sm:p-8 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-emerald-400 font-bold">$</span>
+          <span>cat /etc/unisuite/curriculum.info</span>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          TU Darmstadt • Informatik Lehre
+        </div>
       </div>
-      <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
-        Interaktives <span class="gradient-text">Uni Lehrmaterial</span>
-      </h1>
-      <p class="text-sm sm:text-base text-slate-400 leading-relaxed">
-        Wählen Sie einen Fachbereich, um die dazugehörigen visuellen Simulatoren, Algorithmen-Labore und Klausur-Trainer zu starten.
-      </p>
+
+      <div class="space-y-2 pt-1">
+        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white font-heading">
+          Interaktives Informatik-Lehrmaterial
+        </h1>
+        <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
+          Kuratierte interaktive Visualisierungen, Algorithmen-Simulatoren und Klausur-Trainer für relationale Datenbanksysteme, Algorithmen &amp; Datenstrukturen und Rechnerorganisation.
+        </p>
+      </div>
+
+      <!-- Quick Command Status Bar -->
+      <div class="pt-2 flex flex-wrap gap-2 text-xs font-mono">
+        <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248] text-slate-300">
+          Fachbereiche: 3
+        </span>
+        <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248] text-slate-300">
+          Simulatoren: 12
+        </span>
+        <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248] text-slate-300">
+          Framework: KaTeX + SVG Simulatoren
+        </span>
+      </div>
     </div>
 
     <!-- 3 Core Fachbereiche (Überkategorien Portale) -->
-    <section class="space-y-6">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h2 class="text-sm font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-          <span>📂</span> Fachbereiche &amp; Themenfelder
+    <section class="space-y-4">
+      <div class="flex items-center justify-between border-b border-[#1e2533] pb-2">
+        <h2 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <span>[+]</span> Fachbereiche wählen
         </h2>
-        <span class="text-xs text-slate-500 font-mono">3 Hauptkategorien</span>
+        <span class="text-xs font-mono text-slate-500">3 Hauptmodule</span>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Category 1: Informationsmanagement & Datenbanken -->
-        <div class="portal-card portal-card-im rounded-2xl p-7 border border-indigo-500/30 flex flex-col justify-between relative overflow-hidden group">
-          <!-- Ambient Glow -->
-          <div class="absolute -right-16 -top-16 w-48 h-48 bg-indigo-600/15 rounded-2xl blur-3xl pointer-events-none group-hover:bg-indigo-600/25 transition"></div>
-
-          <div class="space-y-5 relative">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-mono font-bold">
-                Fachbereich 1
+        <div class="cs-card rounded-xl p-6 flex flex-col justify-between group">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+              <span class="text-xs font-mono font-bold text-blue-400">
+                01_informationsmanagement
               </span>
-              <span class="text-3xl">🗄️</span>
+              <span class="text-xs font-mono text-slate-400 bg-[#151c28] px-2 py-0.5 rounded border border-[#273248]">
+                DB &amp; SQL
+              </span>
             </div>
 
             <div>
-              <h3 class="text-2xl font-black text-white group-hover:text-indigo-300 transition">
+              <h3 class="text-xl font-bold text-white group-hover:text-blue-400 transition font-heading">
                 Informationsmanagement
               </h3>
-              <p class="text-xs font-medium text-indigo-400/80 mt-1">Relationale Datenbanken &amp; SQL</p>
-              <p class="text-xs text-slate-300 mt-3 leading-relaxed">
-                Umfassende Simulatoren für relationale Algebra, Operatorbaum-Optimierung, Attributhüllen &amp; Normalisierung (1NF–BCNF), B+-Bäume sowie ACID-Transaktionen mit 2PL Locking.
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                Relationale Algebra, logische Operatorbäume, Attributhüllen &amp; Normalisierung (1NF–BCNF), B+-Bäume sowie ACID-Transaktionen mit 2PL Locking.
               </p>
             </div>
 
             <!-- Contained Tools List -->
-            <div class="space-y-2 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-indigo-400">✓</span> Relationale Algebra &amp; Join Explorer
+            <div class="space-y-1.5 pt-2 border-t border-[#1e2533] text-xs font-mono text-slate-300">
+              <div class="flex items-center gap-2">
+                <span class="text-blue-400 font-bold">&gt;</span> Relationale Algebra &amp; Joins
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-indigo-400">✓</span> SQL Query Optimizer &amp; AST
+              <div class="flex items-center gap-2">
+                <span class="text-blue-400 font-bold">&gt;</span> SQL Query Optimizer (AST)
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-indigo-400">✓</span> Normalisierungs-Coach &amp; Bernstein
+              <div class="flex items-center gap-2">
+                <span class="text-blue-400 font-bold">&gt;</span> Normalisierungs-Coach (1NF-BCNF)
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-indigo-400">✓</span> B+ Tree &amp; Indexing Playground
+              <div class="flex items-center gap-2">
+                <span class="text-blue-400 font-bold">&gt;</span> B+ Tree &amp; Indexing Playground
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-indigo-400">✓</span> Transaktionen &amp; 2PL Scheduler
+              <div class="flex items-center gap-2">
+                <span class="text-blue-400 font-bold">&gt;</span> Transaktionen &amp; 2PL Scheduler
               </div>
             </div>
           </div>
 
-          <div class="pt-6 mt-6 border-t border-slate-800">
+          <div class="pt-6 mt-4 border-t border-[#1e2533]">
             <a 
               href="./informationsmanagement/" 
-              class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-indigo-600/30 group-hover:scale-[1.02]"
+              class="w-full py-2.5 px-4 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] hover:border-blue-500 text-slate-100 hover:text-white font-mono font-semibold text-xs flex items-center justify-between transition"
             >
-              <span>🚀</span> Fachbereich öffnen &rarr;
+              <span>Fachbereich öffnen</span>
+              <span class="text-blue-400">&rarr;</span>
             </a>
           </div>
         </div>
 
         <!-- Category 2: Algorithmen & Datenstrukturen -->
-        <div class="portal-card portal-card-aud rounded-2xl p-7 border border-amber-500/30 flex flex-col justify-between relative overflow-hidden group">
-          <!-- Ambient Glow -->
-          <div class="absolute -right-16 -top-16 w-48 h-48 bg-amber-600/15 rounded-2xl blur-3xl pointer-events-none group-hover:bg-amber-600/25 transition"></div>
-
-          <div class="space-y-5 relative">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-mono font-bold">
-                Fachbereich 2
+        <div class="cs-card rounded-xl p-6 flex flex-col justify-between group">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+              <span class="text-xs font-mono font-bold text-amber-400">
+                02_algorithmen_datenstrukturen
               </span>
-              <span class="text-3xl">⚡</span>
+              <span class="text-xs font-mono text-slate-400 bg-[#151c28] px-2 py-0.5 rounded border border-[#273248]">
+                AuD
+              </span>
             </div>
 
             <div>
-              <h3 class="text-2xl font-black text-white group-hover:text-amber-300 transition">
+              <h3 class="text-xl font-bold text-white group-hover:text-amber-400 transition font-heading">
                 Algorithmen &amp; Datenstrukturen
               </h3>
-              <p class="text-xs font-medium text-amber-400/80 mt-1">Graphen, Bäume &amp; Komplexität</p>
-              <p class="text-xs text-slate-300 mt-3 leading-relaxed">
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">
                 Interaktive visuelle Labore für Kürzeste-Wege-Algorithmen (Dijkstra), selbstbalancierende AVL-Bäume mit allen 4 Rotationen, Sortierverfahren und asymptotische Master-Theorem Analyse.
               </p>
             </div>
 
             <!-- Contained Tools List -->
-            <div class="space-y-2 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-amber-400">✓</span> Dijkstra Kürzeste-Wege Graph-Explorer
+            <div class="space-y-1.5 pt-2 border-t border-[#1e2533] text-xs font-mono text-slate-300">
+              <div class="flex items-center gap-2">
+                <span class="text-amber-400 font-bold">&gt;</span> Dijkstra Graph-Explorer
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-amber-400">✓</span> AVL-Baum Selbstbalancierung (LL/RR/LR/RL)
+              <div class="flex items-center gap-2">
+                <span class="text-amber-400 font-bold">&gt;</span> AVL-Baum Rotationen (LL/RR/LR/RL)
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-amber-400">✓</span> Quicksort vs. Bubble-Sort Rekursions-Lab
+              <div class="flex items-center gap-2">
+                <span class="text-amber-400 font-bold">&gt;</span> Quicksort vs. Bubblesort Labor
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-amber-400">✓</span> Master-Theorem Fall-Analysator
+              <div class="flex items-center gap-2">
+                <span class="text-amber-400 font-bold">&gt;</span> Master-Theorem Analysator
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-amber-400">✓</span> Asymptotik- &amp; Klausur-Quiz
+              <div class="flex items-center gap-2">
+                <span class="text-amber-400 font-bold">&gt;</span> Asymptotik &amp; O-Notation Quiz
               </div>
             </div>
           </div>
 
-          <div class="pt-6 mt-6 border-t border-slate-800">
+          <div class="pt-6 mt-4 border-t border-[#1e2533]">
             <a 
               href="./algorithmen-datenstrukturen/" 
-              class="w-full py-3 px-4 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-amber-600/30 group-hover:scale-[1.02]"
+              class="w-full py-2.5 px-4 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] hover:border-amber-500 text-slate-100 hover:text-white font-mono font-semibold text-xs flex items-center justify-between transition"
             >
-              <span>⚡</span> Fachbereich öffnen &rarr;
+              <span>Fachbereich öffnen</span>
+              <span class="text-amber-400">&rarr;</span>
             </a>
           </div>
         </div>
 
         <!-- Category 3: Rechnerorganisation -->
-        <div class="portal-card portal-card-ro rounded-2xl p-7 border border-emerald-500/30 flex flex-col justify-between relative overflow-hidden group">
-          <!-- Ambient Glow -->
-          <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-600/15 rounded-2xl blur-3xl pointer-events-none group-hover:bg-emerald-600/25 transition"></div>
-
-          <div class="space-y-5 relative">
-            <div class="flex items-center justify-between">
-              <span class="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold">
-                Fachbereich 3
+        <div class="cs-card rounded-xl p-6 flex flex-col justify-between group">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+              <span class="text-xs font-mono font-bold text-emerald-400">
+                03_rechnerorganisation
               </span>
-              <span class="text-3xl">⚙️</span>
+              <span class="text-xs font-mono text-slate-400 bg-[#151c28] px-2 py-0.5 rounded border border-[#273248]">
+                RO &amp; CPU
+              </span>
             </div>
 
             <div>
-              <h3 class="text-2xl font-black text-white group-hover:text-emerald-300 transition">
+              <h3 class="text-xl font-bold text-white group-hover:text-emerald-400 transition font-heading">
                 Rechnerorganisation
               </h3>
-              <p class="text-xs font-medium text-emerald-400/80 mt-1">Architektur, Pipeline &amp; Speicher</p>
-              <p class="text-xs text-slate-300 mt-3 leading-relaxed">
+              <p class="text-xs text-slate-400 mt-2 leading-relaxed">
                 Architektur-Visualisierungen: 5-Stufen RISC-V Pipeline mit Hazards &amp; Forwarding, CPU Cache-Simulator (Direct / 2-Way) mit Hit/Miss-Statistik, IEEE-754 Bit-Labor und Amdahl's Law.
               </p>
             </div>
 
             <!-- Contained Tools List -->
-            <div class="space-y-2 pt-2 border-t border-slate-800/80 text-xs text-slate-300">
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-emerald-400">✓</span> 5-Stufen RISC-V Pipeline Simulator
+            <div class="space-y-1.5 pt-2 border-t border-[#1e2533] text-xs font-mono text-slate-300">
+              <div class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">&gt;</span> 5-Stufen RISC-V Pipeline
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-emerald-400">✓</span> Data &amp; Control Hazard Behandlung
+              <div class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">&gt;</span> Data Hazards &amp; Forwarding
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-emerald-400">✓</span> CPU Cache Simulator (Tag/Index/Offset)
+              <div class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">&gt;</span> CPU Cache Simulator (Tag/Index)
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-emerald-400">✓</span> IEEE-754 32-Bit Gleitkomma-Labor
+              <div class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">&gt;</span> IEEE-754 32-Bit Gleitkomma
               </div>
-              <div class="flex items-center gap-2 font-medium">
-                <span class="text-emerald-400">✓</span> Amdahl'sches Gesetz Speedup-Rechner
+              <div class="flex items-center gap-2">
+                <span class="text-emerald-400 font-bold">&gt;</span> Amdahl's Law Speedup Rechner
               </div>
             </div>
           </div>
 
-          <div class="pt-6 mt-6 border-t border-slate-800">
+          <div class="pt-6 mt-4 border-t border-[#1e2533]">
             <a 
               href="./rechnerorganisation/" 
-              class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-md shadow-emerald-600/30 group-hover:scale-[1.02]"
+              class="w-full py-2.5 px-4 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] hover:border-emerald-500 text-slate-100 hover:text-white font-mono font-semibold text-xs flex items-center justify-between transition"
             >
-              <span>⚙️</span> Fachbereich öffnen &rarr;
+              <span>Fachbereich öffnen</span>
+              <span class="text-emerald-400">&rarr;</span>
             </a>
           </div>
         </div>
@@ -331,20 +303,18 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-slate-950 border-t border-slate-800/80 text-slate-500 text-xs py-8 mt-16">
-    <div class="max-w-7xl mx-auto px-4 text-center space-y-3">
-      <p class="font-semibold text-slate-300">UniSuite • Interaktive Lehrmaterial-Suite &amp; Simulatoren</p>
-      <p>Entwickelt für universitäre Informatik-Lehrveranstaltungen &amp; Klausurvorbereitung • TU Darmstadt Lehrpläne</p>
-      <div class="flex flex-wrap justify-center gap-4 pt-2 text-slate-400">
-        <a href="/" class="hover:text-white transition">🏠 Portfolio</a>
+  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 text-xs py-6 mt-16 font-mono">
+    <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+      <p class="text-slate-400">UniSuite • Hochschul-Lehrmaterial &amp; Simulatoren</p>
+      <p class="text-[11px] text-slate-500">TU Darmstadt Informatik-Lehrpläne</p>
+      <div class="flex flex-wrap justify-center gap-4 pt-2 text-slate-400 text-xs">
+        <a href="/" class="hover:text-white transition">~/portfolio</a>
         <span>•</span>
-        <a href="./informationsmanagement/" class="hover:text-indigo-300 transition">🗄️ Informationsmanagement</a>
+        <a href="./informationsmanagement/" class="hover:text-blue-400 transition">~/informationsmanagement</a>
         <span>•</span>
-        <a href="./algorithmen-datenstrukturen/" class="hover:text-amber-300 transition">⚡ Algorithmen &amp; Datenstrukturen</a>
+        <a href="./algorithmen-datenstrukturen/" class="hover:text-amber-400 transition">~/algorithmen_und_datenstrukturen</a>
         <span>•</span>
-        <a href="./rechnerorganisation/" class="hover:text-emerald-300 transition">⚙️ Rechnerorganisation</a>
-        <span>•</span>
-        <a href="/#contact" class="hover:text-white transition">Kontakt</a>
+        <a href="./rechnerorganisation/" class="hover:text-emerald-400 transition">~/rechnerorganisation</a>
       </div>
     </div>
   </footer>
