@@ -31,3 +31,4 @@ Set-Location $targetDir
 git diff
 git add .
 git commit -m "Refactor: Extract header and footer to components.js"
+

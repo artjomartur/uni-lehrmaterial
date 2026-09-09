@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
@@ -83,6 +83,12 @@
       </button>
       <button onclick="switchAuDTab('quiz')" id="tab-btn-quiz" class="aud-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
         Asymptotik- &amp; Klausur-Quiz
+      </button>
+      <button onclick="switchAuDTab('pathfinding')" id="tab-btn-pathfinding" class="aud-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        A* Pathfinding Raster
+      </button>
+      <button onclick="switchAuDTab('hashing')" id="tab-btn-hashing" class="aud-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        Hashing Simulator
       </button>
     </div>
 
@@ -391,6 +397,79 @@
       </div>
     </section>
 
+    <!-- ======================================================== -->
+    <!-- SECTION 5: PATHFINDING RASTER                            -->
+    <!-- ======================================================== -->
+    <section id="section-pathfinding" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-8 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-4 shadow-xl">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-950 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🧭</span> A* Pathfinding Raster
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Klicke auf das Raster, um Wände zu zeichnen</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="resetGrid()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">Reset</button>
+              <button onclick="runAStar()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow">A* Starten</button>
+            </div>
+          </div>
+          <div id="pathfinding-grid" class="grid gap-1 border border-indigo-950 p-2 bg-[#070919] rounded-xl mx-auto w-full max-w-2xl select-none" style="grid-template-columns: repeat(20, minmax(0, 1fr));">
+            <!-- JS Populated -->
+          </div>
+        </div>
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">A* Heuristik</h3>
+            <div class="text-xs text-slate-300 space-y-2">
+              <p>Der A*-Algorithmus nutzt eine Heuristik (Manhattan-Distanz), um den Kürzesten Weg effizienter als Dijkstra zu finden.</p>
+              <div class="flex items-center gap-2 mt-4"><div class="w-4 h-4 bg-emerald-500 rounded"></div> Startknoten</div>
+              <div class="flex items-center gap-2"><div class="w-4 h-4 bg-rose-500 rounded"></div> Zielknoten</div>
+              <div class="flex items-center gap-2"><div class="w-4 h-4 bg-slate-600 rounded"></div> Wand</div>
+              <div class="flex items-center gap-2"><div class="w-4 h-4 bg-sky-500 rounded"></div> Besucht</div>
+              <div class="flex items-center gap-2"><div class="w-4 h-4 bg-amber-400 rounded"></div> Kürzester Pfad</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 6: HASHING SIMULATOR                             -->
+    <!-- ======================================================== -->
+    <section id="section-hashing" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-8 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-4 shadow-xl">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-950 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🔑</span> Hashing Simulator
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Hash-Tabelle mit Array der Größe 11 (Linear Probing)</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="number" id="hash-input" placeholder="Zahl (z.B. 42)" class="w-32 bg-[#070919] border border-indigo-900 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-indigo-500 font-mono">
+              <button onclick="insertHash()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow">Einfügen</button>
+              <button onclick="resetHash()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">Reset</button>
+            </div>
+          </div>
+          <div class="flex justify-center p-4">
+            <div id="hash-table-container" class="flex flex-wrap gap-2 justify-center max-w-lg">
+              <!-- JS Populated -->
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Hash Log</h3>
+            <div id="hash-log" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 text-slate-300 text-xs leading-relaxed font-mono min-h-[100px]">
+              Tabelle initialisiert. Hashfunktion: h(x) = x mod 11.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- Footer -->
@@ -403,7 +482,7 @@
        TAB SWITCHING
        ========================================================================== */
     function switchAuDTab(tabId) {
-      const tabs = ['dijkstra', 'avl', 'sorting', 'quiz'];
+      const tabs = ['dijkstra', 'avl', 'sorting', 'quiz', 'pathfinding', 'hashing'];
       tabs.forEach(t => {
         const sec = document.getElementById('section-' + t);
         const btn = document.getElementById('tab-btn-' + t);
@@ -419,6 +498,8 @@
       if (tabId === 'dijkstra') renderGraph();
       if (tabId === 'avl') renderAVL();
       if (tabId === 'sorting') resetSortVisualizer();
+      if (tabId === 'pathfinding' && pfGrid.length === 0) initGrid();
+      if (tabId === 'hashing' && hashTable.length === 0) initHash();
     }
 
     /* ==========================================================================
@@ -1068,6 +1149,159 @@
         `;
       }
     }
+
+    /* ==========================================================================
+       5. PATHFINDING RASTER (A*)
+       ========================================================================== */
+    const PF_ROWS = 10, PF_COLS = 20;
+    let pfGrid = [];
+    let pfStart = {r: 2, c: 2}, pfEnd = {r: 7, c: 17};
+    let isDragging = false;
+
+    function initGrid() {
+      const container = document.getElementById('pathfinding-grid');
+      container.innerHTML = '';
+      pfGrid = Array.from({length: PF_ROWS}, () => Array(PF_COLS).fill(0)); // 0: empty, 1: wall
+      
+      container.addEventListener('mousedown', () => isDragging = true);
+      container.addEventListener('mouseup', () => isDragging = false);
+      container.addEventListener('mouseleave', () => isDragging = false);
+
+      for(let r=0; r<PF_ROWS; r++){
+        for(let c=0; c<PF_COLS; c++){
+          const cell = document.createElement('div');
+          cell.id = `cell-${r}-${c}`;
+          cell.className = 'w-full aspect-square rounded-sm border border-indigo-900/30 transition-colors cursor-pointer ';
+          
+          if(r===pfStart.r && c===pfStart.c) cell.classList.add('bg-emerald-500');
+          else if(r===pfEnd.r && c===pfEnd.c) cell.classList.add('bg-rose-500');
+          else cell.classList.add('bg-[#151c28]', 'hover:bg-indigo-900/50');
+          
+          const toggleWall = () => {
+            if((r===pfStart.r && c===pfStart.c) || (r===pfEnd.r && c===pfEnd.c)) return;
+            pfGrid[r][c] = pfGrid[r][c] ? 0 : 1;
+            cell.classList.toggle('bg-slate-600', pfGrid[r][c] === 1);
+            cell.classList.toggle('bg-[#151c28]', pfGrid[r][c] === 0);
+          };
+
+          cell.addEventListener('mousedown', toggleWall);
+          cell.addEventListener('mouseenter', () => { if(isDragging) toggleWall(); });
+          
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function resetGrid() { initGrid(); }
+
+    async function runAStar() {
+      let openSet = [{r: pfStart.r, c: pfStart.c, g: 0, h: 0, f: 0, parent: null}];
+      let closedSet = new Set();
+      const getDist = (a,b) => Math.abs(a.r - b.r) + Math.abs(a.c - b.c);
+      
+      while(openSet.length > 0) {
+        openSet.sort((a,b) => a.f - b.f);
+        let curr = openSet.shift();
+        let key = `${curr.r},${curr.c}`;
+        
+        if(curr.r === pfEnd.r && curr.c === pfEnd.c) {
+          let p = curr.parent;
+          while(p && (p.r !== pfStart.r || p.c !== pfStart.c)) {
+            document.getElementById(`cell-${p.r}-${p.c}`).classList.replace('bg-sky-500', 'bg-amber-400');
+            p = p.parent;
+            await new Promise(res => setTimeout(res, 50));
+          }
+          return;
+        }
+
+        closedSet.add(key);
+        if(curr.r !== pfStart.r || curr.c !== pfStart.c) {
+          document.getElementById(`cell-${curr.r}-${curr.c}`).classList.replace('bg-[#151c28]', 'bg-sky-500');
+          await new Promise(res => setTimeout(res, 30));
+        }
+
+        const neighbors = [
+          {r: curr.r-1, c: curr.c}, {r: curr.r+1, c: curr.c},
+          {r: curr.r, c: curr.c-1}, {r: curr.r, c: curr.c+1}
+        ];
+
+        for(let n of neighbors) {
+          if(n.r>=0 && n.r<PF_ROWS && n.c>=0 && n.c<PF_COLS && pfGrid[n.r][n.c] !== 1 && !closedSet.has(`${n.r},${n.c}`)) {
+            let existing = openSet.find(o => o.r === n.r && o.c === n.c);
+            let g = curr.g + 1;
+            let h = getDist(n, pfEnd);
+            if(!existing) {
+              openSet.push({...n, g, h, f: g+h, parent: curr});
+            } else if (g < existing.g) {
+              existing.g = g; existing.f = g + existing.h; existing.parent = curr;
+            }
+          }
+        }
+      }
+    }
+
+    /* ==========================================================================
+       6. HASHING SIMULATOR
+       ========================================================================== */
+    const HASH_SIZE = 11;
+    let hashTable = [];
+
+    function initHash() {
+      hashTable = new Array(HASH_SIZE).fill(null);
+      renderHash();
+      document.getElementById('hash-log').innerHTML = 'Tabelle geleert. Hashfunktion: h(x) = x mod 11 (Linear Probing).';
+    }
+
+    function renderHash(highlightIdx = -1) {
+      const container = document.getElementById('hash-table-container');
+      if(!container) return;
+      container.innerHTML = '';
+      
+      for(let i=0; i<HASH_SIZE; i++){
+        const isHighlight = i === highlightIdx;
+        container.innerHTML += `
+          <div class="flex flex-col items-center gap-1">
+            <span class="text-[10px] text-slate-500 font-mono">${i}</span>
+            <div class="w-12 h-12 flex items-center justify-center border-2 rounded ${isHighlight ? 'border-amber-400 bg-amber-400/20 shadow-[0_0_10px_rgba(251,191,36,0.5)]' : (hashTable[i] !== null ? 'border-indigo-500 bg-indigo-900/50' : 'border-indigo-950 bg-[#070919]')} text-sm font-bold font-mono transition-all">
+              ${hashTable[i] !== null ? hashTable[i] : ''}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    async function insertHash() {
+      const input = document.getElementById('hash-input');
+      const val = parseInt(input.value);
+      if(isNaN(val)) return;
+      input.value = '';
+
+      let idx = val % HASH_SIZE;
+      let logMsg = `Füge <b>${val}</b> ein. <br>&bull; h(${val}) = ${val} mod ${HASH_SIZE} = ${idx}<br>`;
+      document.getElementById('hash-log').innerHTML = logMsg;
+
+      for(let step=0; step<HASH_SIZE; step++) {
+        let probeIdx = (idx + step) % HASH_SIZE;
+        renderHash(probeIdx);
+        await new Promise(res => setTimeout(res, 500));
+        
+        if(hashTable[probeIdx] === null) {
+          hashTable[probeIdx] = val;
+          logMsg += step === 0 ? `&bull; Index ${probeIdx} ist frei. Eingefügt.` : `&bull; Kollision! Linear Probing findet freien Platz bei ${probeIdx}.`;
+          document.getElementById('hash-log').innerHTML = logMsg;
+          renderHash();
+          return;
+        } else {
+          logMsg += `&bull; Kollision bei Index ${probeIdx} (belegt durch ${hashTable[probeIdx]}).<br>`;
+          document.getElementById('hash-log').innerHTML = logMsg;
+        }
+      }
+      logMsg += `&bull; <b>Fehler:</b> Hash-Tabelle ist voll!`;
+      document.getElementById('hash-log').innerHTML = logMsg;
+      renderHash();
+    }
+
+    function resetHash() { initHash(); }
 
     // Init on load
     window.addEventListener('DOMContentLoaded', () => {

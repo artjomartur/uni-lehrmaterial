@@ -75,6 +75,9 @@ function renderHeader(relativePath) {
       </div>
 
       <div class="flex items-center space-x-4 text-xs font-mono">
+        <button onclick="printAsPDF()" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#151c28] border border-[#273248] text-slate-300 hover:text-white hover:border-blue-500 transition">
+          📄 PDF
+        </button>
         <a href="/" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
           <span>&larr;</span> portfolio
         </a>
@@ -115,3 +118,50 @@ function renderFooter(relativePath) {
   if (el) el.innerHTML = footerHtml;
   else document.write(footerHtml);
 }
+
+// Local Storage Manager (Auto-Save forms)
+document.addEventListener('DOMContentLoaded', () => {
+  const inputs = document.querySelectorAll('input[type="text"], input[type="number"], select, textarea');
+  inputs.forEach(input => {
+    if(!input.id) return;
+    
+    // Load saved value
+    const saved = localStorage.getItem('unisuite_' + input.id);
+    if(saved !== null) {
+      input.value = saved;
+      // Trigger change event so calculators update automatically
+      input.dispatchEvent(new Event('change'));
+    }
+
+    // Save on change
+    input.addEventListener('input', () => {
+      localStorage.setItem('unisuite_' + input.id, input.value);
+    });
+  });
+});
+
+// PDF Print Function
+function printAsPDF() {
+  window.print();
+}
+
+// Inject Print CSS
+const printStyle = document.createElement('style');
+printStyle.innerHTML = `
+  @media print {
+    body { background: white !important; color: black !important; }
+    header, footer, button, .hidden-print, #app-header, #app-footer { display: none !important; }
+    .cs-card, .bg-[#0b0e26], .bg-[#070919], .bg-[#0d1117] { 
+      background: white !important; 
+      border: 1px solid #ddd !important; 
+      color: black !important;
+      box-shadow: none !important;
+      break-inside: avoid;
+    }
+    .text-slate-200, .text-slate-300, .text-slate-400, .text-white { color: black !important; }
+    .border-indigo-950, .border-[#1e2533] { border-color: #ddd !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+`;
+document.head.appendChild(printStyle);
+

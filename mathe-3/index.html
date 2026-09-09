@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
@@ -62,10 +62,36 @@
     <!-- SECTIONS -->
     <section class="space-y-6">
       <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
-        <h2 class="text-base font-bold text-white font-heading">Stochastik &amp; Wahrscheinlichkeit</h2>
-        <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg text-slate-300 text-sm space-y-2">
-          <p>Normalverteilung $\mathcal{N}(\mu, \sigma^2)$ und Satz von Bayes.</p>
-          <div class="text-xs text-rose-400 font-mono mt-4">[Inhalte für Mathe 3 in Entwicklung...]</div>
+        <h2 class="text-base font-bold text-white font-heading">Bayes-Theorem Rechner (z.B. Medizin-Test)</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+          <div>
+            <label class="block text-slate-400 mb-1" title="P(A)">Prävalenz / P(A)</label>
+            <input type="number" id="input-p-a" step="0.001" min="0" max="1" value="0.01" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1" title="P(B|A)">Sensitivität / P(B|A)</label>
+            <input type="number" id="input-p-b-a" step="0.001" min="0" max="1" value="0.95" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1" title="P(B|¬A)">Falsch-Positiv-Rate / P(B|¬A)</label>
+            <input type="number" id="input-p-b-nota" step="0.001" min="0" max="1" value="0.05" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded px-3 py-2 text-white focus:outline-none focus:border-rose-500">
+          </div>
+        </div>
+
+        <button id="btn-calculate" class="bg-rose-600 hover:bg-rose-500 text-white font-medium py-2 px-4 rounded text-sm transition-colors">
+          Berechnen
+        </button>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg">
+            <h3 class="text-sm font-bold text-white mb-4">Wahrscheinlichkeitsbaum</h3>
+            <div id="tree-container" class="flex justify-center overflow-x-auto text-white"></div>
+          </div>
+          <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg">
+            <h3 class="text-sm font-bold text-white mb-4">Rechenweg (Satz von Bayes)</h3>
+            <div id="math-container" class="text-slate-300 text-sm overflow-x-auto"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -82,6 +108,69 @@
         renderMathInElement(document.body, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
       }
     });
+  </script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+
+    function updateCalculator() {
+      const pA = parseFloat(document.getElementById('input-p-a').value) || 0;
+      const pBA = parseFloat(document.getElementById('input-p-b-a').value) || 0;
+      const pBNotA = parseFloat(document.getElementById('input-p-b-nota').value) || 0;
+
+      const pNotA = 1 - pA;
+      const pNotBA = 1 - pBA;
+      const pNotBNotA = 1 - pBNotA;
+
+      const pB = (pBA * pA) + (pBNotA * pNotA);
+      let pAB = 0;
+      if (pB > 0) {
+        pAB = (pBA * pA) / pB;
+      }
+
+      // Update KaTeX Math
+      const mathHTML = `
+        <div class="space-y-4">
+          <p>Gesucht ist $P(A|B)$, die Wahrscheinlichkeit für A, unter der Bedingung B (z.B. Kranksein bei positivem Test).</p>
+          <p>$$P(A|B) = \\frac{P(B|A) \\cdot P(A)}{P(B)}$$</p>
+          <p>$$P(B) = P(B|A) \\cdot P(A) + P(B|\\neg A) \\cdot P(\\neg A)$$</p>
+          <hr class="border-[#1e2533] my-2">
+          <p>Werte einsetzen:</p>
+          <p>$$P(B) = ${pBA} \\cdot ${pA} + ${pBNotA} \\cdot ${pNotA.toFixed(4)} = ${pB.toFixed(4)}$$</p>
+          <p>$$P(A|B) = \\frac{${pBA} \\cdot ${pA}}{${pB.toFixed(4)}} = \\frac{${(pBA * pA).toFixed(4)}}{${pB.toFixed(4)}} \\approx ${(pAB * 100).toFixed(2)}\\%$$</p>
+        </div>
+      `;
+      const mathContainer = document.getElementById('math-container');
+      mathContainer.innerHTML = mathHTML;
+      if (window.renderMathInElement) {
+        renderMathInElement(mathContainer, { delimiters: [{left: "$$", right: "$$", display: true}, {left: "$", right: "$", display: false}] });
+      }
+
+      // Update Mermaid
+      const graphDef = `
+      graph LR
+        Start(( )) -->|P(A)=${pA}| A(A)
+        Start -->|P(¬A)=${pNotA.toFixed(4)}| NotA(¬A)
+        A -->|P(B|A)=${pBA}| B1(B)
+        A -->|P(¬B|A)=${pNotBA.toFixed(4)}| NotB1(¬B)
+        NotA -->|P(B|¬A)=${pBNotA}| B2(B)
+        NotA -->|P(¬B|¬A)=${pNotBNotA.toFixed(4)}| NotB2(¬B)
+        
+        B1 -.-> |${(pBA*pA).toFixed(4)}| R1[P(A ∩ B)]
+        NotB1 -.-> |${(pNotBA*pA).toFixed(4)}| R2[P(A ∩ ¬B)]
+        B2 -.-> |${(pBNotA*pNotA).toFixed(4)}| R3[P(¬A ∩ B)]
+        NotB2 -.-> |${(pNotBNotA*pNotA).toFixed(4)}| R4[P(¬A ∩ ¬B)]
+      `;
+      
+      const treeContainer = document.getElementById('tree-container');
+      treeContainer.innerHTML = '<div class="mermaid">' + graphDef + '</div>';
+      mermaid.run({ nodes: treeContainer.querySelectorAll('.mermaid') }).catch(e => console.error(e));
+    }
+
+    document.getElementById('btn-calculate').addEventListener('click', updateCalculator);
+    
+    // Initial render
+    setTimeout(updateCalculator, 200); 
   </script>
 </body>
 </html>
