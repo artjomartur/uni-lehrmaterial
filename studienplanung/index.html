@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studienplanung & Stundenplan</title>
+  
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col custom-scrollbar selection:bg-blue-600 selection:text-white">
+
+  <!-- Header -->
+  <div id="app-header"></div>
+  <script src="../components.js"></script>
+  <script>renderHeader("../");</script>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Hero / Title -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-900 to-indigo-900 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-lg shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+          📅
+        </div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
+            Studienplanung &amp; Stundenplan
+          </h1>
+          <p class="text-sm text-slate-400 mt-1">
+            Persönliche Modulübersicht, Raumsuche und Notenspiegel.
+          </p>
+        </div>
+      </div>
+      
+      <!-- TUCaN Disclaimer -->
+      <div class="p-4 bg-red-950/40 border border-red-500/50 rounded-lg flex gap-3 items-start">
+        <div class="text-red-400 mt-0.5">⚠️</div>
+        <div class="text-sm text-red-200">
+          <strong class="font-bold text-red-400">Wichtiger Hinweis zur TUCaN-Anmeldung:</strong><br>
+          Dieser Studienplaner dient ausschließlich der persönlichen Organisation und Übersicht. 
+          <strong class="text-white">Eine verbindliche Anmeldung zu Modulen, Lehrveranstaltungen und Prüfungen muss zwingend weiterhin über TUCaN erfolgen!</strong> 
+          Ohne Anmeldung auf TUCaN sind Sie nicht berechtigt, an Prüfungen teilzunehmen.
+        </div>
+      </div>
+    </div>
+
+    <!-- Interface -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Left Column: Search & Add -->
+      <div class="lg:col-span-1 space-y-4">
+        <div class="cs-card rounded-xl p-5 space-y-4">
+          <h2 class="font-heading font-bold text-white text-lg">Modul Suchen & Hinzufügen</h2>
+          
+          <div class="relative">
+            <input type="text" id="search-input" placeholder="Z.B. 'Informationsmanagement'..." class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+          </div>
+          
+          <div id="search-results" class="space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <div class="cs-card rounded-xl p-5 space-y-4">
+          <h2 class="font-heading font-bold text-white text-lg">Modul-Details & Notenspiegel</h2>
+          <div id="module-details" class="text-sm text-slate-400">
+            Klicke auf ein Modul, um Rauminfos, Vorlesungsinhalte und alte Notenspiegel zu sehen.
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Timetable -->
+      <div class="lg:col-span-2 space-y-4">
+        <div class="cs-card rounded-xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="font-heading font-bold text-white text-lg">Mein Stundenplan (WiSe 26/27)</h2>
+            <button onclick="clearPlan()" class="px-3 py-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/30 border border-red-900/50 hover:bg-red-900/50 rounded transition">
+              Plan leeren
+            </button>
+          </div>
+          
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-[#1e2533] text-slate-400 font-mono text-xs">
+                  <th class="py-3 px-4 font-normal">Zeit</th>
+                  <th class="py-3 px-4 font-normal">Montag</th>
+                  <th class="py-3 px-4 font-normal">Dienstag</th>
+                  <th class="py-3 px-4 font-normal">Mittwoch</th>
+                  <th class="py-3 px-4 font-normal">Donnerstag</th>
+                  <th class="py-3 px-4 font-normal">Freitag</th>
+                </tr>
+              </thead>
+              <tbody id="timetable-body" class="text-slate-300">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <div id="app-footer"></div>
+  <script>renderFooter("../");</script>
+
+  <script>
+    // --- Mock Database (Since we can't scrape TUCaN live due to authentication) ---
+    const MOCK_MODULES = [
+      {
+        id: "infoman",
+        name: "Informationsmanagement",
+        type: "VL + Ü",
+        day: 2, // Tuesday
+        timeSlot: "11:40 - 13:20",
+        room: "hex/S311/08",
+        contents: "Relationales Modell, SQL, Normalisierung, Transaktionen (2PL, ACID).",
+        grades: "Durchschnitt: 2.7 | Durchfallquote: 18%",
+        color: "bg-blue-900/50 border-blue-500/50 text-blue-300"
+      },
+      {
+        id: "aud",
+        name: "Algorithmen & Datenstrukturen",
+        type: "VL",
+        day: 4, // Thursday
+        timeSlot: "09:50 - 11:30",
+        room: "hex/S101/A1",
+        contents: "Graphen, Sortierverfahren, Hashing, AVL-Bäume.",
+        grades: "Durchschnitt: 3.2 | Durchfallquote: 42%",
+        color: "bg-amber-900/50 border-amber-500/50 text-amber-300"
+      },
+      {
+        id: "ro",
+        name: "Rechnerorganisation",
+        type: "VL",
+        day: 1, // Monday
+        timeSlot: "13:30 - 15:10",
+        room: "hex/S311/08",
+        contents: "RISC-V Pipeline, Caches, IEEE-754, KV-Diagramme.",
+        grades: "Durchschnitt: 2.9 | Durchfallquote: 25%",
+        color: "bg-emerald-900/50 border-emerald-500/50 text-emerald-300"
+      },
+      {
+        id: "mathe3",
+        name: "Probabilistische Methoden",
+        type: "VL + Ü",
+        day: 3, // Wednesday
+        timeSlot: "08:00 - 09:40",
+        room: "hex/S103/226",
+        contents: "Wahrscheinlichkeit, Bayes, Markov-Ketten, Verteilungen.",
+        grades: "Durchschnitt: 3.5 | Durchfallquote: 48%",
+        color: "bg-rose-900/50 border-rose-500/50 text-rose-300"
+      },
+      {
+        id: "fop",
+        name: "FOP (Java)",
+        type: "VL",
+        day: 5, // Friday
+        timeSlot: "11:40 - 13:20",
+        room: "hex/S101/A1",
+        contents: "Funktionale und Objektorientierte Programmierung in Java.",
+        grades: "Durchschnitt: 2.5 | Durchfallquote: 15%",
+        color: "bg-purple-900/50 border-purple-500/50 text-purple-300"
+      }
+    ];
+
+    const timeSlots = ["08:00 - 09:40", "09:50 - 11:30", "11:40 - 13:20", "13:30 - 15:10", "15:20 - 17:00"];
+    
+    let myPlan = JSON.parse(localStorage.getItem('unisuite_stundenplan')) || [];
+
+    function renderTimetable() {
+      const tbody = document.getElementById('timetable-body');
+      tbody.innerHTML = '';
+
+      timeSlots.forEach(slot => {
+        let tr = document.createElement('tr');
+        tr.className = "border-b border-[#1e2533] last:border-0";
+        
+        let th = document.createElement('td');
+        th.className = "py-3 px-4 font-mono text-xs text-slate-500 whitespace-nowrap";
+        th.textContent = slot;
+        tr.appendChild(th);
+
+        for (let day = 1; day <= 5; day++) {
+          let td = document.createElement('td');
+          td.className = "py-2 px-2 min-w-[140px] align-top";
+          
+          const modId = myPlan.find(m => m.day === day && m.slot === slot);
+          if (modId) {
+            const mod = MOCK_MODULES.find(m => m.id === modId.id);
+            if(mod) {
+              td.innerHTML = `
+                <div class="p-2 border rounded ${mod.color} cursor-pointer hover:brightness-110 transition" onclick="showDetails('${mod.id}')">
+                  <div class="font-bold text-xs leading-tight">${mod.name}</div>
+                  <div class="text-[10px] font-mono mt-1 opacity-80">${mod.room}</div>
+                  <div class="text-[10px] font-mono opacity-80">${mod.type}</div>
+                </div>
+              `;
+            }
+          }
+          tr.appendChild(td);
+        }
+        tbody.appendChild(tr);
+      });
+      
+      localStorage.setItem('unisuite_stundenplan', JSON.stringify(myPlan));
+    }
+
+    function renderSearchResults(query = "") {
+      const resDiv = document.getElementById('search-results');
+      resDiv.innerHTML = '';
+      
+      const filtered = MOCK_MODULES.filter(m => m.name.toLowerCase().includes(query.toLowerCase()));
+      
+      filtered.forEach(mod => {
+        const isAdded = myPlan.some(p => p.id === mod.id);
+        const div = document.createElement('div');
+        div.className = "p-3 bg-[#151c28] border border-[#273248] rounded-lg flex items-center justify-between";
+        div.innerHTML = `
+          <div>
+            <div class="text-sm font-bold text-white cursor-pointer hover:text-blue-400 transition" onclick="showDetails('${mod.id}')">${mod.name}</div>
+            <div class="text-xs font-mono text-slate-500">${mod.timeSlot} (Tag ${mod.day})</div>
+          </div>
+          <button onclick="toggleModul('${mod.id}', ${mod.day}, '${mod.timeSlot}')" class="px-2 py-1 rounded text-xs font-bold font-mono transition ${isAdded ? 'bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white' : 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500 hover:text-white'}">
+            ${isAdded ? 'Entfernen' : 'Hinzufügen'}
+          </button>
+        `;
+        resDiv.appendChild(div);
+      });
+    }
+
+    function toggleModul(id, day, slot) {
+      const idx = myPlan.findIndex(p => p.id === id);
+      if (idx >= 0) {
+        myPlan.splice(idx, 1);
+      } else {
+        myPlan.push({id, day, slot});
+      }
+      renderSearchResults(document.getElementById('search-input').value);
+      renderTimetable();
+    }
+
+    function showDetails(id) {
+      const mod = MOCK_MODULES.find(m => m.id === id);
+      const detDiv = document.getElementById('module-details');
+      detDiv.innerHTML = `
+        <div class="space-y-3">
+          <div class="text-lg font-bold text-white font-heading">${mod.name}</div>
+          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
+              <span class="text-slate-500 block mb-1">Typ:</span>
+              <span class="text-slate-300">${mod.type}</span>
+            </div>
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
+              <span class="text-slate-500 block mb-1">Raum:</span>
+              <span class="text-slate-300">${mod.room}</span>
+            </div>
+          </div>
+          <div class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded text-sm text-slate-300">
+            <span class="font-bold text-white block mb-1">Inhalte:</span>
+            ${mod.contents}
+          </div>
+          <div class="p-3 bg-indigo-950/20 border border-indigo-900/50 rounded text-sm text-indigo-200">
+            <span class="font-bold text-indigo-400 block mb-1">📊 Historischer Notenspiegel:</span>
+            ${mod.grades}
+          </div>
+        </div>
+      `;
+    }
+
+    function clearPlan() {
+      myPlan = [];
+      renderSearchResults();
+      renderTimetable();
+    }
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+      renderSearchResults(e.target.value);
+    });
+
+    // Init
+    renderSearchResults();
+    renderTimetable();
+  </script>
+</body>
+</html>
+

@@ -2,7 +2,7 @@
 
 > Live verfügbar unter: **[https://unisuite.artjombecker.com](https://unisuite.artjombecker.com)**
 
-Eine kuratierte Sammlung visueller Simulatoren, interaktiver Entscheidungsbäume und Übungswerkzeuge für komplexe Informatik- und Datenbankthemen der **TU Darmstadt**. Entwickelt von **Artjom Becker**.
+Eine kuratierte Sammlung visueller Simulatoren, interaktiver Entscheidungsbäume und Übungswerkzeuge für Informatik-, Mathematik- und Organisationsthemen der **TU Darmstadt**. Entwickelt von **Artjom Becker**.
 
 ---
 
@@ -36,6 +36,40 @@ Eine kuratierte Sammlung visueller Simulatoren, interaktiver Entscheidungsbäume
 - **Konfliktgraph $G=(V, E)$**: Automatische Zyklen-Erkennung zur Prüfung auf Konflikt-Serialisierbarkeit.
 - **Topologische Sortierung**: Berechnung des äquivalenten seriellen Ablaufs.
 - **2-Phasen-Sperren (2PL)** & Visualisierung klassischer ACID-Anomalien (Dirty Read, Lost Update, Phantom Read).
+
+### 6. 🧠 Modellierung, Spezifikation und Semantik (`/moses/`)
+- **Hoare-Kalkül & Weakest Preconditions**: Interaktive Verifikation von Hoare-Tripeln und Berechnung schwächster Vorbedingungen.
+- **Operationelle Semantik**: Big-Step-Ableitungsbäume für imperative Programme.
+- **Temporallogik**: LTL/CTL-Model-Checking mit Kripke-Strukturen.
+- **Aussagenlogik**: Resolutionskalkül, DPLL und Klausur-Trainer.
+
+### 7. 🤖 Automaten, formale Sprachen und Entscheidbarkeit (`/afe/`)
+- **Automaten-Simulator**: DFA- und NFA-Visualisierung mit Ablaufverfolgung.
+- **Formale Sprachen**: Reguläre Ausdrücke und kontextfreie Grammatiken.
+- **Berechenbarkeit**: Grundlagen zu Turingmaschinen und Entscheidbarkeit.
+
+### 8. 🔣 Aussagen- und Prädikatenlogik (`/apl/`)
+- **Wahrheitstabellen-Generator** für aussagenlogische Formeln.
+- **Logische Verfahren**: Resolution, Unifikation und Herbrand-Theorie.
+- **Logikprogrammierung**: Grundlagen von Prolog.
+
+### 9. 📈 Mathematik I: Analysis (`/mathe-1/`)
+- **Analysis-Grundlagen**: Grenzwerte, Stetigkeit, Differential- und Integralrechnung.
+- **Funktionsplotter & L'Hospital**: Interaktive Vorbereitung und Visualisierung mathematischer Aufgaben.
+
+### 10. 🔢 Mathematik II: Lineare Algebra (`/mathe-2/`)
+- **Lineare Algebra**: Vektorräume, Matrizen und Eigenwerte.
+- **Gauß-Algorithmus**: Schritt-für-Schritt-Lösung linearer Gleichungssysteme.
+
+### 11. 🎲 Mathematik III & ProMi: Stochastik und Propädeutikum (`/mathe-3/`)
+- **Stochastik**: Wahrscheinlichkeiten und Statistik.
+- **Bayes-Theorem-Rechner** für bedingte Wahrscheinlichkeiten und diagnostische Tests.
+- **Propädeutische Grundlagen**: Logik, Mengenlehre und vollständige Induktion.
+
+### 12. 📅 Studienplanung & Stundenplan (`/studienplanung/`)
+- **Modulsuche** und persönliche Modulübersicht.
+- **Stundenplan** mit Raum- und Veranstaltungsinformationen.
+- **Notenspiegel** und organisatorische Hinweise zur TUCaN-Anmeldung.
 
 ---
 
