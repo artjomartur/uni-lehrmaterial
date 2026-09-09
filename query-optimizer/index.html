@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="de" class="h-full bg-[#060818] text-slate-100">
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SQL Query Optimizer & AST Visualizer | UniSuite</title>
+  <title>SQL Query Optimizer &amp; AST Visualizer | UniSuite</title>
   <meta name="description" content="Interaktiver SQL Query Optimizer: Visualisierung von logischen und physischen Ausführungsplänen, Pushdown-Heuristiken und Kostenreduktion.">
   
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -19,66 +19,61 @@
 
   <style>
     body { font-family: 'Inter', sans-serif; }
-    h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
-    .glass-panel {
-      background: rgba(11, 14, 38, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
     }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #060818; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
     .node-box {
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .node-box:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
     }
   </style>
 </head>
-<body class="min-h-full flex flex-col bg-[#060818] text-slate-100 antialiased custom-scrollbar">
+<body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-blue-600 selection:text-white">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-50 glass-panel border-b border-indigo-950/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <a href="../" class="flex items-center space-x-2.5 text-indigo-400 hover:text-white transition group">
-          <div class="w-8 h-8 rounded-lg bg-slate-900/90 border border-indigo-500/40 p-1 flex items-center justify-center group-hover:scale-105 group-hover:border-indigo-400 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition duration-200">
+  <!-- Top Technical Header -->
+  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <a href="../informationsmanagement/" class="flex items-center space-x-3 text-slate-100 hover:text-blue-400 transition group">
+          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-blue-400 group-hover:border-blue-500 transition">
             <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="18,3 30,10 18,17 6,10" fill="url(#qoLogoTop)" />
-              <polygon points="6,10 18,17 18,31 6,24" fill="url(#qoLogoLeft)" />
-              <polygon points="18,17 30,10 30,24 18,31" fill="url(#qoLogoRight)" />
-              <line x1="18" y1="3" x2="18" y2="31" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.4" />
-              <line x1="6" y1="10" x2="30" y2="24" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3" />
-              <line x1="30" y1="10" x2="6" y2="24" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3" />
-              <circle cx="18" cy="17" r="2.2" fill="#ffffff" />
-              <circle cx="18" cy="17" r="4.5" fill="#38bdf8" fill-opacity="0.35" />
-              <defs>
-                <linearGradient id="qoLogoTop" x1="6" y1="3" x2="30" y2="17" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#38bdf8"/>
-                  <stop offset="1" stop-color="#6366f1"/>
-                </linearGradient>
-                <linearGradient id="qoLogoLeft" x1="6" y1="10" x2="18" y2="31" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#6366f1"/>
-                  <stop offset="1" stop-color="#312e81"/>
-                </linearGradient>
-                <linearGradient id="qoLogoRight" x1="18" y1="17" x2="30" y2="31" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#06b6d4"/>
-                  <stop offset="1" stop-color="#10b981"/>
-                </linearGradient>
-              </defs>
+              <polygon points="18,3 30,10 18,17 6,10" fill="#3b82f6" />
+              <polygon points="6,10 18,17 18,31 6,24" fill="#1e40af" />
+              <polygon points="18,17 30,10 30,24 18,31" fill="#0284c7" />
+              <circle cx="18" cy="17" r="2.5" fill="#ffffff" />
             </svg>
           </div>
-          <span class="font-heading font-black text-lg text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-400 tracking-tight">UniSuite</span>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
+            <span class="text-[10px] text-blue-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">01_optimizer</span>
+          </div>
         </a>
+
+        <!-- Desktop Menu: Überkategorien -->
+        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
+          <a href="../informationsmanagement/" class="text-blue-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">
+            01_informationsmanagement
+          </a>
+          <a href="../algorithmen-datenstrukturen/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            02_algorithmen_und_datenstrukturen
+          </a>
+          <a href="../rechnerorganisation/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            03_rechnerorganisation
+          </a>
+        </nav>
       </div>
 
-      <div class="flex items-center space-x-4">
-        <a href="../" class="text-xs sm:text-sm font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition">
-          <span>←</span> Alle Module
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="../informationsmanagement/" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>&larr;</span> 01_infomanagement
         </a>
       </div>
     </div>
@@ -86,65 +81,77 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     
-    <!-- Title & Intro -->
-    <div class="space-y-3">
-      <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
-        SQL Query Optimizer &amp; <span class="text-indigo-400">Operatorbaum AST</span>
-      </h1>
-      <p class="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
-        Visualisieren Sie Schritt für Schritt, wie eine relationale Datenbank (RDBMS) eine deklarative SQL-Abfrage in einen logischen Operatorbaum übersetzt, teure Kreuzprodukte durch Joins ersetzt und Selektionen ($\sigma$) sowie Projektionen ($\pi$) frühzeitig nach unten schiebt (Pushdown).
-      </p>
+    <!-- Hero Header (Simple, Technical, Monospace Accents, NO Gradient) -->
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-blue-400 font-bold">$</span>
+          <span>explain select * from professors join lectures ...</span>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          TU Darmstadt • Modul 01 • Optimizer
+        </div>
+      </div>
+
+      <div class="space-y-1 pt-1">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
+          SQL Query Optimizer &amp; AST Operatorbaum
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+          Visualisieren Sie Schritt für Schritt, wie eine relationale Datenbank eine deklarative SQL-Abfrage in einen logischen Operatorbaum übersetzt, teure Kreuzprodukte durch Joins ersetzt und Selektionen ($\sigma$) sowie Projektionen ($\pi$) frühzeitig nach unten schiebt (Pushdown).
+        </p>
+      </div>
     </div>
 
     <!-- Presets Selector & Control Bar -->
-    <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4">
+    <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Klausur-Abfrage auswählen:</label>
+          <label class="text-xs font-bold text-slate-400 font-mono uppercase tracking-wider block mb-2">[+] Klausur-Abfrage wählen:</label>
           <div class="flex flex-wrap gap-2" id="preset-buttons">
-            <button onclick="selectPreset('uni_sokrates')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500" data-id="uni_sokrates">
-              🎓 Vorlesungen von Sokrates
+            <button onclick="selectPreset('uni_sokrates')" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-blue-600 text-white border border-blue-500" data-id="uni_sokrates">
+              Vorlesungen von Sokrates
             </button>
-            <button onclick="selectPreset('ecommerce_nike')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="ecommerce_nike">
-              👟 Nike-Bestellungen &gt; 100€
+            <button onclick="selectPreset('ecommerce_nike')" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="ecommerce_nike">
+              Nike-Bestellungen &gt; 100€
             </button>
-            <button onclick="selectPreset('bib_kemper')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="bib_kemper">
-              📚 Bücher von Prof. Kemper
+            <button onclick="selectPreset('bib_kemper')" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="bib_kemper">
+              Bücher von Prof. Kemper
             </button>
-            <button onclick="selectPreset('airline_frankfurt')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="airline_frankfurt">
-              ✈️ Flüge ab Frankfurt
+            <button onclick="selectPreset('airline_frankfurt')" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="airline_frankfurt">
+              Flüge ab Frankfurt
             </button>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 self-start md:self-end">
-          <button onclick="prevStep()" id="btn-prev-step" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">
-            ◀ Vorheriger Schritt
+        <div class="flex items-center gap-2 self-start md:self-end font-mono text-xs">
+          <button onclick="prevStep()" id="btn-prev-step" class="px-4 py-2 rounded-lg bg-[#151c28] hover:bg-[#1e293b] text-slate-200 font-semibold transition border border-[#273248] disabled:opacity-30 disabled:cursor-not-allowed">
+            &larr; Zurück
           </button>
-          <button onclick="nextStep()" id="btn-next-step" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/30 disabled:opacity-40 disabled:cursor-not-allowed">
-            Nächster Heuristik-Schritt ▶
+          <button onclick="nextStep()" id="btn-next-step" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold transition disabled:opacity-30 disabled:cursor-not-allowed">
+            Nächster Schritt &rarr;
           </button>
         </div>
       </div>
 
       <!-- SQL Box -->
-      <div class="bg-[#070919] p-4 rounded-xl border border-indigo-950/80 font-mono text-xs text-emerald-300 space-y-1">
+      <div class="bg-[#0a0c10] p-4 rounded-lg border border-[#1e2533] font-mono text-xs text-emerald-400 space-y-1">
         <div class="text-[11px] text-slate-500 uppercase font-bold flex justify-between items-center">
-          <span>Eingabe SQL-Statement (SFW-Block)</span>
-          <span id="opt-stats-badge" class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-500/30 font-sans text-[10px] font-bold"></span>
+          <span>SQL-Statement (SFW-Block)</span>
+          <span id="opt-stats-badge" class="px-2 py-0.5 rounded bg-[#151c28] text-blue-400 border border-[#273248] font-mono text-[10px] font-bold"></span>
         </div>
         <pre id="sql-code-display" class="whitespace-pre-wrap leading-relaxed"></pre>
       </div>
     </div>
 
     <!-- Stepper Navigation Progress Bar -->
-    <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4">
-      <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
-        <span id="step-count-text" class="font-bold text-indigo-300">Schritt 1 von 5</span>
-        <span id="step-rule-name" class="font-mono text-amber-300 font-semibold">Regel 1: Kanonische Übersetzung</span>
+    <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4">
+      <div class="flex items-center justify-between text-xs font-mono mb-2">
+        <span id="step-count-text" class="font-bold text-blue-400">Schritt 1 von 5</span>
+        <span id="step-rule-name" class="text-amber-400 font-semibold">Regel 1: Kanonische Übersetzung</span>
       </div>
-      <div class="w-full bg-[#070919] rounded-sm h-2 overflow-hidden border border-indigo-950">
-        <div id="step-progress-bar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full transition-all duration-300" style="width: 20%"></div>
+      <div class="w-full bg-[#0a0c10] rounded h-1.5 overflow-hidden border border-[#1e2533]">
+        <div id="step-progress-bar" class="bg-blue-500 h-full transition-all duration-300" style="width: 20%"></div>
       </div>
     </div>
 
@@ -152,21 +159,21 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
       <!-- Visual Operator Tree (AST) -->
-      <div class="lg:col-span-7 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-xl">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <span>🌳</span> Logischer Operatorbaum (AST)
+      <div class="lg:col-span-7 bg-[#0d1117] border border-[#1e2533] rounded-xl p-6 flex flex-col justify-between space-y-6">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <h2 class="text-base font-bold text-white font-heading">
+            Logischer Operatorbaum (AST)
           </h2>
-          <span class="text-xs font-mono text-slate-400">Auswertung: Blätter ➔ Wurzel</span>
+          <span class="text-xs font-mono text-slate-400">Auswertung: Blätter &rarr; Wurzel</span>
         </div>
 
         <!-- Rendered Tree Canvas / HTML Nodes -->
-        <div id="tree-canvas-container" class="p-4 bg-[#070919] rounded-xl border border-indigo-950/80 min-h-[360px] flex items-center justify-center overflow-x-auto custom-scrollbar font-mono text-xs">
+        <div id="tree-canvas-container" class="p-4 bg-[#0a0c10] rounded-lg border border-[#1e2533] min-h-[360px] flex items-center justify-center overflow-x-auto custom-scrollbar font-mono text-xs">
           <!-- Populated dynamically -->
         </div>
 
-        <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-indigo-950">
-          <span>💡 Farbcodierung: <b class="text-amber-400">Selektion (σ)</b> • <b class="text-sky-400">Projektion (π)</b> • <b class="text-indigo-400">Join (⋈)</b> • <b class="text-emerald-400">Relation</b></span>
+        <div class="flex items-center justify-between text-xs font-mono text-slate-500 pt-2 border-t border-[#1e2533]">
+          <span>Legende: <b class="text-amber-400">σ Selektion</b> • <b class="text-sky-400">π Projektion</b> • <b class="text-blue-400">⋈ Join</b> • <b class="text-emerald-400">Relation</b></span>
         </div>
       </div>
 
@@ -174,50 +181,49 @@
       <div class="lg:col-span-5 space-y-6">
         
         <!-- Algebra Expression Box -->
-        <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Algebra-Formel (KaTeX):</span>
-            <span id="cost-badge" class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Kosten: ~100k Tupel</span>
+        <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-3">
+          <div class="flex items-center justify-between font-mono text-xs">
+            <span class="font-bold text-blue-400 uppercase tracking-wider">Algebra-Formel:</span>
+            <span id="cost-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#151c28] text-amber-400 border border-[#273248]">Kosten: ~100k Tupel</span>
           </div>
-          <div id="latex-output" class="p-4 bg-[#070919] rounded-xl border border-indigo-950 overflow-x-auto custom-scrollbar text-sm font-semibold text-center text-indigo-100 min-h-[60px] flex items-center justify-center">
+          <div id="latex-output" class="p-4 bg-[#0a0c10] rounded-lg border border-[#1e2533] overflow-x-auto custom-scrollbar text-sm font-semibold text-center text-slate-100 min-h-[60px] flex items-center justify-center">
             <!-- KaTeX here -->
           </div>
         </div>
 
         <!-- Explanation Step Box -->
-        <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
-          <div class="flex items-center gap-2 border-b border-indigo-950 pb-3">
-            <span class="text-base">📝</span>
-            <h3 class="text-sm font-bold text-white" id="step-title">Schritterklärung</h3>
+        <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-4">
+          <div class="flex items-center gap-2 border-b border-[#1e2533] pb-3">
+            <h3 class="text-sm font-bold text-white font-heading" id="step-title">Schritterklärung</h3>
           </div>
           <div id="step-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
             <!-- Populated dynamically -->
           </div>
           
-          <div class="p-3.5 bg-indigo-950/30 rounded-xl border border-indigo-500/20 space-y-1.5 text-xs">
-            <div class="font-bold text-indigo-300 flex items-center gap-1.5">
-              <span>🎯</span> Klausur-Regel:
+          <div class="p-3.5 bg-[#151c28] rounded-lg border border-[#273248] space-y-1 text-xs">
+            <div class="font-bold text-blue-400 font-mono flex items-center gap-1.5">
+              <span>[>]</span> Klausur-Regel:
             </div>
-            <p id="rule-tip" class="text-slate-300 text-[11px] leading-relaxed"></p>
+            <p id="rule-tip" class="text-slate-300 text-xs leading-relaxed"></p>
           </div>
         </div>
 
         <!-- Cost Reduction Comparison -->
-        <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
-          <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kosten-Schätzung (Zwischenergebnisse)</div>
+        <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-3">
+          <div class="text-xs font-bold font-mono text-slate-400 uppercase tracking-wider">Kosten-Schätzung (Zwischenergebnisse)</div>
           <div class="space-y-2">
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400">Initiale Kreuzprodukt-Kardinalität:</span>
-              <span id="card-initial" class="font-mono font-bold text-rose-400">100.000 Tupel</span>
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-slate-400">Kreuzprodukt-Kardinalität:</span>
+              <span id="card-initial" class="font-bold text-rose-400">100.000 Tupel</span>
             </div>
-            <div class="flex items-center justify-between text-xs">
-              <span class="text-slate-400">Aktueller Zwischenspeicherbedarf:</span>
-              <span id="card-current" class="font-mono font-bold text-emerald-400">120 Tupel</span>
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-slate-400">Aktueller Zwischenspeicher:</span>
+              <span id="card-current" class="font-bold text-emerald-400">120 Tupel</span>
             </div>
-            <div class="w-full bg-[#070919] rounded-sm h-2 overflow-hidden border border-indigo-950">
+            <div class="w-full bg-[#0a0c10] rounded h-1.5 overflow-hidden border border-[#1e2533]">
               <div id="cost-bar" class="bg-emerald-500 h-full" style="width: 1%"></div>
             </div>
-            <p id="cost-summary" class="text-[11px] text-slate-400 italic pt-1"></p>
+            <p id="cost-summary" class="text-[11px] text-slate-400 font-mono italic pt-1"></p>
           </div>
         </div>
 
@@ -227,14 +233,19 @@
 
   </main>
 
-  <footer class="bg-[#04060e] border-t border-indigo-950/80 text-center py-6 text-xs text-slate-500 space-y-2 mt-12">
-    <div>SQL Query Optimizer • UniSuite Lehrmaterial • TU Darmstadt</div>
-    <div class="flex justify-center gap-4 text-indigo-400 text-[11px]">
-      <a href="../" class="hover:underline">Alle Module</a>
-      <span>•</span>
-      <a href="../relationale-algebra/" class="hover:underline">Relationale Algebra Explorer</a>
-      <span>•</span>
-      <a href="/" class="hover:underline">Portfolio</a>
+  <!-- Footer -->
+  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded bg-emerald-500"></span>
+        <span>UniSuite // Query Optimizer</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-6 text-slate-400">
+        <a href="/" class="hover:text-slate-200 transition">~/portfolio</a>
+        <a href="/informationsmanagement/" class="hover:text-slate-200 transition">~/informationsmanagement</a>
+        <a href="/algorithmen-datenstrukturen/" class="hover:text-slate-200 transition">~/algorithmen_und_datenstrukturen</a>
+        <a href="/rechnerorganisation/" class="hover:text-slate-200 transition">~/rechnerorganisation</a>
+      </div>
     </div>
   </footer>
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" class="h-full bg-[#060818] text-slate-100">
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -19,59 +19,55 @@
 
   <style>
     body { font-family: 'Inter', sans-serif; }
-    h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
-    .glass-panel {
-      background: rgba(11, 14, 38, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
     }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #060818; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e254d; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
   </style>
 </head>
-<body class="min-h-full flex flex-col bg-[#060818] text-slate-100 antialiased custom-scrollbar">
+<body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-blue-600 selection:text-white">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-50 glass-panel border-b border-indigo-950/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <a href="../" class="flex items-center space-x-2.5 text-indigo-400 hover:text-white transition group">
-          <div class="w-8 h-8 rounded-lg bg-slate-900/90 border border-indigo-500/40 p-1 flex items-center justify-center group-hover:scale-105 group-hover:border-indigo-400 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition duration-200">
+  <!-- Top Technical Header -->
+  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <a href="../informationsmanagement/" class="flex items-center space-x-3 text-slate-100 hover:text-blue-400 transition group">
+          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-blue-400 group-hover:border-blue-500 transition">
             <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="18,3 30,10 18,17 6,10" fill="url(#txLogoTop)" />
-              <polygon points="6,10 18,17 18,31 6,24" fill="url(#txLogoLeft)" />
-              <polygon points="18,17 30,10 30,24 18,31" fill="url(#txLogoRight)" />
-              <line x1="18" y1="3" x2="18" y2="31" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.4" />
-              <line x1="6" y1="10" x2="30" y2="24" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3" />
-              <line x1="30" y1="10" x2="6" y2="24" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3" />
-              <circle cx="18" cy="17" r="2.2" fill="#ffffff" />
-              <circle cx="18" cy="17" r="4.5" fill="#38bdf8" fill-opacity="0.35" />
-              <defs>
-                <linearGradient id="txLogoTop" x1="6" y1="3" x2="30" y2="17" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#38bdf8"/>
-                  <stop offset="1" stop-color="#6366f1"/>
-                </linearGradient>
-                <linearGradient id="txLogoLeft" x1="6" y1="10" x2="18" y2="31" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#6366f1"/>
-                  <stop offset="1" stop-color="#312e81"/>
-                </linearGradient>
-                <linearGradient id="txLogoRight" x1="18" y1="17" x2="30" y2="31" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#06b6d4"/>
-                  <stop offset="1" stop-color="#10b981"/>
-                </linearGradient>
-              </defs>
+              <polygon points="18,3 30,10 18,17 6,10" fill="#3b82f6" />
+              <polygon points="6,10 18,17 18,31 6,24" fill="#1e40af" />
+              <polygon points="18,17 30,10 30,24 18,31" fill="#0284c7" />
+              <circle cx="18" cy="17" r="2.5" fill="#ffffff" />
             </svg>
           </div>
-          <span class="font-heading font-black text-lg text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-400 tracking-tight">UniSuite</span>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
+            <span class="text-[10px] text-blue-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">01_transaktionen</span>
+          </div>
         </a>
+
+        <!-- Desktop Menu: Überkategorien -->
+        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
+          <a href="../informationsmanagement/" class="text-blue-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">
+            01_informationsmanagement
+          </a>
+          <a href="../algorithmen-datenstrukturen/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            02_algorithmen_und_datenstrukturen
+          </a>
+          <a href="../rechnerorganisation/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            03_rechnerorganisation
+          </a>
+        </nav>
       </div>
 
-      <div class="flex items-center space-x-4">
-        <a href="../" class="text-xs sm:text-sm font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition">
-          <span>←</span> Alle Module
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="../informationsmanagement/" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>&larr;</span> 01_infomanagement
         </a>
       </div>
     </div>
@@ -79,70 +75,82 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     
-    <!-- Title & Intro -->
-    <div class="space-y-3">
-      <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
-        Transaktionen, 2PL &amp; <span class="text-indigo-400">Konfliktgraphen</span>
-      </h1>
-      <p class="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
-        Analysieren Sie verzahnte Ablaufpläne (Schedules) interaktiv auf <b>Konflikt-Serialisierbarkeit</b>, erkennen Sie Zyklen im Abhängigkeitsgraphen ($G$), berechnen Sie topologische Sortierungen und simulieren Sie das <b>2-Phasen-Sperrprotokoll (2PL / Strict 2PL)</b> mit Deadlock-Erkennung.
-      </p>
+    <!-- Hero Header (Simple, Technical, Monospace Accents, NO Gradient) -->
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-blue-400 font-bold">$</span>
+          <span>tx-scheduler --check-conflict-graph --simulate-2pl</span>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          TU Darmstadt • Modul 01 • Transaktionen &amp; ACID
+        </div>
+      </div>
+
+      <div class="space-y-1 pt-1">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
+          Transaktionen, 2PL &amp; Konfliktgraphen
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+          Analysieren Sie verzahnte Ablaufpläne (Schedules) interaktiv auf <b>Konflikt-Serialisierbarkeit</b>, erkennen Sie Zyklen im Abhängigkeitsgraphen ($G$), berechnen Sie topologische Sortierungen und simulieren Sie das <b>2-Phasen-Sperrprotokoll (2PL / Strict 2PL)</b> mit Deadlock-Erkennung.
+        </p>
+      </div>
     </div>
 
     <!-- Presets Selector -->
-    <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-xl">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Klausur-Schedules:</span>
+    <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2 font-mono text-xs">
+        <span class="font-bold text-slate-400 uppercase tracking-wider">[+] Klausur-Schedules:</span>
         <div class="flex flex-wrap gap-2" id="tx-presets">
-          <button onclick="loadTxPreset('serializable_3tx')" class="tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500" data-id="serializable_3tx">
-            ✓ Serialisierbar (3 Transaktionen)
+          <button onclick="loadTxPreset('serializable_3tx')" class="tx-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white border border-blue-500" data-id="serializable_3tx">
+            Serialisierbar (3 Transaktionen)
           </button>
-          <button onclick="loadTxPreset('cycle_conflict')" class="tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="cycle_conflict">
-            ✗ Nicht serialisierbar (Zyklus T1 ⇄ T2)
+          <button onclick="loadTxPreset('cycle_conflict')" class="tx-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="cycle_conflict">
+            Zyklus (T1 &harr; T2)
           </button>
-          <button onclick="loadTxPreset('dirty_read')" class="tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="dirty_read">
-            ⚠️ Dirty Read (Lesen vor Abort)
+          <button onclick="loadTxPreset('dirty_read')" class="tx-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="dirty_read">
+            Dirty Read (Abort)
           </button>
-          <button onclick="loadTxPreset('deadlock_2pl')" class="tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="deadlock_2pl">
-            🔒 Deadlock unter 2PL
+          <button onclick="loadTxPreset('deadlock_2pl')" class="tx-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="deadlock_2pl">
+            Deadlock unter 2PL
           </button>
         </div>
       </div>
-      <button onclick="analyzeSchedule()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5">
-        <span>⚡</span> Schedule Prüfen &amp; Graph Generieren
+      <button onclick="analyzeSchedule()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs transition flex items-center gap-1.5">
+        <span>&gt;</span> Schedule Prüfen
       </button>
     </div>
 
     <!-- Schedule Input & Matrix -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
       
-      <div class="md:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-2">
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>⏱️</span> Schedule-Eingabe (Ablaufprotokoll)
+      <div class="md:col-span-6 bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-3">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-2">
+          <h2 class="text-sm font-bold text-white font-heading flex items-center gap-2">
+            Schedule-Eingabe (Ablaufprotokoll)
           </h2>
-          <span class="text-xs text-slate-400">Syntax: <code>r1(A), w2(A), c1...</code></span>
+          <span class="text-xs font-mono text-slate-400">Syntax: <code>r1(A), w2(A)...</code></span>
         </div>
         <div>
-          <textarea id="schedule-input" rows="3" class="w-full bg-[#070919] border border-indigo-950 rounded-xl p-3 text-xs sm:text-sm font-mono text-emerald-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed custom-scrollbar">r1(A), r2(B), w1(A), w2(B), r3(A), w3(C), c1, c2, c3</textarea>
+          <textarea id="schedule-input" rows="3" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg p-3 text-xs sm:text-sm font-mono text-emerald-400 focus:outline-none focus:border-blue-500 leading-relaxed custom-scrollbar">r1(A), r2(B), w1(A), w2(B), r3(A), w3(C), c1, c2, c3</textarea>
         </div>
-        <div class="text-[11px] text-slate-400">
+        <div class="text-[11px] font-mono text-slate-400">
           Operationen: <b>r_i(X)</b> = Read von $X$ in $T_i$, <b>w_i(X)</b> = Write auf $X$ in $T_i$, <b>c_i</b> = Commit, <b>a_i</b> = Abort.
         </div>
       </div>
 
       <!-- Schedule Timeline Grid -->
-      <div class="md:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl flex flex-col justify-between">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-2">
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>📊</span> Transaktions-Timeline
+      <div class="md:col-span-6 bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-3 flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-2">
+          <h2 class="text-sm font-bold text-white font-heading flex items-center gap-2">
+            Transaktions-Timeline
           </h2>
-          <span id="tx-count-badge" class="text-xs font-mono text-indigo-300">3 Transaktionen</span>
+          <span id="tx-count-badge" class="text-xs font-mono text-blue-400">3 Transaktionen</span>
         </div>
-        <div id="timeline-container" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 overflow-x-auto custom-scrollbar font-mono text-xs">
+        <div id="timeline-container" class="p-3 bg-[#0a0c10] rounded-lg border border-[#1e2533] overflow-x-auto custom-scrollbar font-mono text-xs">
           <!-- Dynamically populated table -->
         </div>
-        <div class="text-[11px] text-slate-500">
+        <div class="text-[11px] font-mono text-slate-500">
           Zeitachse verläuft chronologisch von links nach rechts ($t_1 \to t_n$).
         </div>
       </div>
@@ -151,21 +159,21 @@
 
     <!-- Metrics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 space-y-1 text-center font-mono">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Konflikt-Serialisierbar?</span>
         <div id="stat-serializable" class="text-base font-bold text-emerald-400">Ja (Kreisfrei)</div>
       </div>
-      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 space-y-1 text-center font-mono">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Konflikt-Kanten ($E$)</span>
-        <div id="stat-conflicts-count" class="text-base font-bold font-mono text-amber-300">2 Kanten</div>
+        <div id="stat-conflicts-count" class="text-base font-bold text-amber-400">2 Kanten</div>
       </div>
-      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 space-y-1 text-center font-mono">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Äquivalenter Serieller Plan</span>
-        <div id="stat-serial-order" class="text-base font-bold font-mono text-sky-300">T1 ➔ T2 ➔ T3</div>
+        <div id="stat-serial-order" class="text-base font-bold text-blue-400">T1 &rarr; T2 &rarr; T3</div>
       </div>
-      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 space-y-1 text-center font-mono">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">2PL Lock-Einhaltung</span>
-        <div id="stat-2pl-status" class="text-base font-bold text-indigo-300">Konform (Strict 2PL)</div>
+        <div id="stat-2pl-status" class="text-base font-bold text-slate-200">Konform (Strict 2PL)</div>
       </div>
     </div>
 
@@ -173,19 +181,19 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
       <!-- Graph Canvas -->
-      <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <span>🕸️</span> Konfliktgraph $G = (V, E)$
+      <div class="lg:col-span-6 bg-[#0d1117] border border-[#1e2533] rounded-xl p-6 space-y-5">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <h2 class="text-base font-bold text-white font-heading flex items-center gap-2">
+            Konfliktgraph $G = (V, E)$
           </h2>
           <span class="text-xs font-mono text-slate-400">Knoten: $T_i$ • Kanten: Konflikte</span>
         </div>
 
-        <div id="graph-visual-canvas" class="p-6 bg-[#070919] rounded-xl border border-indigo-950 min-h-[300px] flex items-center justify-center font-mono text-xs">
+        <div id="graph-visual-canvas" class="p-6 bg-[#0a0c10] rounded-lg border border-[#1e2533] min-h-[300px] flex items-center justify-center font-mono text-xs">
           <!-- Graph Nodes -->
         </div>
 
-        <div class="space-y-1.5 text-xs text-slate-400">
+        <div class="space-y-1.5 text-xs font-mono text-slate-400">
           <div class="font-bold text-slate-300">Konflikt-Bedingungen ($op_i(X)$ vor $op_j(X)$):</div>
           <div>• <b>Read-Write:</b> $r_i(X) < w_j(X) \implies T_i \to T_j$</div>
           <div>• <b>Write-Read:</b> $w_i(X) < r_j(X) \implies T_i \to T_j$</div>
@@ -194,21 +202,21 @@
       </div>
 
       <!-- Conflicts List & 2PL Analyzer -->
-      <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <span>🔍</span> Gefundene Konflikt-Paare
+      <div class="lg:col-span-6 bg-[#0d1117] border border-[#1e2533] rounded-xl p-6 space-y-5">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <h2 class="text-base font-bold text-white font-heading flex items-center gap-2">
+            Gefundene Konflikt-Paare
           </h2>
           <span class="text-xs font-mono text-slate-400">Ausführliche Begründung</span>
         </div>
 
-        <div id="conflicts-detail-list" class="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar">
+        <div id="conflicts-detail-list" class="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar font-mono text-xs">
           <!-- Dynamically populated -->
         </div>
 
-        <div class="p-4 bg-[#070919] rounded-xl border border-indigo-950 space-y-2 text-xs">
-          <div class="font-bold text-indigo-300">🎯 Klausur-Satz:</div>
-          <p class="text-slate-300 text-[11px] leading-relaxed">
+        <div class="p-4 bg-[#0a0c10] rounded-lg border border-[#1e2533] space-y-1 text-xs">
+          <div class="font-bold text-blue-400 font-mono">[>] Klausur-Satz:</div>
+          <p class="text-slate-300 text-xs leading-relaxed">
             Ein Schedule $S$ ist genau dann <b>konflikt-serialisierbar</b>, wenn sein Konfliktgraph $G(S)$ <b>azyklisch</b> (kreisfrei) ist. Jede topologische Sortierung von $G(S)$ liefert einen konflikt-äquivalenten seriellen Schedule.
           </p>
         </div>
@@ -218,18 +226,19 @@
 
   </main>
 
-  <footer class="bg-[#04060e] border-t border-indigo-950/80 text-center py-6 text-xs text-slate-500 space-y-2 mt-12">
-    <div>Transaktionen &amp; 2PL Scheduler • UniSuite Lehrmaterial • TU Darmstadt</div>
-    <div class="flex justify-center gap-4 text-indigo-400 text-[11px]">
-      <a href="../" class="hover:underline">Alle Module</a>
-      <span>•</span>
-      <a href="../relationale-algebra/" class="hover:underline">Relationale Algebra Explorer</a>
-      <span>•</span>
-      <a href="../query-optimizer/" class="hover:underline">SQL Query Optimizer</a>
-      <span>•</span>
-      <a href="../normalisierung/" class="hover:underline">Normalisierungs-Coach</a>
-      <span>•</span>
-      <a href="../b-tree/" class="hover:underline">B+ Tree Playground</a>
+  <!-- Footer -->
+  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded bg-emerald-500"></span>
+        <span>UniSuite // Transaktionen &amp; 2PL</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-6 text-slate-400">
+        <a href="/" class="hover:text-slate-200 transition">~/portfolio</a>
+        <a href="/informationsmanagement/" class="hover:text-slate-200 transition">~/informationsmanagement</a>
+        <a href="/algorithmen-datenstrukturen/" class="hover:text-slate-200 transition">~/algorithmen_und_datenstrukturen</a>
+        <a href="/rechnerorganisation/" class="hover:text-slate-200 transition">~/rechnerorganisation</a>
+      </div>
     </div>
   </footer>
 

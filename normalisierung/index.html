@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de" class="h-full bg-[#060818] text-slate-100">
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -19,59 +19,55 @@
 
   <style>
     body { font-family: 'Inter', sans-serif; }
-    h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
-    .glass-panel {
-      background: rgba(11, 14, 38, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
     }
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: #060818; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e254d; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
   </style>
 </head>
-<body class="min-h-full flex flex-col bg-[#060818] text-slate-100 antialiased custom-scrollbar">
+<body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-blue-600 selection:text-white">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-50 glass-panel border-b border-indigo-950/80">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <a href="../" class="flex items-center space-x-2.5 text-indigo-400 hover:text-white transition group">
-          <div class="w-8 h-8 rounded-lg bg-slate-900/90 border border-indigo-500/40 p-1 flex items-center justify-center group-hover:scale-105 group-hover:border-indigo-400 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.5)] transition duration-200">
+  <!-- Top Technical Header -->
+  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <a href="../informationsmanagement/" class="flex items-center space-x-3 text-slate-100 hover:text-blue-400 transition group">
+          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-blue-400 group-hover:border-blue-500 transition">
             <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="18,3 30,10 18,17 6,10" fill="url(#normLogoTop)" />
-              <polygon points="6,10 18,17 18,31 6,24" fill="url(#normLogoLeft)" />
-              <polygon points="18,17 30,10 30,24 18,31" fill="url(#normLogoRight)" />
-              <line x1="18" y1="3" x2="18" y2="31" stroke="#ffffff" stroke-width="0.75" stroke-opacity="0.4" />
-              <line x1="6" y1="10" x2="30" y2="24" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3" />
-              <line x1="30" y1="10" x2="6" y2="24" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.3" />
-              <circle cx="18" cy="17" r="2.2" fill="#ffffff" />
-              <circle cx="18" cy="17" r="4.5" fill="#38bdf8" fill-opacity="0.35" />
-              <defs>
-                <linearGradient id="normLogoTop" x1="6" y1="3" x2="30" y2="17" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#38bdf8"/>
-                  <stop offset="1" stop-color="#6366f1"/>
-                </linearGradient>
-                <linearGradient id="normLogoLeft" x1="6" y1="10" x2="18" y2="31" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#6366f1"/>
-                  <stop offset="1" stop-color="#312e81"/>
-                </linearGradient>
-                <linearGradient id="normLogoRight" x1="18" y1="17" x2="30" y2="31" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#06b6d4"/>
-                  <stop offset="1" stop-color="#10b981"/>
-                </linearGradient>
-              </defs>
+              <polygon points="18,3 30,10 18,17 6,10" fill="#3b82f6" />
+              <polygon points="6,10 18,17 18,31 6,24" fill="#1e40af" />
+              <polygon points="18,17 30,10 30,24 18,31" fill="#0284c7" />
+              <circle cx="18" cy="17" r="2.5" fill="#ffffff" />
             </svg>
           </div>
-          <span class="font-heading font-black text-lg text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-400 tracking-tight">UniSuite</span>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
+            <span class="text-[10px] text-blue-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">01_normalisierung</span>
+          </div>
         </a>
+
+        <!-- Desktop Menu: Überkategorien -->
+        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
+          <a href="../informationsmanagement/" class="text-blue-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">
+            01_informationsmanagement
+          </a>
+          <a href="../algorithmen-datenstrukturen/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            02_algorithmen_und_datenstrukturen
+          </a>
+          <a href="../rechnerorganisation/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            03_rechnerorganisation
+          </a>
+        </nav>
       </div>
 
-      <div class="flex items-center space-x-4">
-        <a href="../" class="text-xs sm:text-sm font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition">
-          <span>←</span> Alle Module
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="../informationsmanagement/" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>&larr;</span> 01_infomanagement
         </a>
       </div>
     </div>
@@ -79,76 +75,88 @@
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     
-    <!-- Title & Intro -->
-    <div class="space-y-3">
-      <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
-        Normalisierungs-Coach &amp; <span class="text-indigo-400">FD-Synthese</span>
-      </h1>
-      <p class="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
-        Überprüfen Sie funktionale Abhängigkeiten ($F$), berechnen Sie Attributhüllen ($X^+$), bestimmen Sie alle Kandidatenschlüssel, testen Sie auf Normalformen (1NF, 2NF, 3NF, BCNF) und führen Sie den 3NF-Synthesealgorithmus mit Verlustlosigkeits- und Abhängigkeitstreue-Garantie interaktiv durch.
-      </p>
+    <!-- Hero Header (Simple, Technical, Monospace Accents, NO Gradient) -->
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-blue-400 font-bold">$</span>
+          <span>check-nf --synthesize -R "PersNr, Name, Rang, VorlNr, Titel, Raum"</span>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          TU Darmstadt • Modul 01 • Normalisierung
+        </div>
+      </div>
+
+      <div class="space-y-1 pt-1">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
+          Normalisierungs-Coach &amp; FD-Synthese
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-3xl leading-relaxed">
+          Überprüfen Sie funktionale Abhängigkeiten ($F$), berechnen Sie Attributhüllen ($X^+$), bestimmen Sie alle Kandidatenschlüssel, testen Sie auf Normalformen (1NF, 2NF, 3NF, BCNF) mit Live-Animation und führen Sie den 3NF-Synthesealgorithmus nach Bernstein interaktiv durch.
+        </p>
+      </div>
     </div>
 
     <!-- Presets Bar -->
-    <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Klausur-Beispiele:</span>
+    <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2 font-mono text-xs">
+        <span class="font-bold text-slate-400 uppercase tracking-wider">[+] Klausur-Beispiele:</span>
         <div class="flex flex-wrap gap-2" id="nf-presets">
-          <button onclick="loadNfPreset('uni_vorlesung')" class="nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500" data-id="uni_vorlesung">
-            🎓 Vorlesung &amp; Professor
+          <button onclick="loadNfPreset('uni_vorlesung')" class="nf-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white border border-blue-500" data-id="uni_vorlesung">
+            Vorlesung &amp; Professor
           </button>
-          <button onclick="loadNfPreset('projekt_mitarbeiter')" class="nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="projekt_mitarbeiter">
-            💼 Projekt, Mitarbeiter &amp; Rolle
+          <button onclick="loadNfPreset('projekt_mitarbeiter')" class="nf-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="projekt_mitarbeiter">
+            Projekt, Mitarbeiter &amp; Rolle
           </button>
-          <button onclick="loadNfPreset('krankenhaus')" class="nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="krankenhaus">
-            🏥 Patient, Station &amp; Chefarzt
+          <button onclick="loadNfPreset('krankenhaus')" class="nf-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="krankenhaus">
+            Patient, Station &amp; Chefarzt
           </button>
-          <button onclick="loadNfPreset('buch_verlag')" class="nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="buch_verlag">
-            📚 Buch, Autor &amp; Verlag
+          <button onclick="loadNfPreset('buch_verlag')" class="nf-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#151c28] text-slate-300 border border-[#273248] hover:text-white" data-id="buch_verlag">
+            Buch, Autor &amp; Verlag
           </button>
         </div>
       </div>
-      <button onclick="runAnalysis()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5">
-        <span>⚡</span> Schema Analysieren &amp; Normalisieren
+      <button onclick="runAnalysis()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs transition flex items-center gap-1.5">
+        <span>&gt;</span> Schema Analysieren
       </button>
     </div>
 
     <!-- Input Configuration Grid -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
       <!-- Relation Attributes -->
-      <div class="md:col-span-5 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>🔤</span> Relationsschema $R$
+      <div class="md:col-span-5 bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <h2 class="text-sm font-bold text-white font-heading flex items-center gap-2">
+            Relationsschema $R$
           </h2>
-          <span class="text-xs text-slate-400">Kommagetrennte Attribute</span>
+          <span class="text-xs font-mono text-slate-400">Kommagetrennt</span>
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-400 block mb-1">Attribute $R(A_1, A_2, \dots)$:</label>
-          <input type="text" id="input-attributes" value="PersNr, Name, Rang, VorlNr, Titel, Raum" class="w-full bg-[#070919] border border-indigo-950 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-mono text-emerald-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <label class="text-xs font-mono text-slate-400 block mb-1">Attribute $R(A_1, A_2, \dots)$:</label>
+          <input type="text" id="input-attributes" value="PersNr, Name, Rang, VorlNr, Titel, Raum" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-4 py-2 text-xs font-mono text-emerald-400 focus:outline-none focus:border-blue-500">
         </div>
         <div>
-          <label class="text-xs font-semibold text-slate-400 block mb-1">Attributhülle berechnen für $X$:</label>
+          <label class="text-xs font-mono text-slate-400 block mb-1">Attributhülle berechnen für $X$:</label>
           <div class="flex gap-2">
-            <input type="text" id="input-closure-target" value="VorlNr" class="flex-1 bg-[#070919] border border-indigo-950 rounded-xl px-4 py-2 text-xs font-mono text-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <button onclick="calcCustomClosure()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition">
+            <input type="text" id="input-closure-target" value="VorlNr" class="flex-1 bg-[#0a0c10] border border-[#1e2533] rounded-lg px-3 py-1.5 text-xs font-mono text-blue-400 focus:outline-none focus:border-blue-500">
+            <button onclick="calcCustomClosure()" class="px-3 py-1.5 bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-200 rounded-lg text-xs font-mono font-bold transition">
               $X^+$ Berechnen
             </button>
           </div>
-          <div id="closure-live-result" class="mt-2 text-xs font-mono text-indigo-200 p-2.5 bg-[#070919] rounded-xl border border-indigo-950/80"></div>
+          <div id="closure-live-result" class="mt-2 text-xs font-mono text-slate-300 p-2.5 bg-[#0a0c10] rounded-lg border border-[#1e2533]"></div>
         </div>
       </div>
 
       <!-- Functional Dependencies FDs -->
-      <div class="md:col-span-7 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-sm font-bold text-white flex items-center gap-2">
-            <span>➡️</span> Funktionale Abhängigkeiten $F$
+      <div class="md:col-span-7 bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <h2 class="text-sm font-bold text-white font-heading flex items-center gap-2">
+            Funktionale Abhängigkeiten $F$
           </h2>
-          <span class="text-xs text-slate-400">Format: <code>A, B -&gt; C</code> (pro Zeile)</span>
+          <span class="text-xs font-mono text-slate-400">Format: <code>A, B -&gt; C</code></span>
         </div>
         <div>
-          <textarea id="input-fds" rows="4" class="w-full bg-[#070919] border border-indigo-950 rounded-xl p-3 text-xs sm:text-sm font-mono text-amber-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed custom-scrollbar">PersNr -> Name, Rang, Raum
+          <textarea id="input-fds" rows="4" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg p-3 text-xs font-mono text-amber-400 focus:outline-none focus:border-blue-500 leading-relaxed custom-scrollbar">PersNr -> Name, Rang, Raum
 VorlNr -> Titel, PersNr</textarea>
         </div>
       </div>
@@ -174,7 +182,7 @@ VorlNr -> Titel, PersNr</textarea>
           <button 
             onclick="startAnimation()" 
             id="btn-play-anim"
-            class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-600/20"
+            class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1.5"
           >
             <span id="play-icon">▶</span> <span id="play-text">Prüfung abspielen</span>
           </button>
@@ -206,7 +214,7 @@ VorlNr -> Titel, PersNr</textarea>
       <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
         
         <!-- Current Inspector Focus -->
-        <div class="md:col-span-7 bg-[#070913] border border-[#1e2533] rounded-lg p-4 space-y-3 font-mono text-xs">
+        <div class="md:col-span-7 bg-[#0a0c10] border border-[#1e2533] rounded-lg p-4 space-y-3 font-mono text-xs">
           <div class="flex items-center justify-between text-slate-400 border-b border-[#1e2533] pb-2">
             <span class="text-[11px] text-blue-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
               <span class="inline-block w-2 h-2 rounded bg-blue-400 animate-pulse"></span> Aktiver Prüfschritt
@@ -231,7 +239,7 @@ VorlNr -> Titel, PersNr</textarea>
         </div>
 
         <!-- Live Terminal Inspector Log -->
-        <div class="md:col-span-5 bg-[#070913] border border-[#1e2533] rounded-lg p-3.5 flex flex-col justify-between font-mono text-[11px] space-y-2">
+        <div class="md:col-span-5 bg-[#0a0c10] border border-[#1e2533] rounded-lg p-3.5 flex flex-col justify-between font-mono text-[11px] space-y-2">
           <div class="text-slate-400 border-b border-[#1e2533] pb-1.5 flex items-center justify-between">
             <span class="text-[10px] uppercase tracking-wider text-emerald-400 font-bold">$ Live Diagnostic Log</span>
             <span class="text-[10px] text-slate-500">Auto-Scroll</span>
@@ -246,21 +254,21 @@ VorlNr -> Titel, PersNr</textarea>
 
     <!-- Results Overview -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 space-y-1 text-center font-mono">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Kandidatenschlüssel</span>
-        <div id="stat-keys" class="text-base font-bold font-mono text-amber-300">VorlNr</div>
+        <div id="stat-keys" class="text-base font-bold text-amber-400">VorlNr</div>
       </div>
-      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 space-y-1 text-center font-mono">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Aktuelle Normalform</span>
         <div id="stat-nf" class="text-base font-bold text-rose-400">Nicht 2NF / Nicht 3NF</div>
       </div>
-      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 space-y-1 text-center font-mono">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Minimale Überdeckung $F_c$</span>
-        <div id="stat-fc-count" class="text-base font-bold font-mono text-sky-300">2 FDs</div>
+        <div id="stat-fc-count" class="text-base font-bold text-blue-400">2 FDs</div>
       </div>
-      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-4 space-y-1 text-center font-mono">
         <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">3NF Synthese Relationen</span>
-        <div id="stat-relations-count" class="text-base font-bold font-mono text-emerald-300">2 Schemata ($R_1, R_2$)</div>
+        <div id="stat-relations-count" class="text-base font-bold text-emerald-400">2 Schemata ($R_1, R_2$)</div>
       </div>
     </div>
 
@@ -268,10 +276,10 @@ VorlNr -> Titel, PersNr</textarea>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       
       <!-- Normal Form Diagnostic & Violations -->
-      <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-base font-bold text-white flex items-center gap-2 font-heading">
-            <span>🔍</span> Normalformen-Diagnose (1NF - BCNF)
+      <div class="lg:col-span-6 bg-[#0d1117] border border-[#1e2533] rounded-xl p-6 space-y-5">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <h2 class="text-base font-bold text-white font-heading flex items-center gap-2">
+            Normalformen-Diagnose (1NF - BCNF)
           </h2>
           <span class="text-xs font-mono text-slate-400">Verletzungen &amp; Kriterien</span>
         </div>
@@ -282,23 +290,23 @@ VorlNr -> Titel, PersNr</textarea>
       </div>
 
       <!-- 3NF Synthesis Decomposition & Schemata -->
-      <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
-        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-base font-bold text-white flex items-center gap-2 font-heading">
-            <span>🧩</span> 3NF Synthesealgorithmus (Bernstein)
+      <div class="lg:col-span-6 bg-[#0d1117] border border-[#1e2533] rounded-xl p-6 space-y-5">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <h2 class="text-base font-bold text-white font-heading flex items-center gap-2">
+            3NF Synthesealgorithmus (Bernstein)
           </h2>
-          <span class="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30 font-mono">
+          <span class="text-xs font-bold text-emerald-400 bg-[#151c28] px-2 py-0.5 rounded border border-[#273248] font-mono">
             Verlustlos &amp; Abhängigkeitstreu
           </span>
         </div>
 
         <div class="space-y-4">
-          <div class="p-3.5 bg-[#070919] rounded-xl border border-indigo-950 font-mono text-xs space-y-2" id="synthesis-steps">
+          <div class="p-3.5 bg-[#0a0c10] rounded-lg border border-[#1e2533] font-mono text-xs space-y-2" id="synthesis-steps">
             <!-- Step by step -->
           </div>
 
           <div class="space-y-2">
-            <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider font-mono">Erzeugtes 3NF Ziel-Schema:</h3>
+            <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider font-mono">Erzeugtes 3NF Ziel-Schema:</h3>
             <div id="synthesis-results-grid" class="space-y-2">
               <!-- Result Tables -->
             </div>
@@ -310,16 +318,19 @@ VorlNr -> Titel, PersNr</textarea>
 
   </main>
 
-  <footer class="bg-[#04060e] border-t border-indigo-950/80 text-center py-6 text-xs text-slate-500 space-y-2 mt-12">
-    <div>Normalisierungs-Coach • UniSuite Lehrmaterial • TU Darmstadt</div>
-    <div class="flex justify-center gap-4 text-indigo-400 text-[11px]">
-      <a href="../" class="hover:underline">Alle Module</a>
-      <span>•</span>
-      <a href="../relationale-algebra/" class="hover:underline">Relationale Algebra Explorer</a>
-      <span>•</span>
-      <a href="../query-optimizer/" class="hover:underline">SQL Query Optimizer</a>
-      <span>•</span>
-      <a href="/" class="hover:underline">Portfolio</a>
+  <!-- Footer -->
+  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded bg-emerald-500"></span>
+        <span>UniSuite // Normalisierung &amp; Synthese</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-6 text-slate-400">
+        <a href="/" class="hover:text-slate-200 transition">~/portfolio</a>
+        <a href="/informationsmanagement/" class="hover:text-slate-200 transition">~/informationsmanagement</a>
+        <a href="/algorithmen-datenstrukturen/" class="hover:text-slate-200 transition">~/algorithmen_und_datenstrukturen</a>
+        <a href="/rechnerorganisation/" class="hover:text-slate-200 transition">~/rechnerorganisation</a>
+      </div>
     </div>
   </footer>
 

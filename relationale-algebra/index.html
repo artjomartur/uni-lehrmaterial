@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,79 +19,101 @@
   <!-- Chart.js for analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <!-- Google Fonts: Inter, JetBrains Mono, Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
     body {
       font-family: 'Inter', sans-serif;
     }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Outfit', sans-serif;
+    }
     code, pre, .font-mono {
       font-family: 'JetBrains Mono', monospace;
+    }
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(15, 23, 42, 0.6);
+      background: #0a0c10;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, 0.4);
+      background: #1e2533;
       border-radius: 4px;
     }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: rgba(99, 102, 241, 0.7);
+      background: #273248;
     }
   </style>
 </head>
-<body class="bg-[#070915] text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+<body class="bg-[#0a0c10] text-slate-200 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white custom-scrollbar">
 
-  <!-- Topmost Meta Bar (TU Darmstadt & Portfolio breadcrumbs) -->
-  <div class="bg-[#04060e] border-b border-indigo-950/60 text-[11px] text-slate-400 py-1.5 px-4 sm:px-8">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-      <div class="flex items-center space-x-3">
-        <a href="/" class="hover:text-indigo-300 transition flex items-center gap-1 font-medium">
-          <span>←</span> Zurück zum Portfolio
+  <!-- Top Technical Header -->
+  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <a href="../informationsmanagement/" class="flex items-center space-x-3 text-slate-100 hover:text-blue-400 transition group">
+          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-blue-400 group-hover:border-blue-500 transition">
+            <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="18,3 30,10 18,17 6,10" fill="#3b82f6" />
+              <polygon points="6,10 18,17 18,31 6,24" fill="#1e40af" />
+              <polygon points="18,17 30,10 30,24 18,31" fill="#0284c7" />
+              <circle cx="18" cy="17" r="2.5" fill="#ffffff" />
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
+            <span class="text-[10px] text-blue-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">01_rel_algebra</span>
+          </div>
         </a>
-        <span class="text-slate-700">·</span>
-        <a href="../" class="text-slate-400 hover:text-indigo-300 transition flex items-center gap-1">
-          <span>📚</span> Alle Lehrmaterialien (Sammlung)
-        </a>
+
+        <!-- Desktop Menu: Überkategorien -->
+        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
+          <a href="../informationsmanagement/" class="text-blue-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">
+            01_informationsmanagement
+          </a>
+          <a href="../algorithmen-datenstrukturen/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            02_algorithmen_und_datenstrukturen
+          </a>
+          <a href="../rechnerorganisation/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            03_rechnerorganisation
+          </a>
+        </nav>
       </div>
-      <div class="text-slate-400 font-medium tracking-wide">
-        TU Darmstadt • Datenbanken &amp; Informationsmanagement
+
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="../informationsmanagement/" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>&larr;</span> 01_infomanagement
+        </a>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Main Navigation Header -->
-  <header class="bg-[#0b0e26]/90 backdrop-blur-md border-b border-indigo-950/80 sticky top-0 z-50 shadow-lg shadow-black/40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-indigo-600/30 ring-1 ring-white/10 shrink-0">
-          ⋈
-        </div>
-        <div>
-          <h1 class="font-bold text-base sm:text-lg text-white leading-tight">
-            Relationale Algebra
-          </h1>
-          <p class="text-xs text-slate-400">Joins, Aggregation (γ), Sortierung (τ) &amp; Optimierung</p>
-        </div>
-      </div>
-
+  <!-- Secondary Tab Bar for Tool Navigation -->
+  <div class="bg-[#0d1117] border-b border-[#1e2533] py-2 px-4 sticky top-14 z-40">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
       <!-- Desktop Nav Tabs -->
-      <nav class="hidden lg:flex items-center space-x-1 font-medium text-xs">
-        <button onclick="switchTab('simulator')" id="nav-simulator" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Join-Simulator</button>
-        <button onclick="switchTab('aggregation')" id="nav-aggregation" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">GROUP BY &amp; Aggregation (γ)</button>
-        <button onclick="switchTab('wizard')" id="nav-wizard" class="tab-btn px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white transition shadow-sm font-semibold">Entscheidungsbaum</button>
-        <button onclick="switchTab('catalog')" id="nav-catalog" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Operator-Katalog</button>
-        <button onclick="switchTab('optimizer')" id="nav-optimizer" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Anfragebaum &amp; Pushdown</button>
-        <button onclick="switchTab('prompts')" id="nav-prompts" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Aufgaben-Trainer</button>
-        <button onclick="switchTab('quiz')" id="nav-quiz" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Wissenstest</button>
+      <nav class="hidden lg:flex items-center space-x-1 font-mono text-xs">
+        <button onclick="switchTab('simulator')" id="nav-simulator" class="tab-btn px-2.5 py-1.5 rounded text-slate-300 hover:text-white hover:bg-[#151c28] transition">Join-Simulator</button>
+        <button onclick="switchTab('aggregation')" id="nav-aggregation" class="tab-btn px-2.5 py-1.5 rounded text-slate-300 hover:text-white hover:bg-[#151c28] transition">GROUP BY &amp; Aggregation (γ)</button>
+        <button onclick="switchTab('wizard')" id="nav-wizard" class="tab-btn px-2.5 py-1.5 rounded bg-blue-600 text-white font-semibold transition">Entscheidungsbaum</button>
+        <button onclick="switchTab('catalog')" id="nav-catalog" class="tab-btn px-2.5 py-1.5 rounded text-slate-300 hover:text-white hover:bg-[#151c28] transition">Operator-Katalog</button>
+        <button onclick="switchTab('optimizer')" id="nav-optimizer" class="tab-btn px-2.5 py-1.5 rounded text-slate-300 hover:text-white hover:bg-[#151c28] transition">Anfragebaum &amp; Pushdown</button>
+        <button onclick="switchTab('prompts')" id="nav-prompts" class="tab-btn px-2.5 py-1.5 rounded text-slate-300 hover:text-white hover:bg-[#151c28] transition">Aufgaben-Trainer</button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="tab-btn px-2.5 py-1.5 rounded text-slate-300 hover:text-white hover:bg-[#151c28] transition">Wissenstest</button>
       </nav>
 
       <!-- Mobile/Tablet Nav Selector -->
-      <div class="lg:hidden">
-        <select id="mobile-nav" onchange="switchTab(this.value)" class="bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+      <div class="lg:hidden w-full">
+        <select id="mobile-nav" onchange="switchTab(this.value)" class="w-full bg-[#151c28] border border-[#273248] text-white rounded px-3 py-1.5 text-xs font-mono focus:ring-1 focus:ring-blue-500 outline-none">
           <option value="wizard">Entscheidungsbaum</option>
           <option value="simulator">Join-Simulator</option>
           <option value="aggregation">GROUP BY &amp; Aggregation (γ)</option>
@@ -102,7 +124,7 @@
         </select>
       </div>
     </div>
-  </header>
+  </div>
 
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
 
@@ -650,21 +672,18 @@
 
   </main>
 
-  <!-- Bottom Footer -->
-  <footer class="bg-[#04060e] border-t border-indigo-950/60 text-center py-6 text-xs text-slate-400 space-y-2">
-    <div class="max-w-7xl mx-auto px-4 space-y-1.5">
-      <div class="font-semibold text-slate-300">Relationale Algebra &amp; Datenbank-Explorer</div>
-      <div class="text-[11px] text-slate-500">
-        UniSuite • TU Darmstadt • Lehrmaterial Datenbanken
+  <!-- Footer -->
+  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded bg-emerald-500"></span>
+        <span>UniSuite // Relationale Algebra</span>
       </div>
-      <div class="text-[11px] text-indigo-400/80 flex items-center justify-center gap-3 pt-1">
-        <a href="../" class="hover:underline flex items-center gap-1">
-          <span>📚</span> Alle Lehrmaterialien
-        </a>
-        <span>·</span>
-        <a href="/" class="hover:underline flex items-center gap-1">
-          <span>🏠</span> Portfolio
-        </a>
+      <div class="flex flex-wrap items-center gap-6 text-slate-400">
+        <a href="/" class="hover:text-slate-200 transition">~/portfolio</a>
+        <a href="/informationsmanagement/" class="hover:text-slate-200 transition">~/informationsmanagement</a>
+        <a href="/algorithmen-datenstrukturen/" class="hover:text-slate-200 transition">~/algorithmen_und_datenstrukturen</a>
+        <a href="/rechnerorganisation/" class="hover:text-slate-200 transition">~/rechnerorganisation</a>
       </div>
     </div>
   </footer>
