@@ -37,11 +37,14 @@ function renderHeader(relativePath) {
             <button class="text-slate-300 hover:text-white px-2.5 py-1.5 rounded hover:bg-[#151c28] transition flex items-center gap-1.5">
               <span class="text-blue-400">I.</span>Praktisch <span class="text-[9px] text-slate-500">▼</span>
             </button>
-            <div class="absolute left-0 top-full pt-1 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <div class="absolute left-0 top-full pt-1 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
               <div class="bg-[#0c1017] border border-[#1e2533] rounded-lg shadow-2xl py-1 overflow-hidden">
-
-                <a href="${relativePath}informationsmanagement/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">01_informationsmanagement</a>
-                <a href="${relativePath}algorithmen-datenstrukturen/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">02_algorithmen_und_datenstrukturen</a>
+                <a href="${relativePath}fop/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">01_fop</a>
+                <a href="${relativePath}algorithmen-datenstrukturen/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">02_algorithmen_datenstrukturen</a>
+                <a href="${relativePath}software-engineering/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">03_software_engineering</a>
+                <a href="${relativePath}informationsmanagement/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">04_informationsmanagement</a>
+                <a href="${relativePath}ki/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">05_künstliche_intelligenz</a>
+                <a href="${relativePath}parallele-programmierung/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">06_parallele_programmierung</a>
               </div>
             </div>
           </div>
@@ -50,9 +53,12 @@ function renderHeader(relativePath) {
             <button class="text-slate-300 hover:text-white px-2.5 py-1.5 rounded hover:bg-[#151c28] transition flex items-center gap-1.5">
               <span class="text-emerald-400">II.</span>Technisch <span class="text-[9px] text-slate-500">▼</span>
             </button>
-            <div class="absolute left-0 top-full pt-1 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <div class="absolute left-0 top-full pt-1 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
               <div class="bg-[#0c1017] border border-[#1e2533] rounded-lg shadow-2xl py-1 overflow-hidden">
-                <a href="${relativePath}rechnerorganisation/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">03_rechnerorganisation</a>
+                <a href="${relativePath}digitaltechnik/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">07_digitaltechnik</a>
+                <a href="${relativePath}rechnerorganisation/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">08_rechnerorganisation</a>
+                <a href="${relativePath}computersystemsicherheit/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">09_computersystemsicherheit</a>
+                <a href="${relativePath}computernetze/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">10_computernetze_verteilte_sys</a>
               </div>
             </div>
           </div>
@@ -63,9 +69,9 @@ function renderHeader(relativePath) {
             </button>
             <div class="absolute left-0 top-full pt-1 w-48 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
               <div class="bg-[#0c1017] border border-[#1e2533] rounded-lg shadow-2xl py-1 overflow-hidden">
-                <a href="${relativePath}moses/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">04_moses</a>
-                <a href="${relativePath}afe/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">05_afe</a>
-                <a href="${relativePath}apl/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">06_apl</a>
+                <a href="${relativePath}moses/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">11_moses</a>
+                <a href="${relativePath}afe/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">12_afe</a>
+                <a href="${relativePath}apl/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">13_apl</a>
               </div>
             </div>
           </div>
@@ -76,9 +82,21 @@ function renderHeader(relativePath) {
             </button>
             <div class="absolute right-0 lg:left-0 lg:right-auto top-full pt-1 w-52 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
               <div class="bg-[#0c1017] border border-[#1e2533] rounded-lg shadow-2xl py-1 overflow-hidden">
-                <a href="${relativePath}mathe-1/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">07_mathe_1</a>
-                <a href="${relativePath}mathe-2/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">08_mathe_2</a>
-                <a href="${relativePath}mathe-3/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">09_mathe_3_promi</a>
+                <a href="${relativePath}mathe-1/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">14_mathe_1</a>
+                <a href="${relativePath}mathe-2/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">15_mathe_2</a>
+                <a href="${relativePath}mathe-3/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">16_mathe_3_promi</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative group">
+            <button class="text-slate-300 hover:text-white px-2.5 py-1.5 rounded hover:bg-[#151c28] transition flex items-center gap-1.5">
+              <span class="text-yellow-400">V.</span>Soft Skills <span class="text-[9px] text-slate-500">▼</span>
+            </button>
+            <div class="absolute right-0 top-full pt-1 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <div class="bg-[#0c1017] border border-[#1e2533] rounded-lg shadow-2xl py-1 overflow-hidden">
+                <a href="${relativePath}informatik-gesellschaft/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">17_informatik_und_gesellschaft</a>
+                <a href="${relativePath}wissenschaftliches-arbeiten/" class="block px-4 py-2.5 text-slate-400 hover:text-white hover:bg-[#151c28] transition">18_wissenschaftliches_arbeiten</a>
               </div>
             </div>
           </div>
