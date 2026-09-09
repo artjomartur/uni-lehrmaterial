@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MoSeS: Modellierung, Spezifikation und Semantik | UniSuite</title>
-  <meta name="description" content="Interaktives Lehrlabor für Modellierung, Spezifikation und Semantik (MoSeS, Prof. Heiko Mantel, TU Darmstadt). Hoare-Kalkül, Big-Step Semantik, LTL/CTL Model Checking & Resolution.">
+  <meta name="description" content="Interaktives Lehrlabor für Modellierung, Spezifikation und Semantik (MoSeS, TU Darmstadt). Hoare-Kalkül, Big-Step Semantik, LTL/CTL Model Checking & Resolution.">
   
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 
@@ -105,7 +105,7 @@
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
         <div class="flex items-center gap-2">
           <span class="text-purple-400 font-bold">$</span>
-          <span>moses-verifier --prof "Heiko Mantel" --tu-darmstadt --sem formal</span>
+          <span>moses-verifier --tu-darmstadt --sem formal</span>
         </div>
         <div class="text-[11px] text-slate-500">
           TU Darmstadt • MAIS • Modellierung, Spezifikation und Semantik
@@ -117,7 +117,7 @@
           Modellierung, Spezifikation und Semantik (MoSeS)
         </h1>
         <p class="text-xs sm:text-sm text-slate-300 max-w-4xl leading-relaxed">
-          Interaktives Lehr- und Simulationslabor zur Vorlesung von <b>Prof. Dr.-Ing. Heiko Mantel</b> (Fachgebiet MAIS, TU Darmstadt). Verstehen und verifizieren Sie <b>Hoare-Tripel</b> $\{P\}\,c\,\{Q\}$, schwächste Vorbedingungen ($wp$), <b>operationelle Big-Step Semantik</b> ($\Downarrow$), <b>Kripke-Strukturen &amp; Temporallogik (LTL/CTL)</b> sowie Resolutions- und DPLL-Beweise.
+          Interaktives Lehr- und Simulationslabor für Formale Methoden (TU Darmstadt). Verstehen und verifizieren Sie <b>Hoare-Tripel</b> $\{P\}\,c\,\{Q\}$, schwächste Vorbedingungen ($wp$), <b>operationelle Big-Step Semantik</b> ($\Downarrow$), <b>Kripke-Strukturen &amp; Temporallogik (LTL/CTL)</b> sowie Resolutions- und DPLL-Beweise.
         </p>
       </div>
     </div>
@@ -243,7 +243,7 @@ od</textarea>
             <h2 class="text-base font-bold text-white font-heading">
               Operationelle Semantik: Big-Step Ableitungsbaum ($\Downarrow$)
             </h2>
-            <p class="text-xs text-slate-400 font-mono">Auswertung von $\langle c, \sigma \rangle \Downarrow \sigma'$ nach den Inferenzregeln von Heiko Mantel</p>
+            <p class="text-xs text-slate-400 font-mono">Auswertung von $\langle c, \sigma \rangle \Downarrow \sigma'$ nach formalen Inferenzregeln</p>
           </div>
           <div class="flex items-center gap-2">
             <button onclick="stepBigStepTree()" class="px-3.5 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-mono text-xs font-bold transition">
@@ -425,7 +425,7 @@ od</textarea>
         <div id="moses-quiz-card" class="space-y-4">
           <div class="flex items-center justify-between text-xs font-mono text-slate-400">
             <span id="moses-quiz-q-num">Frage 1 von 5</span>
-            <span class="text-purple-400">MoSeS • Heiko Mantel</span>
+            <span class="text-purple-400">MoSeS • Formale Methoden</span>
           </div>
 
           <p id="moses-quiz-q-text" class="text-sm sm:text-base font-semibold text-white leading-relaxed">
@@ -457,7 +457,7 @@ od</textarea>
     <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded bg-purple-500"></span>
-        <span>UniSuite // MoSeS • TU Darmstadt (Prof. Heiko Mantel)</span>
+        <span>UniSuite // MoSeS • TU Darmstadt</span>
       </div>
       <div class="flex flex-wrap items-center gap-6 text-slate-400">
         <a href="/" class="hover:text-slate-200 transition">~/portfolio</a>
