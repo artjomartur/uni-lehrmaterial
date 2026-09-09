@@ -154,6 +154,96 @@ VorlNr -> Titel, PersNr</textarea>
       </div>
     </div>
 
+    <!-- Animation & Step-by-Step Inspection Control Bar -->
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-4 sm:p-5 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2533] pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-[#151c28] border border-[#273248] flex items-center justify-center text-blue-400 font-mono font-bold text-xs">
+            ▶
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-white font-mono">
+              Live NF-Prüfanimation &amp; Diagnose-Pipeline
+            </h2>
+            <p class="text-[11px] text-slate-400">Schrittweises Visualisieren der 1NF, 2NF, 3NF und BCNF Prüfschritte</p>
+          </div>
+        </div>
+
+        <!-- Animation Controls -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button 
+            onclick="startAnimation()" 
+            id="btn-play-anim"
+            class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-600/20"
+          >
+            <span id="play-icon">▶</span> <span id="play-text">Prüfung abspielen</span>
+          </button>
+          <button 
+            onclick="stepForward()" 
+            id="btn-step-fwd"
+            class="px-3 py-1.5 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-200 font-mono text-xs font-semibold transition"
+          >
+            Einzelschritt &rarr;
+          </button>
+          <button 
+            onclick="resetAnimation()" 
+            class="px-3 py-1.5 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-400 hover:text-white font-mono text-xs transition"
+          >
+            Zurücksetzen
+          </button>
+          <select 
+            id="anim-speed" 
+            class="bg-[#151c28] border border-[#273248] text-slate-300 font-mono text-xs rounded-lg px-2.5 py-1.5 focus:outline-none"
+          >
+            <option value="1800">1.0x Tempo</option>
+            <option value="3000">0.5x Tempo (Langsam)</option>
+            <option value="900">2.0x Tempo (Schnell)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Inspection Live Visualizer Canvas & Radar -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+        
+        <!-- Current Inspector Focus -->
+        <div class="md:col-span-7 bg-[#070913] border border-[#1e2533] rounded-lg p-4 space-y-3 font-mono text-xs">
+          <div class="flex items-center justify-between text-slate-400 border-b border-[#1e2533] pb-2">
+            <span class="text-[11px] text-blue-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
+              <span class="inline-block w-2 h-2 rounded bg-blue-400 animate-pulse"></span> Aktiver Prüfschritt
+            </span>
+            <span id="anim-step-badge" class="px-2 py-0.5 rounded bg-[#151c28] border border-[#273248] text-slate-300 text-[10px]">
+              Bereit
+            </span>
+          </div>
+
+          <!-- Highlight Box -->
+          <div id="inspector-display" class="p-3.5 rounded-lg bg-[#0d1117] border border-[#273248] min-h-[90px] flex flex-col justify-center space-y-1.5">
+            <div class="text-slate-400 text-xs font-sans">Klicken Sie auf <b>„Prüfung abspielen“</b> oder <b>„Einzelschritt“</b>, um die detaillierte Normalformen-Prüfung visuell Schritt für Schritt nachzuvollziehen.</div>
+          </div>
+
+          <!-- Progress Dots -->
+          <div class="flex items-center justify-between pt-1 text-[11px] text-slate-500">
+            <div class="flex gap-1.5" id="step-dots-container">
+              <!-- Rendered dynamically -->
+            </div>
+            <span id="step-indicator-text">Schritt 0 / 5</span>
+          </div>
+        </div>
+
+        <!-- Live Terminal Inspector Log -->
+        <div class="md:col-span-5 bg-[#070913] border border-[#1e2533] rounded-lg p-3.5 flex flex-col justify-between font-mono text-[11px] space-y-2">
+          <div class="text-slate-400 border-b border-[#1e2533] pb-1.5 flex items-center justify-between">
+            <span class="text-[10px] uppercase tracking-wider text-emerald-400 font-bold">$ Live Diagnostic Log</span>
+            <span class="text-[10px] text-slate-500">Auto-Scroll</span>
+          </div>
+          <div id="inspector-terminal-log" class="h-28 overflow-y-auto space-y-1 text-slate-300 custom-scrollbar pr-1">
+            <div class="text-slate-500">[INIT] Normalisierungs-Engine geladen.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- Results Overview -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
@@ -180,7 +270,7 @@ VorlNr -> Titel, PersNr</textarea>
       <!-- Normal Form Diagnostic & Violations -->
       <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
         <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <h2 class="text-base font-bold text-white flex items-center gap-2 font-heading">
             <span>🔍</span> Normalformen-Diagnose (1NF - BCNF)
           </h2>
           <span class="text-xs font-mono text-slate-400">Verletzungen &amp; Kriterien</span>
@@ -194,10 +284,10 @@ VorlNr -> Titel, PersNr</textarea>
       <!-- 3NF Synthesis Decomposition & Schemata -->
       <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
         <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <h2 class="text-base font-bold text-white flex items-center gap-2 font-heading">
             <span>🧩</span> 3NF Synthesealgorithmus (Bernstein)
           </h2>
-          <span class="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30">
+          <span class="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30 font-mono">
             Verlustlos &amp; Abhängigkeitstreu
           </span>
         </div>
@@ -208,7 +298,7 @@ VorlNr -> Titel, PersNr</textarea>
           </div>
 
           <div class="space-y-2">
-            <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Erzeugtes 3NF Ziel-Schema:</h3>
+            <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider font-mono">Erzeugtes 3NF Ziel-Schema:</h3>
             <div id="synthesis-results-grid" class="space-y-2">
               <!-- Result Tables -->
             </div>
@@ -559,6 +649,9 @@ VorlNr -> Titel, PersNr</textarea>
 
       document.getElementById("synthesis-results-grid").innerHTML = resultsGridHTML;
 
+      // Build Animation Steps for Live Visual Inspection
+      buildAnimationSteps(attrs, fds, candidateKeys, primeAttributes, violations2NF, violations3NF, violationsBCNF, schemaList);
+
       if (window.renderMathInElement) {
         renderMathInElement(document.body, {
           delimiters: [
@@ -568,6 +661,215 @@ VorlNr -> Titel, PersNr</textarea>
           throwOnError: false
         });
       }
+    }
+
+    /* ==========================================================================
+       ANIMATION & LIVE INSPECTOR ENGINE
+       ========================================================================== */
+    let ANIM_STEPS = [];
+    let currentAnimIndex = -1;
+    let animTimer = null;
+    let isPlaying = false;
+
+    function buildAnimationSteps(attrs, fds, candidateKeys, primeAttributes, v2NF, v3NF, vBCNF, schemaList) {
+      ANIM_STEPS = [
+        {
+          badge: "01: Schema & FDs",
+          title: "Initialisierung: Relationsschema & funktionale Abhängigkeiten",
+          html: `
+            <div class="text-slate-300">
+              Prüfe Relation <b>R(${attrs.join(", ")})</b> mit ${fds.length} funktionalen Abhängigkeiten:
+              <div class="mt-1 text-amber-300 font-mono text-[11px] bg-[#070919] p-2 rounded border border-[#1e2533]">
+                ${fds.map(fd => `{${fd.lhs.join(", ")}} ➔ {${fd.rhs.join(", ")}}`).join("<br>")}
+              </div>
+            </div>
+          `,
+          log: `[SCHEMA] R(${attrs.join(", ")}) mit ${fds.length} FDs geladen.`
+        },
+        {
+          badge: "02: Schlüssel-Finder",
+          title: "Kandidatenschlüssel & Primattribute ermitteln",
+          html: `
+            <div class="text-slate-300 space-y-1">
+              <div>Berechne Attributhüllen über Potenzmenge:</div>
+              <div class="text-amber-300 font-mono text-[11px]">Minimaler Kandidatenschlüssel: <b>${candidateKeys.map(k => `{${k.join(", ")}}`).join(" oder ")}</b></div>
+              <div class="text-slate-400 text-[11px]">Primattribute: <span class="text-emerald-300">{${Array.from(primeAttributes).join(", ")}}</span> | Nicht-Prim: <span class="text-slate-200">{${attrs.filter(a => !primeAttributes.has(a)).join(", ")}}</span></div>
+            </div>
+          `,
+          log: `[KEYS] Kandidatenschlüssel gefunden: ${candidateKeys.map(k => `{${k.join(", ")}}`).join(", ")} | Primattribute: {${Array.from(primeAttributes).join(", ")}}`
+        },
+        {
+          badge: "03: 1NF Test",
+          title: "1. Normalform: Atomarität & Wertebereiche",
+          html: `
+            <div class="text-slate-300">
+              <span class="text-emerald-400 font-bold">✓ 1NF Erfüllt:</span> Alle Attribute <code>${attrs.join(", ")}</code> besitzen atomare Wertebereiche. Keine verschachtelten Tabellen oder Mengen vorhanden.
+            </div>
+          `,
+          log: `[1NF] Status: OK (Alle Attribute sind atomar).`
+        },
+        {
+          badge: "04: 2NF Test",
+          title: "2. Normalform: Prüfung auf Teil-Schlüsselabhängigkeiten",
+          html: `
+            <div class="text-slate-300 space-y-1.5">
+              <div>Prüfung: Hängt ein Nicht-Primattribut von einem <i>echten Teilschlüssel</i> ab?</div>
+              ${v2NF.length > 0 ? `
+                <div class="text-rose-400 font-mono text-[11px] bg-rose-950/40 p-2 rounded border border-rose-500/30">
+                  ✗ <b>2NF verletzt:</b> ${v2NF.join("; ")}
+                </div>
+              ` : `
+                <div class="text-emerald-300 font-mono text-[11px] bg-emerald-950/40 p-2 rounded border border-emerald-500/30">
+                  ✓ <b>2NF erfüllt:</b> Voll funktionale Abhängigkeit aller Nicht-Primattribute.
+                </div>
+              `}
+            </div>
+          `,
+          log: v2NF.length > 0 ? `[2NF] VERLETZT! Gefundene Teilabhängigkeiten: ${v2NF.join(", ")}` : `[2NF] Status: OK (Keine partiellen Schlüsselabhängigkeiten).`
+        },
+        {
+          badge: "05: 3NF & BCNF Test",
+          title: "3. Normalform & BCNF: Transitive Abhängigkeiten",
+          html: `
+            <div class="text-slate-300 space-y-1.5">
+              <div>Kriterium für $X \\to A$: $X$ muss Superschlüssel sein ODER $A$ muss Primattribut sein.</div>
+              ${v3NF.length > 0 ? `
+                <div class="text-rose-400 font-mono text-[11px] bg-rose-950/40 p-2 rounded border border-rose-500/30">
+                  ✗ <b>3NF verletzt:</b> Transitive Abhängigkeiten vorhanden.<br>
+                  <span class="text-slate-400">${v3NF[0]}</span>
+                </div>
+              ` : `
+                <div class="text-emerald-300 font-mono text-[11px] bg-emerald-950/40 p-2 rounded border border-emerald-500/30">
+                  ✓ <b>3NF erfüllt:</b> Keine transitiven Nicht-Prim-Abhängigkeiten.
+                </div>
+              `}
+              <div class="text-[11px] text-slate-400 mt-1">
+                BCNF Status: <b class="${vBCNF.length === 0 ? 'text-emerald-400' : 'text-amber-400'}">${vBCNF.length === 0 ? 'Erfüllt' : 'Nicht erfüllt (nicht alle Determinanten sind Superschlüssel)'}</b>
+              </div>
+            </div>
+          `,
+          log: v3NF.length > 0 ? `[3NF] VERLETZT! Transitive Abhängigkeit entdeckt: ${v3NF.join(", ")}` : `[3NF] Status: OK (Keine transitiven Abhängigkeiten).`
+        },
+        {
+          badge: "06: 3NF Synthese",
+          title: "Ergebnis: Dekomposition nach Bernstein (Verlustlos & Treu)",
+          html: `
+            <div class="text-slate-300 space-y-1.5">
+              <div class="text-emerald-400 font-bold font-mono">Dekomposition abgeschlossen: ${schemaList.length} Teilschemata erzeugt</div>
+              <div class="flex flex-wrap gap-2 text-xs font-mono">
+                ${schemaList.map(s => `<span class="px-2 py-1 rounded bg-[#151c28] border border-[#273248] text-indigo-300">${s.name}(<u>${s.primaryKey.join(", ")}</u>, ${s.attrs.filter(a => !s.primaryKey.includes(a)).join(", ")})</span>`).join("")}
+              </div>
+            </div>
+          `,
+          log: `[SYNTHESIS] 3NF-Dekomposition erfolgreich. Schemata: ${schemaList.map(s => s.name).join(", ")}.`
+        }
+      ];
+
+      renderStepDots();
+      if (currentAnimIndex < 0) {
+        currentAnimIndex = 0;
+        renderCurrentStep(false);
+      }
+    }
+
+    function renderStepDots() {
+      const container = document.getElementById("step-dots-container");
+      if (!container) return;
+      container.innerHTML = ANIM_STEPS.map((_, i) => `
+        <button onclick="goToStep(${i})" class="w-6 h-6 rounded text-[10px] font-mono font-bold flex items-center justify-center transition border ${i === currentAnimIndex ? 'bg-blue-600 text-white border-blue-400 shadow-sm' : i < currentAnimIndex ? 'bg-emerald-950 text-emerald-300 border-emerald-500/30' : 'bg-[#151c28] text-slate-400 border-[#273248]'}">
+          ${i + 1}
+        </button>
+      `).join("");
+      document.getElementById("step-indicator-text").innerText = `Schritt ${currentAnimIndex + 1} / ${ANIM_STEPS.length}`;
+    }
+
+    function renderCurrentStep(logToTerminal = true) {
+      if (currentAnimIndex < 0 || currentAnimIndex >= ANIM_STEPS.length) return;
+      const step = ANIM_STEPS[currentAnimIndex];
+
+      document.getElementById("anim-step-badge").innerText = step.badge;
+      document.getElementById("inspector-display").innerHTML = `
+        <div class="text-xs font-bold text-white font-mono flex items-center gap-2">
+          <span class="text-blue-400">#${currentAnimIndex + 1}</span> ${step.title}
+        </div>
+        <div class="text-xs text-slate-300 mt-1 leading-relaxed">
+          ${step.html}
+        </div>
+      `;
+
+      if (logToTerminal) {
+        const term = document.getElementById("inspector-terminal-log");
+        const entry = document.createElement("div");
+        entry.className = "text-slate-300 font-mono text-[11px] leading-tight";
+        entry.innerHTML = `<span class="text-blue-400">&gt;</span> ${step.log}`;
+        term.appendChild(entry);
+        term.scrollTop = term.scrollHeight;
+      }
+
+      renderStepDots();
+    }
+
+    function startAnimation() {
+      if (isPlaying) {
+        pauseAnimation();
+        return;
+      }
+
+      isPlaying = true;
+      document.getElementById("play-icon").innerText = "⏸";
+      document.getElementById("play-text").innerText = "Pausieren";
+
+      if (currentAnimIndex >= ANIM_STEPS.length - 1) {
+        currentAnimIndex = 0;
+      }
+
+      const speed = parseInt(document.getElementById("anim-speed").value) || 1800;
+
+      function playNext() {
+        if (!isPlaying) return;
+        renderCurrentStep(true);
+        currentAnimIndex++;
+
+        if (currentAnimIndex < ANIM_STEPS.length) {
+          animTimer = setTimeout(playNext, speed);
+        } else {
+          pauseAnimation();
+          currentAnimIndex = ANIM_STEPS.length - 1;
+          renderStepDots();
+        }
+      }
+
+      playNext();
+    }
+
+    function pauseAnimation() {
+      isPlaying = false;
+      if (animTimer) clearTimeout(animTimer);
+      document.getElementById("play-icon").innerText = "▶";
+      document.getElementById("play-text").innerText = "Prüfung abspielen";
+    }
+
+    function stepForward() {
+      pauseAnimation();
+      if (currentAnimIndex < ANIM_STEPS.length - 1) {
+        currentAnimIndex++;
+      } else {
+        currentAnimIndex = 0;
+      }
+      renderCurrentStep(true);
+    }
+
+    function goToStep(idx) {
+      pauseAnimation();
+      currentAnimIndex = idx;
+      renderCurrentStep(true);
+    }
+
+    function resetAnimation() {
+      pauseAnimation();
+      currentAnimIndex = 0;
+      document.getElementById("inspector-terminal-log").innerHTML = '<div class="text-slate-500">[RESET] Inspektor auf Anfang gesetzt.</div>';
+      renderCurrentStep(true);
     }
 
     window.onload = function() {
