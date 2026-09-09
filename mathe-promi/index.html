@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mathe 1, 2, 3 &amp; ProMi | UniSuite</title>
+  <meta name="description" content="Interaktives Lehrlabor für Mathematik (ProMi, Analysis, Lineare Algebra, Stochastik).">
+  
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .cs-card {
+      background: #0f131a;
+      border: 1px solid #1e2533;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-rose-600 selection:text-white">
+
+  <!-- Top Technical Header -->
+  <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+      <div class="flex items-center space-x-6">
+        <a href="../" class="flex items-center space-x-3 text-slate-100 hover:text-rose-400 transition group">
+          <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-rose-400 group-hover:border-rose-500 transition">
+            <svg class="w-full h-full" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="18" cy="18" r="10" stroke="currentColor" stroke-width="2.5" />
+              <path d="M12 12 L24 24 M24 12 L12 24" stroke="currentColor" stroke-width="2.5" />
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
+            <span class="text-[10px] text-rose-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">05_mathe_promi</span>
+          </div>
+        </a>
+
+        <!-- Desktop Menu: Überkategorien -->
+        <nav class="hidden md:flex items-center space-x-1 border-l border-[#1e2533] pl-6 text-xs font-mono">
+          <a href="../informationsmanagement/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            01_informationsmanagement
+          </a>
+          <a href="../algorithmen-datenstrukturen/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            02_algorithmen_und_datenstrukturen
+          </a>
+          <a href="../rechnerorganisation/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            03_rechnerorganisation
+          </a>
+          <a href="../moses/" class="text-slate-300 hover:text-white px-2.5 py-1 rounded hover:bg-[#151c28] transition">
+            04_moses
+          </a>
+          <a href="../mathe-promi/" class="text-rose-400 bg-[#151c28] px-2.5 py-1 rounded border border-[#273248] transition">
+            05_mathe_promi
+          </a>
+        </nav>
+      </div>
+
+      <div class="flex items-center space-x-4 text-xs font-mono">
+        <a href="../" class="text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>&larr;</span> 00_startseite
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Secondary Tab Bar for Tool Navigation -->
+  <nav class="sticky top-14 z-40 bg-[#0a0c10]/95 backdrop-blur border-b border-[#1e2533] px-4">
+    <div class="max-w-7xl mx-auto flex items-center space-x-2 py-2 overflow-x-auto text-xs font-mono custom-scrollbar">
+      <button onclick="switchTab('logic')" id="tab-btn-logic" class="mathe-tab-btn px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold transition">
+        1. ProMi (Logik & Mengen)
+      </button>
+      <button onclick="switchTab('induction')" id="tab-btn-induction" class="mathe-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        2. Induktion (ProMi)
+      </button>
+      <button onclick="switchTab('analysis')" id="tab-btn-analysis" class="mathe-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        3. Mathe 1 (Analysis)
+      </button>
+      <button onclick="switchTab('linalg')" id="tab-btn-linalg" class="mathe-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        4. Mathe 2 (LinAlg)
+      </button>
+      <button onclick="switchTab('stochastics')" id="tab-btn-stochastics" class="mathe-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        5. Mathe 3 (Stochastik)
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Hero Header -->
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-rose-400 font-bold">$</span>
+          <span>unisuite-math --module all --tu-darmstadt</span>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          TU Darmstadt • Mathematik für Informatik
+        </div>
+      </div>
+
+      <div class="space-y-1 pt-1">
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
+          Mathe 1, 2, 3 &amp; ProMi (Propädeutikum)
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-4xl leading-relaxed">
+          Interaktives Lehr- und Simulationslabor für die Mathematik-Grundlagen der Informatik. Trainieren Sie <b>Aussagenlogik</b>, üben Sie <b>Vollständige Induktion</b>, analysieren Sie <b>Grenzwerte &amp; Matrizen</b> und berechnen Sie Wahrscheinlichkeiten.
+        </p>
+      </div>
+    </div>
+
+    <!-- SECTIONS -->
+
+    <!-- 1. ProMi Logic -->
+    <section id="section-logic" class="space-y-6">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <h2 class="text-base font-bold text-white font-heading">ProMi: Aussagenlogik &amp; Wahrheitstabellen</h2>
+        <p class="text-xs text-slate-400 font-mono">Beweise von Tautologien und Äquivalenzen</p>
+        <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg">
+          <p class="text-sm text-slate-300 mb-2">Die Formel: $\\neg (A \\wedge B) \\iff (\\neg A \\vee \\neg B)$ (De Morgan'sche Gesetze)</p>
+          <div class="text-xs text-rose-400 font-mono">[Wahrheitstabellen-Generator: Demnächst verfügbar...]</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Induction -->
+    <section id="section-induction" class="space-y-6 hidden">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <h2 class="text-base font-bold text-white font-heading">ProMi: Vollständige Induktion</h2>
+        <p class="text-xs text-slate-400 font-mono">Schritt-für-Schritt Beweis von Summenformeln</p>
+        <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg text-slate-300 text-sm space-y-2">
+          <p>Zu zeigen: $\\sum_{k=1}^n k = \\frac{n(n+1)}{2}$</p>
+          <ul class="list-disc pl-5 space-y-1">
+            <li><b>Induktionsanfang ($n=1$):</b> $1 = \\frac{1(2)}{2} = 1$ ✓</li>
+            <li><b>Induktionsvoraussetzung:</b> Gelte die Formel für ein beliebiges, festes $n$.</li>
+            <li><b>Induktionsschluss ($n \\to n+1$):</b> $\\sum_{k=1}^{n+1} k = \\frac{n(n+1)}{2} + (n+1) = \\frac{(n+1)(n+2)}{2}$ ✓</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Analysis -->
+    <section id="section-analysis" class="space-y-6 hidden">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <h2 class="text-base font-bold text-white font-heading">Mathe 1: Analysis</h2>
+        <p class="text-xs text-slate-400 font-mono">Grenzwerte, Stetigkeit und Differentialrechnung</p>
+        <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg">
+          <p class="text-sm text-slate-300 mb-2">Beispiel: Regel von L'Hospital für $\\lim_{x \\to 0} \\frac{\\sin(x)}{x}$</p>
+          <div class="text-xs text-rose-400 font-mono">[Funktionsplotter: Demnächst verfügbar...]</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. LinAlg -->
+    <section id="section-linalg" class="space-y-6 hidden">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <h2 class="text-base font-bold text-white font-heading">Mathe 2: Lineare Algebra</h2>
+        <p class="text-xs text-slate-400 font-mono">Vektorräume, Matrizen, Eigenwerte, Gauss-Algorithmus</p>
+        <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg">
+          <p class="text-sm text-slate-300 mb-2">Matrix-Multiplikation &amp; Determinantenberechnung</p>
+          <div class="text-xs text-rose-400 font-mono">[Interaktiver Gauss-Eliminations-Rechner: Demnächst verfügbar...]</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Stochastics -->
+    <section id="section-stochastics" class="space-y-6 hidden">
+      <div class="bg-[#0d1117] border border-[#1e2533] rounded-xl p-5 space-y-5">
+        <h2 class="text-base font-bold text-white font-heading">Mathe 3: Stochastik &amp; Numerik</h2>
+        <p class="text-xs text-slate-400 font-mono">Wahrscheinlichkeitsräume, Verteilungen und Statistik</p>
+        <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-lg">
+          <p class="text-sm text-slate-300 mb-2">Satz von Bayes &amp; Normalverteilung $\\mathcal{N}(\\mu, \\sigma^2)$</p>
+          <div class="text-xs text-rose-400 font-mono">[Verteilungs-Visualisierung: Demnächst verfügbar...]</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#0a0c10] border-t border-[#1e2533] text-slate-500 font-mono text-xs py-6 mt-16">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded bg-rose-500"></span>
+        <span>UniSuite // Mathe 1, 2, 3 &amp; ProMi</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-6 text-slate-400">
+        <a href="../" class="hover:text-slate-200 transition">~/portfolio</a>
+        <a href="../informationsmanagement/" class="hover:text-slate-200 transition">~/informationsmanagement</a>
+        <a href="../algorithmen-datenstrukturen/" class="hover:text-slate-200 transition">~/algorithmen_und_datenstrukturen</a>
+        <a href="../rechnerorganisation/" class="hover:text-slate-200 transition">~/rechnerorganisation</a>
+        <a href="../moses/" class="hover:text-slate-200 transition">~/moses</a>
+        <a href="../mathe-promi/" class="text-slate-200">~/mathe_promi</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function switchTab(tabId) {
+      const tabs = ['logic', 'induction', 'analysis', 'linalg', 'stochastics'];
+      tabs.forEach(t => {
+        const sec = document.getElementById('section-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+        if (btn) {
+          if (t === tabId) {
+            btn.className = 'mathe-tab-btn px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold transition';
+          } else {
+            btn.className = 'mathe-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition';
+          }
+        }
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "\\[", right: "\\]", display: true},
+            {left: "$", right: "$", display: false},
+            {left: "\\(", right: "\\)", display: false}
+          ]
+        });
+      }
+    });
+  </script>
+</body>
+</html>
