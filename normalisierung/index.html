@@ -210,45 +210,29 @@ VorlNr -> Titel, PersNr</textarea>
         </div>
       </div>
 
-      <!-- Inspection Live Visualizer Canvas & Radar -->
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
-        
-        <!-- Current Inspector Focus -->
-        <div class="md:col-span-7 bg-[#0a0c10] border border-[#1e2533] rounded-lg p-4 space-y-3 font-mono text-xs">
-          <div class="flex items-center justify-between text-slate-400 border-b border-[#1e2533] pb-2">
-            <span class="text-[11px] text-blue-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
-              <span class="inline-block w-2 h-2 rounded bg-blue-400 animate-pulse"></span> Aktiver Prüfschritt
-            </span>
-            <span id="anim-step-badge" class="px-2 py-0.5 rounded bg-[#151c28] border border-[#273248] text-slate-300 text-[10px]">
-              Bereit
-            </span>
-          </div>
-
-          <!-- Highlight Box -->
-          <div id="inspector-display" class="p-3.5 rounded-lg bg-[#0d1117] border border-[#273248] min-h-[90px] flex flex-col justify-center space-y-1.5">
-            <div class="text-slate-400 text-xs font-sans">Klicken Sie auf <b>„Prüfung abspielen“</b> oder <b>„Einzelschritt“</b>, um die detaillierte Normalformen-Prüfung visuell Schritt für Schritt nachzuvollziehen.</div>
-          </div>
-
-          <!-- Progress Dots -->
-          <div class="flex items-center justify-between pt-1 text-[11px] text-slate-500">
-            <div class="flex gap-1.5" id="step-dots-container">
-              <!-- Rendered dynamically -->
-            </div>
-            <span id="step-indicator-text">Schritt 0 / 5</span>
-          </div>
+      <!-- Current Inspector Focus (Full Width) -->
+      <div class="bg-[#0a0c10] border border-[#1e2533] rounded-lg p-4 space-y-3 font-mono text-xs">
+        <div class="flex items-center justify-between text-slate-400 border-b border-[#1e2533] pb-2">
+          <span class="text-[11px] text-blue-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
+            <span class="inline-block w-2 h-2 rounded bg-blue-400 animate-pulse"></span> Aktiver Prüfschritt
+          </span>
+          <span id="anim-step-badge" class="px-2 py-0.5 rounded bg-[#151c28] border border-[#273248] text-slate-300 text-[10px]">
+            Bereit
+          </span>
         </div>
 
-        <!-- Live Terminal Inspector Log -->
-        <div class="md:col-span-5 bg-[#0a0c10] border border-[#1e2533] rounded-lg p-3.5 flex flex-col justify-between font-mono text-[11px] space-y-2">
-          <div class="text-slate-400 border-b border-[#1e2533] pb-1.5 flex items-center justify-between">
-            <span class="text-[10px] uppercase tracking-wider text-emerald-400 font-bold">$ Live Diagnostic Log</span>
-            <span class="text-[10px] text-slate-500">Auto-Scroll</span>
-          </div>
-          <div id="inspector-terminal-log" class="h-28 overflow-y-auto space-y-1 text-slate-300 custom-scrollbar pr-1">
-            <div class="text-slate-500">[INIT] Normalisierungs-Engine geladen.</div>
-          </div>
+        <!-- Highlight Box -->
+        <div id="inspector-display" class="p-3.5 rounded-lg bg-[#0d1117] border border-[#273248] min-h-[75px] flex flex-col justify-center space-y-1.5">
+          <div class="text-slate-400 text-xs font-sans">Klicken Sie auf <b>„Prüfung abspielen“</b> oder <b>„Einzelschritt“</b>, um die detaillierte Normalformen-Prüfung visuell Schritt für Schritt nachzuvollziehen.</div>
         </div>
 
+        <!-- Progress Dots -->
+        <div class="flex items-center justify-between pt-1 text-[11px] text-slate-500">
+          <div class="flex gap-1.5" id="step-dots-container">
+            <!-- Rendered dynamically -->
+          </div>
+          <span id="step-indicator-text">Schritt 0 / 6</span>
+        </div>
       </div>
 
       <!-- Live Relational Table Canvas & Visual Inspector -->
@@ -856,7 +840,7 @@ VorlNr -> Titel, PersNr</textarea>
           title: "3. Normalform & BCNF: Transitive Abhängigkeiten",
           html: `
             <div class="text-slate-300 space-y-1.5">
-              <div>Kriterium für $X \\to A$: $X$ muss Superschlüssel sein ODER $A$ muss Primattribut sein.</div>
+              <div>Kriterium für <code>X ➔ A</code>: <b>X</b> muss Superschlüssel sein ODER <b>A</b> muss Primattribut sein.</div>
               ${v3NF.length > 0 ? `
                 <div class="text-rose-400 font-mono text-[11px] bg-rose-950/40 p-2 rounded border border-rose-500/30">
                   ✗ <b>3NF verletzt:</b> Transitive Abhängigkeiten vorhanden.<br>
@@ -1193,15 +1177,6 @@ VorlNr -> Titel, PersNr</textarea>
         </div>
       `;
 
-      if (logToTerminal) {
-        const term = document.getElementById("inspector-terminal-log");
-        const entry = document.createElement("div");
-        entry.className = "text-slate-300 font-mono text-[11px] leading-tight";
-        entry.innerHTML = `<span class="text-blue-400">&gt;</span> ${step.log}`;
-        term.appendChild(entry);
-        term.scrollTop = term.scrollHeight;
-      }
-
       renderStepDots();
       renderLiveTableCanvas(currentAnimIndex);
     }
@@ -1266,7 +1241,6 @@ VorlNr -> Titel, PersNr</textarea>
     function resetAnimation() {
       pauseAnimation();
       currentAnimIndex = 0;
-      document.getElementById("inspector-terminal-log").innerHTML = '<div class="text-slate-500">[RESET] Inspektor auf Anfang gesetzt.</div>';
       renderCurrentStep(true);
     }
 
