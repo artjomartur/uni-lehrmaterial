@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#060818] text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithmen &amp; Datenstrukturen (AuD) Simulator | Artjom Becker</title>
+  <meta name="description" content="Interaktive Visualisierungen für Algorithmen und Datenstrukturen: Dijkstra, AVL-Bäume, Sortieralgorithmen und Komplexitätsanalyse nach TU Darmstadt Lehrplan.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter, Outfit, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- KaTeX for Math & Complexity Notations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glass-panel {
+      background: rgba(11, 14, 38, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #060818; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #334155; }
+    .node-active { stroke: #6366f1; stroke-width: 3px; filter: drop-shadow(0 0 8px rgba(99,102,241,0.6)); }
+    .node-visited { fill: #1e1b4b; stroke: #818cf8; }
+    .node-current { fill: #4338ca; stroke: #38bdf8; stroke-width: 3px; }
+    .edge-path { stroke: #38bdf8; stroke-width: 3.5px; stroke-dasharray: 6; animation: dash 1s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset: -12; } }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#060818] text-slate-100 antialiased custom-scrollbar">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-indigo-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="../" class="flex items-center space-x-2 text-indigo-400 hover:text-white transition group">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-mono font-bold text-sm text-indigo-300 group-hover:scale-105 transition">
+            AB
+          </div>
+          <span class="font-heading font-bold text-slate-200 tracking-tight">Lehrmaterial</span>
+        </a>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <a href="../" class="text-xs sm:text-sm font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>←</span> Alle Module
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Title & Navigation Tabs -->
+    <div class="space-y-4">
+      <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+        Algorithmen &amp; <span class="text-indigo-400">Datenstrukturen Lab</span>
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+        Interaktive Werkzeuge für Kürzeste-Wege-Algorithmen (Dijkstra, BFS), selbstbalancierende Suchbäume (AVL-Rotationen), Sortierverfahren mit Rekursionstiefe und Master-Theorem Komplexitätsanalyse.
+      </p>
+
+      <!-- Main Section Tabs -->
+      <div class="flex flex-wrap gap-2 pt-2 border-b border-indigo-950 pb-3 font-medium text-xs">
+        <button onclick="switchAuDTab('dijkstra')" id="tab-btn-dijkstra" class="aud-tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold transition shadow">
+          🗺️ Graph &amp; Dijkstra Explorer
+        </button>
+        <button onclick="switchAuDTab('avl')" id="tab-btn-avl" class="aud-tab-btn px-4 py-2 rounded-lg bg-[#0b0e26] text-slate-300 hover:text-white border border-indigo-950 transition">
+          🌳 AVL-Baum &amp; Rotationen
+        </button>
+        <button onclick="switchAuDTab('sorting')" id="tab-btn-sorting" class="aud-tab-btn px-4 py-2 rounded-lg bg-[#0b0e26] text-slate-300 hover:text-white border border-indigo-950 transition">
+          📊 Sortier- &amp; Rekursions-Lab
+        </button>
+        <button onclick="switchAuDTab('quiz')" id="tab-btn-quiz" class="aud-tab-btn px-4 py-2 rounded-lg bg-[#0b0e26] text-slate-300 hover:text-white border border-indigo-950 transition">
+          🎯 Asymptotik- &amp; Klausur-Quiz
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 1: DIJKSTRA & GRAPH ALGORITHMEN                  -->
+    <!-- ======================================================== -->
+    <section id="section-dijkstra" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Interactive Graph Canvas -->
+        <div class="lg:col-span-8 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-4 shadow-xl flex flex-col justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-950 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🗺️</span> Kürzeste Wege: Dijkstra &amp; BFS
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Startknoten wählen und schrittweise die Priority Queue abarbeiten</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="resetDijkstra()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">
+                Reset
+              </button>
+              <button onclick="stepDijkstra()" id="btn-step-dijkstra" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow-md shadow-indigo-600/30">
+                Schritt weiter &rarr;
+              </button>
+              <button onclick="autoRunDijkstra()" id="btn-auto-dijkstra" class="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-xs font-semibold text-white transition">
+                ▶ Auto-Play
+              </button>
+            </div>
+          </div>
+
+          <!-- SVG Graph Area -->
+          <div class="bg-[#070919] rounded-xl border border-indigo-950/80 p-2 overflow-x-auto custom-scrollbar flex items-center justify-center min-h-[360px]">
+            <svg id="graph-svg" width="620" height="340" class="select-none font-mono"></svg>
+          </div>
+
+          <!-- Algorithm Legend -->
+          <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400 pt-2 border-t border-indigo-950">
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-indigo-600 inline-block"></span> Unbesucht</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-sky-500 inline-block"></span> Aktueller Knoten</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-emerald-600 inline-block"></span> Final (abgeschlossen)</span>
+            </div>
+            <div class="font-mono text-indigo-300">
+              Komplexität: $\mathcal{O}((V + E) \log V)$ mit Fibonacci-Heap
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Distance Table & Priority Queue -->
+        <div class="lg:col-span-4 space-y-6">
+          <!-- Distance Table -->
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between border-b border-indigo-950 pb-2">
+              <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Distanz-Array $d[v]$ &amp; Vorgänger $\pi[v]$</h3>
+              <span class="text-[10px] font-mono text-indigo-400" id="dijkstra-step-indicator">Schritt 0</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-xs text-left">
+                <thead class="text-[11px] font-mono bg-indigo-950/40 text-indigo-300">
+                  <tr>
+                    <th class="p-2 border-b border-indigo-900/40">Knoten $v$</th>
+                    <th class="p-2 border-b border-indigo-900/40">Distanz $d[v]$</th>
+                    <th class="p-2 border-b border-indigo-900/40">Vorgänger $\pi$</th>
+                    <th class="p-2 border-b border-indigo-900/40">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-dijkstra-table" class="font-mono divide-y divide-indigo-950/60 text-slate-300">
+                  <!-- JS Populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Priority Queue State -->
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+            <div class="text-xs font-bold text-slate-200 uppercase tracking-wider">Min-Priority-Queue ($Q$)</div>
+            <div id="pq-container" class="space-y-1.5 font-mono text-xs max-h-40 overflow-y-auto custom-scrollbar">
+              <!-- JS Populated -->
+            </div>
+            <div id="dijkstra-log" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 text-slate-300 text-xs leading-relaxed font-sans">
+              Wähle Startknoten A und klicke auf „Schritt weiter“, um Dijkstra zu starten.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 2: AVL-BAUM & ROTATIONEN                         -->
+    <!-- ======================================================== -->
+    <section id="section-avl" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: AVL Canvas & Controls -->
+        <div class="lg:col-span-8 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-4 shadow-xl flex flex-col justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-950 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🌳</span> AVL-Baum: Höhenbalancierter Suchbaum
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Balance-Faktor $BF(v) = h(\text{rechts}) - h(\text{links}) \in \{-1, 0, 1\}$</p>
+            </div>
+
+            <!-- Insert input -->
+            <div class="flex items-center gap-2">
+              <input type="number" id="avl-input" placeholder="Wert (z.B. 42)" class="w-32 bg-[#070919] border border-indigo-900 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-indigo-500 font-mono">
+              <button onclick="insertIntoAVL()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow">
+                Einfügen
+              </button>
+              <button onclick="resetAVLTree()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Presets -->
+          <div class="flex flex-wrap gap-2 items-center text-xs">
+            <span class="text-slate-400 font-semibold">Klausur-Szenarien:</span>
+            <button onclick="loadAVLPreset('left_left')" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-indigo-300 hover:bg-indigo-950/60 transition">
+              LL-Konflikt (Rechtsrotation)
+            </button>
+            <button onclick="loadAVLPreset('right_right')" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-indigo-300 hover:bg-indigo-950/60 transition">
+              RR-Konflikt (Linksrotation)
+            </button>
+            <button onclick="loadAVLPreset('left_right')" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-amber-300 hover:bg-indigo-950/60 transition">
+              LR-Doppelrotation
+            </button>
+            <button onclick="loadAVLPreset('right_left')" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-amber-300 hover:bg-indigo-950/60 transition">
+              RL-Doppelrotation
+            </button>
+          </div>
+
+          <!-- Tree Drawing Area -->
+          <div class="bg-[#070919] rounded-xl border border-indigo-950/80 p-2 overflow-x-auto custom-scrollbar flex items-center justify-center min-h-[380px]">
+            <svg id="avl-svg" width="650" height="360" class="select-none font-mono"></svg>
+          </div>
+
+          <div class="text-[11px] text-slate-400 border-t border-indigo-950 pt-2 flex justify-between">
+            <span>🔵 Zahl im Knoten = Schlüssel • <b class="text-amber-300">Kleine Zahl oben</b> = Balance-Faktor $BF$</span>
+            <span class="font-mono text-indigo-300">Höhe $h \le 1.44 \log_2(n)$</span>
+          </div>
+        </div>
+
+        <!-- Right: Rotation Explainer & Log -->
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+            <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Letzte ausgeführte Rotation</h3>
+            <div id="avl-rotation-badge" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 text-indigo-200 font-mono text-xs">
+              Keine Rotation erforderlich (Baum ist balanciert).
+            </div>
+            <div id="avl-rotation-explainer" class="text-xs text-slate-300 leading-relaxed space-y-2">
+              Ein AVL-Baum garantiert logarithmische Such-, Einfüge- und Löschzeiten $\mathcal{O}(\log n)$ durch automatische Rebalancierung nach jeder Operation.
+            </div>
+          </div>
+
+          <!-- 4 Rotation Types Cheat Sheet -->
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-2.5 shadow-xl text-xs">
+            <div class="font-bold text-slate-200 uppercase tracking-wider text-[11px]">Die 4 AVL-Rotationsfälle</div>
+            <div class="space-y-2 text-slate-300">
+              <div class="p-2 rounded bg-[#070919] border border-indigo-950">
+                <span class="text-indigo-300 font-bold">1. LL (Links-Links):</span> Einfügen in linken Teilbaum des linken Kindes $\to$ <b>Einfache Rechtsrotation</b> um Wurzel.
+              </div>
+              <div class="p-2 rounded bg-[#070919] border border-indigo-950">
+                <span class="text-indigo-300 font-bold">2. RR (Rechts-Rechts):</span> Einfügen in rechten Teilbaum des rechten Kindes $\to$ <b>Einfache Linksrotation</b> um Wurzel.
+              </div>
+              <div class="p-2 rounded bg-[#070919] border border-indigo-950">
+                <span class="text-amber-300 font-bold">3. LR (Links-Rechts):</span> Einfügen in rechten Teilbaum des linken Kindes $\to$ <b>Linksrotation an Kind, dann Rechtsrotation</b>.
+              </div>
+              <div class="p-2 rounded bg-[#070919] border border-indigo-950">
+                <span class="text-amber-300 font-bold">4. RL (Rechts-Links):</span> Einfügen in linken Teilbaum des rechten Kindes $\to$ <b>Rechtsrotation an Kind, dann Linksrotation</b>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 3: SORTIEREN & MASTER-THEOREM LAB                -->
+    <!-- ======================================================== -->
+    <section id="section-sorting" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Sorting Visualizer -->
+        <div class="lg:col-span-7 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-4 shadow-xl flex flex-col justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-950 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>📊</span> Sortier- &amp; Rekursions-Simulator
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">QuickSort, MergeSort und HeapSort im direkten Vergleich</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <select id="sort-algo-select" onchange="resetSortVisualizer()" class="bg-[#070919] border border-indigo-900 rounded-lg px-2.5 py-1.5 text-xs text-white outline-none">
+                <option value="quicksort">QuickSort (Divide &amp; Conquer)</option>
+                <option value="mergesort">MergeSort (Stabil, $\mathcal{O}(n \log n)$)</option>
+                <option value="heapsort">HeapSort (In-Place, $\mathcal{O}(n \log n)$)</option>
+              </select>
+              <button onclick="startSortAnimation()" id="btn-start-sort" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow">
+                Sortieren starten
+              </button>
+            </div>
+          </div>
+
+          <!-- Bar Chart Animation Canvas -->
+          <div id="sort-bars-container" class="bg-[#070919] rounded-xl border border-indigo-950/80 p-4 h-64 flex items-end justify-between gap-1.5 overflow-hidden">
+            <!-- Dynamically populated bars -->
+          </div>
+
+          <!-- Metrics Row -->
+          <div class="grid grid-cols-3 gap-3 text-xs font-mono text-center">
+            <div class="bg-[#070919] p-2.5 rounded-lg border border-indigo-950">
+              <span class="text-slate-400 block text-[10px]">Vergleiche</span>
+              <span id="sort-comparisons" class="text-indigo-300 font-bold text-sm">0</span>
+            </div>
+            <div class="bg-[#070919] p-2.5 rounded-lg border border-indigo-950">
+              <span class="text-slate-400 block text-[10px]">Tausche / Writes</span>
+              <span id="sort-swaps" class="text-emerald-300 font-bold text-sm">0</span>
+            </div>
+            <div class="bg-[#070919] p-2.5 rounded-lg border border-indigo-950">
+              <span class="text-slate-400 block text-[10px]">Rekursionstiefe</span>
+              <span id="sort-depth" class="text-amber-300 font-bold text-sm">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Master Theorem Calculator -->
+        <div class="lg:col-span-5 space-y-6">
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
+            <div class="border-b border-indigo-950 pb-2">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>🧮</span> Master-Theorem Rechner
+              </h3>
+              <p class="text-xs text-slate-400">Für Rekursionsgleichungen $T(n) = a \cdot T(n/b) + \mathcal{O}(n^d)$</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+              <div>
+                <label class="block text-slate-400 text-[10px] mb-1">Teilprobleme $a$</label>
+                <input type="number" id="mt-a" value="2" min="1" onchange="calculateMasterTheorem()" class="w-full bg-[#070919] border border-indigo-900 rounded p-1.5 text-center text-white">
+              </div>
+              <div>
+                <label class="block text-slate-400 text-[10px] mb-1">Teiler $b$ ($b > 1$)</label>
+                <input type="number" id="mt-b" value="2" min="2" onchange="calculateMasterTheorem()" class="w-full bg-[#070919] border border-indigo-900 rounded p-1.5 text-center text-white">
+              </div>
+              <div>
+                <label class="block text-slate-400 text-[10px] mb-1">Aufwand-Grad $d$</label>
+                <input type="number" id="mt-d" value="1" min="0" step="0.5" onchange="calculateMasterTheorem()" class="w-full bg-[#070919] border border-indigo-900 rounded p-1.5 text-center text-white">
+              </div>
+            </div>
+
+            <!-- Result Box -->
+            <div class="p-4 bg-[#070919] rounded-xl border border-indigo-950 space-y-2">
+              <div class="text-[11px] font-mono text-indigo-400 font-bold">Ergebnis &amp; Master-Fall:</div>
+              <div id="mt-result-case" class="text-xs font-semibold text-white">Fall 2: $a = b^d \implies 2 = 2^1$</div>
+              <div id="mt-complexity" class="text-lg font-mono font-black text-emerald-400">$\mathcal{O}(n \log n)$</div>
+              <p id="mt-explainer" class="text-xs text-slate-300 leading-relaxed">
+                Der Aufwand auf jeder Rekursionsebene ist gleich groß. Typisches Beispiel: MergeSort.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 4: ASYMPTOTIK & KLAUSUR-QUIZ                     -->
+    <!-- ======================================================== -->
+    <section id="section-quiz" class="space-y-6 hidden">
+      <div class="max-w-3xl mx-auto bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-6 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-4">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>🎯</span> Klausur-Quiz: Algorithmen &amp; Datenstrukturen
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Typische Verständnisfragen zu Komplexität, AVL-Bäumen und Graphen</p>
+          </div>
+          <span id="quiz-score" class="font-mono text-xs font-bold text-indigo-400">0 / 5 Punkte</span>
+        </div>
+
+        <div id="quiz-card" class="space-y-4">
+          <div class="bg-[#070919] p-4 rounded-xl border border-indigo-950 space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold" id="quiz-q-num">Frage 1 von 5</span>
+            <p id="quiz-q-text" class="text-sm font-semibold text-white leading-relaxed">
+              Welche Worst-Case-Laufzeit hat das Einfügen eines Elements in einen AVL-Baum mit $n$ Elementen?
+            </p>
+          </div>
+
+          <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <!-- Dynamically populated -->
+          </div>
+
+          <div id="quiz-feedback" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+
+          <div class="flex justify-end pt-2">
+            <button onclick="nextAuDQuestion()" id="btn-quiz-next" class="hidden px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition">
+              Nächste Frage &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#04060e] border-t border-indigo-950/80 text-center py-6 text-xs text-slate-500 space-y-2 mt-12">
+    <div>Algorithmen &amp; Datenstrukturen Lab • Lehrmaterial Suite von Artjom Becker • TU Darmstadt</div>
+    <div class="flex justify-center gap-4 text-indigo-400 text-[11px]">
+      <a href="../" class="hover:underline">Alle Fachbereiche</a>
+      <span>•</span>
+      <a href="../relationale-algebra/" class="hover:underline">Relationale Algebra</a>
+      <span>•</span>
+      <a href="../rechnerorganisation/" class="hover:underline">Rechnerorganisation</a>
+      <span>•</span>
+      <a href="/" class="hover:underline">Portfolio</a>
+    </div>
+  </footer>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    /* ==========================================================================
+       TAB SWITCHING
+       ========================================================================== */
+    function switchAuDTab(tabId) {
+      const tabs = ['dijkstra', 'avl', 'sorting', 'quiz'];
+      tabs.forEach(t => {
+        const sec = document.getElementById('section-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+        if (btn) {
+          if (t === tabId) {
+            btn.className = 'aud-tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold transition shadow';
+          } else {
+            btn.className = 'aud-tab-btn px-4 py-2 rounded-lg bg-[#0b0e26] text-slate-300 hover:text-white border border-indigo-950 transition';
+          }
+        }
+      });
+      if (tabId === 'dijkstra') renderGraph();
+      if (tabId === 'avl') renderAVL();
+      if (tabId === 'sorting') resetSortVisualizer();
+    }
+
+    /* ==========================================================================
+       1. DIJKSTRA SIMULATOR
+       ========================================================================== */
+    const GRAPH = {
+      nodes: [
+        { id: 'A', x: 80, y: 170 },
+        { id: 'B', x: 220, y: 80 },
+        { id: 'C', x: 220, y: 260 },
+        { id: 'D', x: 380, y: 80 },
+        { id: 'E', x: 380, y: 260 },
+        { id: 'F', x: 520, y: 170 }
+      ],
+      edges: [
+        { u: 'A', v: 'B', w: 4 },
+        { u: 'A', v: 'C', w: 2 },
+        { u: 'B', v: 'C', w: 1 },
+        { u: 'B', v: 'D', w: 5 },
+        { u: 'C', v: 'E', w: 8 },
+        { u: 'C', v: 'D', w: 8 },
+        { u: 'D', v: 'E', w: 2 },
+        { u: 'D', v: 'F', w: 6 },
+        { u: 'E', v: 'F', w: 3 }
+      ]
+    };
+
+    let dijkstraState = {
+      dist: {},
+      prev: {},
+      visited: new Set(),
+      pq: [],
+      current: null,
+      step: 0,
+      finished: false
+    };
+
+    function resetDijkstra() {
+      dijkstraState.dist = { A: 0, B: Infinity, C: Infinity, D: Infinity, E: Infinity, F: Infinity };
+      dijkstraState.prev = { A: null, B: null, C: null, D: null, E: null, F: null };
+      dijkstraState.visited = new Set();
+      dijkstraState.pq = [{ id: 'A', d: 0 }];
+      dijkstraState.current = null;
+      dijkstraState.step = 0;
+      dijkstraState.finished = false;
+      document.getElementById('dijkstra-log').innerHTML = 'Startknoten A mit Distanz 0 initialisiert.';
+      updateDijkstraUI();
+      renderGraph();
+    }
+
+    function stepDijkstra() {
+      if (dijkstraState.finished || dijkstraState.pq.length === 0) {
+        dijkstraState.finished = true;
+        document.getElementById('dijkstra-log').innerHTML = '<b>Fertig!</b> Alle kürzesten Pfade vom Startknoten A wurden erfolgreich berechnet.';
+        renderGraph();
+        return;
+      }
+
+      dijkstraState.step++;
+      // Sort PQ to find min
+      dijkstraState.pq.sort((a, b) => a.d - b.d);
+      const curr = dijkstraState.pq.shift();
+      dijkstraState.current = curr.id;
+      dijkstraState.visited.add(curr.id);
+
+      let logMsg = `<b>Schritt ${dijkstraState.step}:</b> Knoten <b>${curr.id}</b> mit minimaler Distanz ${curr.d} aus Queue entnommen.<br>`;
+
+      // Relax neighbors
+      const neighbors = GRAPH.edges.filter(e => e.u === curr.id || e.v === curr.id);
+      neighbors.forEach(e => {
+        const neighbor = e.u === curr.id ? e.v : e.u;
+        if (!dijkstraState.visited.has(neighbor)) {
+          const newDist = curr.d + e.w;
+          if (newDist < dijkstraState.dist[neighbor]) {
+            dijkstraState.dist[neighbor] = newDist;
+            dijkstraState.prev[neighbor] = curr.id;
+            // Update or push to PQ
+            const existing = dijkstraState.pq.find(item => item.id === neighbor);
+            if (existing) {
+              existing.d = newDist;
+            } else {
+              dijkstraState.pq.push({ id: neighbor, d: newDist });
+            }
+            logMsg += `&bull; Kante (${curr.id} &harr; ${neighbor}, Gew: ${e.w}) relaxiert: $d[${neighbor}] = ${newDist}$<br>`;
+          }
+        }
+      });
+
+      document.getElementById('dijkstra-log').innerHTML = logMsg;
+      updateDijkstraUI();
+      renderGraph();
+    }
+
+    function autoRunDijkstra() {
+      const interval = setInterval(() => {
+        if (dijkstraState.finished || dijkstraState.pq.length === 0) {
+          clearInterval(interval);
+        } else {
+          stepDijkstra();
+        }
+      }, 700);
+    }
+
+    function updateDijkstraUI() {
+      document.getElementById('dijkstra-step-indicator').innerText = `Schritt ${dijkstraState.step}`;
+      
+      // Table
+      const tbody = document.getElementById('tbody-dijkstra-table');
+      tbody.innerHTML = '';
+      GRAPH.nodes.forEach(n => {
+        const d = dijkstraState.dist[n.id] === Infinity ? '∞' : dijkstraState.dist[n.id];
+        const p = dijkstraState.prev[n.id] ? dijkstraState.prev[n.id] : '-';
+        const isCurrent = dijkstraState.current === n.id;
+        const isVisited = dijkstraState.visited.has(n.id);
+        const status = isVisited ? '<span class="text-emerald-400 font-semibold">Abgeschlossen</span>' : (d !== '∞' ? '<span class="text-sky-300">In Queue</span>' : '<span class="text-slate-500">Unbesucht</span>');
+        
+        tbody.innerHTML += `
+          <tr class="${isCurrent ? 'bg-indigo-950/60 font-bold' : ''}">
+            <td class="p-2">${n.id}</td>
+            <td class="p-2 text-indigo-300 font-bold">${d}</td>
+            <td class="p-2 text-slate-400">${p}</td>
+            <td class="p-2">${status}</td>
+          </tr>
+        `;
+      });
+
+      // PQ
+      const pqContainer = document.getElementById('pq-container');
+      pqContainer.innerHTML = '';
+      if (dijkstraState.pq.length === 0) {
+        pqContainer.innerHTML = '<span class="text-slate-500 italic">Queue ist leer</span>';
+      } else {
+        dijkstraState.pq.forEach((item, idx) => {
+          pqContainer.innerHTML += `
+            <div class="flex justify-between items-center bg-[#070919] p-2 rounded border border-indigo-950">
+              <span class="text-indigo-300 font-bold">Knoten ${item.id}</span>
+              <span class="text-emerald-400 font-bold">d = ${item.d}</span>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function renderGraph() {
+      const svg = document.getElementById('graph-svg');
+      if (!svg) return;
+      svg.innerHTML = '';
+
+      // Draw Edges
+      GRAPH.edges.forEach(e => {
+        const u = GRAPH.nodes.find(n => n.id === e.u);
+        const v = GRAPH.nodes.find(n => n.id === e.v);
+        const isPath = (dijkstraState.prev[e.v] === e.u && dijkstraState.visited.has(e.v)) || (dijkstraState.prev[e.u] === e.v && dijkstraState.visited.has(e.u));
+        
+        // Line
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', u.x);
+        line.setAttribute('y1', u.y);
+        line.setAttribute('x2', v.x);
+        line.setAttribute('y2', v.y);
+        line.setAttribute('stroke', isPath ? '#38bdf8' : '#1e293b');
+        line.setAttribute('stroke-width', isPath ? '4' : '2');
+        if (isPath) line.setAttribute('class', 'edge-path');
+        svg.appendChild(line);
+
+        // Edge Weight label
+        const midX = (u.x + v.x) / 2;
+        const midY = (u.y + v.y) / 2;
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', midX - 10);
+        rect.setAttribute('y', midY - 10);
+        rect.setAttribute('width', '20');
+        rect.setAttribute('height', '18');
+        rect.setAttribute('rx', '4');
+        rect.setAttribute('fill', '#0b0e26');
+        rect.setAttribute('stroke', '#312e81');
+        svg.appendChild(rect);
+
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', midX);
+        txt.setAttribute('y', midY + 3);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('fill', '#a5b4fc');
+        txt.setAttribute('font-size', '11');
+        txt.textContent = e.w;
+        svg.appendChild(txt);
+      });
+
+      // Draw Nodes
+      GRAPH.nodes.forEach(n => {
+        const isCurrent = dijkstraState.current === n.id;
+        const isVisited = dijkstraState.visited.has(n.id);
+        
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        
+        // Outer circle
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', n.x);
+        circle.setAttribute('cy', n.y);
+        circle.setAttribute('r', '20');
+        circle.setAttribute('fill', isCurrent ? '#4f46e5' : isVisited ? '#064e3b' : '#0f172a');
+        circle.setAttribute('stroke', isCurrent ? '#38bdf8' : isVisited ? '#10b981' : '#4338ca');
+        circle.setAttribute('stroke-width', isCurrent ? '3' : '2');
+        if (isCurrent) circle.setAttribute('class', 'node-active');
+        g.appendChild(circle);
+
+        // Node Label
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', n.x);
+        txt.setAttribute('y', n.y + 4);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('fill', '#ffffff');
+        txt.setAttribute('font-weight', 'bold');
+        txt.setAttribute('font-size', '13');
+        txt.textContent = n.id;
+        g.appendChild(txt);
+
+        svg.appendChild(g);
+      });
+    }
+
+    /* ==========================================================================
+       2. AVL TREE IMPLEMENTATION
+       ========================================================================== */
+    class AVLNode {
+      constructor(key) {
+        this.key = key;
+        this.left = null;
+        this.right = null;
+        this.height = 1;
+      }
+    }
+
+    let avlRoot = null;
+    let lastRotationInfo = 'Baum initialisiert.';
+
+    function getHeight(node) {
+      return node ? node.height : 0;
+    }
+
+    function getBalance(node) {
+      return node ? getHeight(node.right) - getHeight(node.left) : 0;
+    }
+
+    function updateHeight(node) {
+      if (node) {
+        node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
+      }
+    }
+
+    function rotateRight(y) {
+      const x = y.left;
+      const T2 = x.right;
+      x.right = y;
+      y.left = T2;
+      updateHeight(y);
+      updateHeight(x);
+      return x;
+    }
+
+    function rotateLeft(x) {
+      const y = x.right;
+      const T2 = y.left;
+      y.left = x;
+      x.right = T2;
+      updateHeight(x);
+      updateHeight(y);
+      return y;
+    }
+
+    function insertAVL(node, key) {
+      if (!node) return new AVLNode(key);
+
+      if (key < node.key) {
+        node.left = insertAVL(node.left, key);
+      } else if (key > node.key) {
+        node.right = insertAVL(node.right, key);
+      } else {
+        return node;
+      }
+
+      updateHeight(node);
+      const balance = getBalance(node);
+
+      // LL Case (Right Rotate)
+      if (balance < -1 && key < node.left.key) {
+        lastRotationInfo = `LL-Konflikt an Knoten ${node.key}: <b>Einfache Rechtsrotation</b> durchgeführt.`;
+        return rotateRight(node);
+      }
+
+      // RR Case (Left Rotate)
+      if (balance > 1 && key > node.right.key) {
+        lastRotationInfo = `RR-Konflikt an Knoten ${node.key}: <b>Einfache Linksrotation</b> durchgeführt.`;
+        return rotateLeft(node);
+      }
+
+      // LR Case (Left-Right Rotate)
+      if (balance < -1 && key > node.left.key) {
+        lastRotationInfo = `LR-Konflikt an Knoten ${node.key}: <b>Linksrotation an ${node.left.key}</b> gefolgt von <b>Rechtsrotation an ${node.key}</b>.`;
+        node.left = rotateLeft(node.left);
+        return rotateRight(node);
+      }
+
+      // RL Case (Right-Left Rotate)
+      if (balance > 1 && key < node.right.key) {
+        lastRotationInfo = `RL-Konflikt an Knoten ${node.key}: <b>Rechtsrotation an ${node.right.key}</b> gefolgt von <b>Linksrotation an ${node.key}</b>.`;
+        node.right = rotateRight(node.right);
+        return rotateLeft(node);
+      }
+
+      return node;
+    }
+
+    function insertIntoAVL() {
+      const input = document.getElementById('avl-input');
+      const val = parseInt(input.value);
+      if (isNaN(val)) return;
+      lastRotationInfo = `Schlüssel ${val} eingefügt. Keine Rotation erforderlich.`;
+      avlRoot = insertAVL(avlRoot, val);
+      input.value = '';
+      document.getElementById('avl-rotation-badge').innerHTML = lastRotationInfo;
+      renderAVL();
+    }
+
+    function resetAVLTree() {
+      avlRoot = null;
+      lastRotationInfo = 'Baum geleert.';
+      document.getElementById('avl-rotation-badge').innerHTML = lastRotationInfo;
+      renderAVL();
+    }
+
+    function loadAVLPreset(type) {
+      resetAVLTree();
+      if (type === 'left_left') {
+        [30, 20, 10].forEach(k => avlRoot = insertAVL(avlRoot, k));
+        lastRotationInfo = 'Preset LL: Schlüssel [30, 20, 10] eingefügt &rarr; Rechtsrotation um 30.';
+      } else if (type === 'right_right') {
+        [10, 20, 30].forEach(k => avlRoot = insertAVL(avlRoot, k));
+        lastRotationInfo = 'Preset RR: Schlüssel [10, 20, 30] eingefügt &rarr; Linksrotation um 10.';
+      } else if (type === 'left_right') {
+        [30, 10, 20].forEach(k => avlRoot = insertAVL(avlRoot, k));
+        lastRotationInfo = 'Preset LR: Schlüssel [30, 10, 20] eingefügt &rarr; Links an 10, Rechts an 30.';
+      } else if (type === 'right_left') {
+        [10, 30, 20].forEach(k => avlRoot = insertAVL(avlRoot, k));
+        lastRotationInfo = 'Preset RL: Schlüssel [10, 30, 20] eingefügt &rarr; Rechts an 30, Links an 10.';
+      }
+      document.getElementById('avl-rotation-badge').innerHTML = lastRotationInfo;
+      renderAVL();
+    }
+
+    function renderAVL() {
+      const svg = document.getElementById('avl-svg');
+      if (!svg) return;
+      svg.innerHTML = '';
+      if (!avlRoot) {
+        svg.innerHTML = '<text x="325" y="180" text-anchor="middle" fill="#64748b" font-size="13">Baum ist leer. Füge oben Zahlen ein.</text>';
+        return;
+      }
+
+      function drawNode(node, x, y, dx) {
+        if (!node) return;
+
+        if (node.left) {
+          const lx = x - dx;
+          const ly = y + 70;
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', x);
+          line.setAttribute('y1', y);
+          line.setAttribute('x2', lx);
+          line.setAttribute('y2', ly);
+          line.setAttribute('stroke', '#312e81');
+          line.setAttribute('stroke-width', '2');
+          svg.appendChild(line);
+          drawNode(node.left, lx, ly, dx / 2);
+        }
+        if (node.right) {
+          const rx = x + dx;
+          const ry = y + 70;
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', x);
+          line.setAttribute('y1', y);
+          line.setAttribute('x2', rx);
+          line.setAttribute('y2', ry);
+          line.setAttribute('stroke', '#312e81');
+          line.setAttribute('stroke-width', '2');
+          svg.appendChild(line);
+          drawNode(node.right, rx, ry, dx / 2);
+        }
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x);
+        circle.setAttribute('cy', y);
+        circle.setAttribute('r', '18');
+        circle.setAttribute('fill', '#1e1b4b');
+        circle.setAttribute('stroke', '#6366f1');
+        circle.setAttribute('stroke-width', '2');
+        svg.appendChild(circle);
+
+        const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', x);
+        txt.setAttribute('y', y + 4);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('fill', '#ffffff');
+        txt.setAttribute('font-weight', 'bold');
+        txt.setAttribute('font-size', '12');
+        txt.textContent = node.key;
+        svg.appendChild(txt);
+
+        const bf = getBalance(node);
+        const bfTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        bfTxt.setAttribute('x', x + 16);
+        bfTxt.setAttribute('y', y - 10);
+        bfTxt.setAttribute('text-anchor', 'middle');
+        bfTxt.setAttribute('fill', Math.abs(bf) > 1 ? '#f43f5e' : '#f59e0b');
+        bfTxt.setAttribute('font-size', '10');
+        bfTxt.setAttribute('font-weight', 'bold');
+        bfTxt.textContent = `bf:${bf}`;
+        svg.appendChild(bfTxt);
+      }
+
+      drawNode(avlRoot, 325, 45, 140);
+    }
+
+    /* ==========================================================================
+       3. SORTING & MASTER THEOREM
+       ========================================================================== */
+    let sortArray = [];
+    const ARRAY_SIZE = 24;
+
+    function resetSortVisualizer() {
+      sortArray = [];
+      for (let i = 0; i < ARRAY_SIZE; i++) {
+        sortArray.push(Math.floor(Math.random() * 85) + 10);
+      }
+      document.getElementById('sort-comparisons').innerText = '0';
+      document.getElementById('sort-swaps').innerText = '0';
+      document.getElementById('sort-depth').innerText = '0';
+      renderSortBars();
+    }
+
+    function renderSortBars(activeIndices = [], pivotIndex = -1) {
+      const container = document.getElementById('sort-bars-container');
+      if (!container) return;
+      container.innerHTML = '';
+      sortArray.forEach((val, idx) => {
+        const bar = document.createElement('div');
+        bar.className = 'flex-1 rounded-sm transition-all duration-150 relative';
+        bar.style.height = `${val}%`;
+        
+        if (idx === pivotIndex) {
+          bar.className += ' bg-amber-400 shadow-md shadow-amber-400/50';
+        } else if (activeIndices.includes(idx)) {
+          bar.className += ' bg-sky-400';
+        } else {
+          bar.className += ' bg-indigo-600 hover:bg-indigo-500';
+        }
+        container.appendChild(bar);
+      });
+    }
+
+    async function startSortAnimation() {
+      const algo = document.getElementById('sort-algo-select').value;
+      let comparisons = 0;
+      let swaps = 0;
+      let maxDepth = 0;
+
+      async function sleep(ms = 40) {
+        return new Promise(res => setTimeout(res, ms));
+      }
+
+      if (algo === 'quicksort') {
+        async function quickSort(arr, low, high, depth = 1) {
+          maxDepth = Math.max(maxDepth, depth);
+          document.getElementById('sort-depth').innerText = maxDepth;
+          if (low < high) {
+            const pi = await partition(arr, low, high);
+            await quickSort(arr, low, pi - 1, depth + 1);
+            await quickSort(arr, pi + 1, high, depth + 1);
+          }
+        }
+
+        async function partition(arr, low, high) {
+          const pivot = arr[high];
+          let i = low - 1;
+          for (let j = low; j < high; j++) {
+            comparisons++;
+            document.getElementById('sort-comparisons').innerText = comparisons;
+            renderSortBars([j, high], high);
+            await sleep();
+            if (arr[j] < pivot) {
+              i++;
+              [arr[i], arr[j]] = [arr[j], arr[i]];
+              swaps++;
+              document.getElementById('sort-swaps').innerText = swaps;
+              renderSortBars([i, j], high);
+              await sleep();
+            }
+          }
+          [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+          swaps++;
+          document.getElementById('sort-swaps').innerText = swaps;
+          renderSortBars([i + 1], i + 1);
+          await sleep();
+          return i + 1;
+        }
+
+        await quickSort(sortArray, 0, sortArray.length - 1);
+        renderSortBars();
+      } else {
+        for (let i = 0; i < sortArray.length; i++) {
+          for (let j = 0; j < sortArray.length - i - 1; j++) {
+            comparisons++;
+            document.getElementById('sort-comparisons').innerText = comparisons;
+            if (sortArray[j] > sortArray[j + 1]) {
+              [sortArray[j], sortArray[j + 1]] = [sortArray[j + 1], sortArray[j]];
+              swaps++;
+              document.getElementById('sort-swaps').innerText = swaps;
+            }
+            renderSortBars([j, j + 1]);
+            await sleep(15);
+          }
+        }
+        renderSortBars();
+      }
+    }
+
+    function calculateMasterTheorem() {
+      const a = parseFloat(document.getElementById('mt-a').value);
+      const b = parseFloat(document.getElementById('mt-b').value);
+      const d = parseFloat(document.getElementById('mt-d').value);
+      if (isNaN(a) || isNaN(b) || isNaN(d) || b <= 1) return;
+
+      const criticalExponent = Math.log(a) / Math.log(b);
+      const diff = criticalExponent - d;
+      let resultCase = '';
+      let compLatex = '';
+      let explainer = '';
+
+      if (Math.abs(diff) < 0.001) {
+        resultCase = `Fall 2: $a = b^d \\implies ${a} = ${b}^${d}$`;
+        compLatex = d === 0 ? `\\mathcal{O}(\\log n)` : d === 1 ? `\\mathcal{O}(n \\log n)` : `\\mathcal{O}(n^{${d}} \\log n)`;
+        explainer = 'Gleichmäßige Verteilung des Aufwands über alle Rekursionsebenen (z. B. MergeSort).';
+      } else if (diff > 0) {
+        resultCase = `Fall 1: $a > b^d \\implies ${a} > ${b}^${d}$`;
+        const critFormatted = Number.isInteger(criticalExponent) ? criticalExponent : criticalExponent.toFixed(2);
+        compLatex = `\\mathcal{O}(n^{\\log_{${b}} ${a}}) \\approx \\mathcal{O}(n^{${critFormatted}})`;
+        explainer = 'Aufwand wird von den Blättern des Rekursionsbaums dominiert.';
+      } else {
+        resultCase = `Fall 3: $a < b^d \\implies ${a} < ${b}^${d}$`;
+        compLatex = `\\mathcal{O}(n^{${d}})`;
+        explainer = 'Aufwand wird von der Wurzel (Divide/Combine-Schritt) dominiert.';
+      }
+
+      document.getElementById('mt-result-case').innerText = resultCase;
+      document.getElementById('mt-complexity').innerText = compLatex;
+      document.getElementById('mt-explainer').innerText = explainer;
+      if (window.katex) {
+        katex.render(compLatex, document.getElementById('mt-complexity'), { throwOnError: false });
+      }
+    }
+
+    /* ==========================================================================
+       4. KLAUSUR QUIZ
+       ========================================================================== */
+    const QUIZ_QUESTIONS = [
+      {
+        q: "Welche Worst-Case-Laufzeit hat das Einfügen eines Elements in einen AVL-Baum mit n Elementen?",
+        options: ["O(1)", "O(log n)", "O(n)", "O(n log n)"],
+        correct: 1,
+        exp: "Da die Höhe eines AVL-Baums durch h <= 1.44 log2(n) beschränkt ist und maximal 2 Rotationen nötig sind, liegt die Worst-Case-Laufzeit in O(log n)."
+      },
+      {
+        q: "Welcher Algorithmus findet auf Graphen mit negativen Kantengewichten kürzeste Pfade (oder erkennt negative Zyklen)?",
+        options: ["Dijkstra-Algorithmus", "Breitensuche (BFS)", "Bellman-Ford-Algorithmus", "Kruskal-Algorithmus"],
+        correct: 2,
+        exp: "Dijkstra setzt nicht-negative Kantengewichte voraus. Für negative Kanten wird der Bellman-Ford-Algorithmus (O(V * E)) verwendet."
+      },
+      {
+        q: "Welche Komplexitätsklasse ergibt sich nach dem Master-Theorem für T(n) = 4 T(n/2) + O(n)?",
+        options: ["O(n log n)", "O(n)", "O(n^2)", "O(n^3)"],
+        correct: 2,
+        exp: "a = 4, b = 2, d = 1. Da log_b(a) = log_2(4) = 2 > d, greift Fall 1: O(n^(log_b a)) = O(n^2)."
+      },
+      {
+        q: "Welche Eigenschaft zeichnet einen stabilen Sortieralgorithmus aus?",
+        options: [
+          "Er benötigt immer O(1) Zusatzspeicher.",
+          "Die relative Reihenfolge von Elementen mit gleichem Schlüssel bleibt erhalten.",
+          "Er hat im Worst-Case die gleiche Laufzeit wie im Best-Case.",
+          "Er funktioniert nur auf Arrays, nicht auf Listen."
+        ],
+        correct: 1,
+        exp: "Stabilität bedeutet, dass Duplikate in ihrer ursprünglichen Reihenfolge verbleiben (z. B. MergeSort)."
+      },
+      {
+        q: "Wie lautet die maximale Anzahl von Knoten in einem Binärbaum der Höhe h (Wurzel hat Höhe 0)?",
+        options: ["2^h", "2^(h+1) - 1", "2^h - 1", "h^2"],
+        correct: 1,
+        exp: "Ein vollständiger Binärbaum der Höhe h besitzt sum_{i=0}^h 2^i = 2^(h+1) - 1 Knoten."
+      }
+    ];
+
+    let currentQIdx = 0;
+    let quizScore = 0;
+
+    function renderAuDQuestion() {
+      const q = QUIZ_QUESTIONS[currentQIdx];
+      document.getElementById('quiz-q-num').innerText = `Frage ${currentQIdx + 1} von ${QUIZ_QUESTIONS.length}`;
+      document.getElementById('quiz-q-text').innerText = q.q;
+      const optContainer = document.getElementById('quiz-options');
+      optContainer.innerHTML = '';
+      document.getElementById('quiz-feedback').className = 'hidden';
+      document.getElementById('btn-quiz-next').className = 'hidden';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'p-3 rounded-lg bg-[#070919] hover:bg-indigo-950/60 border border-indigo-950 text-left text-slate-200 font-medium transition';
+        btn.innerText = opt;
+        btn.onclick = () => selectAuDAnswer(idx);
+        optContainer.appendChild(btn);
+      });
+    }
+
+    function selectAuDAnswer(idx) {
+      const q = QUIZ_QUESTIONS[currentQIdx];
+      const fb = document.getElementById('quiz-feedback');
+      const isCorrect = idx === q.correct;
+      if (isCorrect) quizScore++;
+
+      document.getElementById('quiz-score').innerText = `${quizScore} / ${QUIZ_QUESTIONS.length} Punkte`;
+      fb.className = `p-3.5 rounded-xl text-xs leading-relaxed ${isCorrect ? 'bg-emerald-950/70 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/70 border border-rose-500/30 text-rose-200'}`;
+      fb.innerHTML = `<b>${isCorrect ? 'Richtig!' : 'Leider falsch.'}</b> ${q.exp}`;
+      document.getElementById('btn-quiz-next').className = 'px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition';
+    }
+
+    function nextAuDQuestion() {
+      currentQIdx++;
+      if (currentQIdx < QUIZ_QUESTIONS.length) {
+        renderAuDQuestion();
+      } else {
+        document.getElementById('quiz-card').innerHTML = `
+          <div class="text-center p-8 space-y-3 bg-[#070919] rounded-xl border border-indigo-950">
+            <h3 class="text-xl font-bold text-white">Quiz abgeschlossen!</h3>
+            <p class="text-indigo-300 font-mono text-base">Ergebnis: ${quizScore} von ${QUIZ_QUESTIONS.length} Fragen richtig beantwortet.</p>
+            <button onclick="currentQIdx=0;quizScore=0;renderAuDQuestion()" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold transition">Nochmal versuchen</button>
+          </div>
+        `;
+      }
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      resetDijkstra();
+      loadAVLPreset('left_right');
+      resetSortVisualizer();
+      calculateMasterTheorem();
+      renderAuDQuestion();
+    });
+  </script>
+</body>
+</html>

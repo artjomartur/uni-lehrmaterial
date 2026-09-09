@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#060818] text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rechnerorganisation (RO) &amp; CPU-Simulator | Artjom Becker</title>
+  <meta name="description" content="Interaktive Werkzeuge für Rechnerorganisation: 5-Stufen RISC-V Pipeline, CPU Cache-Simulator, IEEE-754 Floating-Point Converter und Amdahl's Law nach TU Darmstadt Lehrplan.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Inter, Outfit, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- KaTeX for Architecture & Bit Formulations -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glass-panel {
+      background: rgba(11, 14, 38, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #060818; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #334155; }
+    .stage-if { background: rgba(59, 130, 246, 0.2); border-color: rgba(59, 130, 246, 0.5); color: #93c5fd; }
+    .stage-id { background: rgba(168, 85, 247, 0.2); border-color: rgba(168, 85, 247, 0.5); color: #d8b4fe; }
+    .stage-ex { background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.5); color: #fde68a; }
+    .stage-mem { background: rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.5); color: #6ee7b7; }
+    .stage-wb { background: rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.5); color: #fca5a5; }
+    .stage-stall { background: rgba(100, 116, 139, 0.2); border-color: rgba(100, 116, 139, 0.4); color: #94a3b8; }
+    .bit-btn { font-family: 'JetBrains Mono', monospace; transition: all 0.15s ease; }
+    .bit-1 { background: #4f46e5; color: #ffffff; border-color: #818cf8; }
+    .bit-0 { background: #0f172a; color: #64748b; border-color: #1e293b; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#060818] text-slate-100 antialiased custom-scrollbar">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-indigo-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="../" class="flex items-center space-x-2 text-indigo-400 hover:text-white transition group">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-mono font-bold text-sm text-indigo-300 group-hover:scale-105 transition">
+            AB
+          </div>
+          <span class="font-heading font-bold text-slate-200 tracking-tight">Lehrmaterial</span>
+        </a>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <a href="../" class="text-xs sm:text-sm font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>←</span> Alle Module
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Title & Navigation Tabs -->
+    <div class="space-y-4">
+      <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+        Rechnerorganisation &amp; <span class="text-indigo-400">Architektur Lab</span>
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+        Interaktiver 5-Stufen RISC-V Pipelining Simulator mit Hazard-Erkennung &amp; Forwarding, CPU Cache-Speicher Visualizer, IEEE-754 Bit-Rechner und Amdahl's Law Speedup-Kalkulator.
+      </p>
+
+      <!-- Main Section Tabs -->
+      <div class="flex flex-wrap gap-2 pt-2 border-b border-indigo-950 pb-3 font-medium text-xs">
+        <button onclick="switchROTab('pipeline')" id="tab-btn-pipeline" class="ro-tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold transition shadow">
+          ⚙️ 5-Stufen RISC-V Pipeline
+        </button>
+        <button onclick="switchROTab('cache')" id="tab-btn-cache" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#0b0e26] text-slate-300 hover:text-white border border-indigo-950 transition">
+          💾 CPU-Cache Speicher Simulator
+        </button>
+        <button onclick="switchROTab('ieee')" id="tab-btn-ieee" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#0b0e26] text-slate-300 hover:text-white border border-indigo-950 transition">
+          🔢 IEEE-754 &amp; Bit-Converter
+        </button>
+        <button onclick="switchROTab('performance')" id="tab-btn-performance" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#0b0e26] text-slate-300 hover:text-white border border-indigo-950 transition">
+          🚀 Amdahl's Law &amp; Klausur-Quiz
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 1: 5-STUFEN RISC-V PIPELINE SIMULATOR            -->
+    <!-- ======================================================== -->
+    <section id="section-pipeline" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Instruction Schedule & Pipeline Grid -->
+        <div class="lg:col-span-8 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl flex flex-col justify-between">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-950 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>⚙️</span> RISC-V 5-Stufen Pipelining: IF | ID | EX | MEM | WB
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Takt-für-Takt Ausführung mit automatischer Hazard- &amp; Forwarding-Erkennung</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button onclick="resetPipeline()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">
+                Reset
+              </button>
+              <button onclick="stepPipeline()" id="btn-step-pipeline" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow-md shadow-indigo-600/30">
+                Takt weiter ($C_{idx}$) &rarr;
+              </button>
+            </div>
+          </div>
+
+          <!-- Presets Bar -->
+          <div class="flex flex-wrap gap-2 items-center text-xs">
+            <span class="text-slate-400 font-semibold">Klausur-Szenario:</span>
+            <button onclick="loadPipelinePreset('forwarding')" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-indigo-300 hover:bg-indigo-950/60 transition">
+              Data Hazard (mit Forwarding)
+            </button>
+            <button onclick="loadPipelinePreset('load_use')" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-amber-300 hover:bg-indigo-950/60 transition">
+              Load-Use Hazard (1 Stall / NOP)
+            </button>
+            <button onclick="loadPipelinePreset('branch')" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-rose-300 hover:bg-indigo-950/60 transition">
+              Branch Control Hazard (Flush)
+            </button>
+            <button onclick="loadPipelinePreset('ideal')" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-emerald-300 hover:bg-indigo-950/60 transition">
+              Ideale Pipeline ($CPI = 1.0$)
+            </button>
+          </div>
+
+          <!-- Pipelining Table Visualizer -->
+          <div class="overflow-x-auto custom-scrollbar bg-[#070919] rounded-xl border border-indigo-950 p-2 min-h-[260px]">
+            <table class="w-full text-xs text-center border-collapse font-mono" id="pipeline-table">
+              <!-- Dynamically populated -->
+            </table>
+          </div>
+
+          <!-- Pipeline Stage Legend -->
+          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center text-[11px] font-mono pt-2 border-t border-indigo-950">
+            <div class="p-1.5 rounded border stage-if"><b>IF</b>: Fetch</div>
+            <div class="p-1.5 rounded border stage-id"><b>ID</b>: Decode</div>
+            <div class="p-1.5 rounded border stage-ex"><b>EX</b>: ALU</div>
+            <div class="p-1.5 rounded border stage-mem"><b>MEM</b>: RAM</div>
+            <div class="p-1.5 rounded border stage-wb"><b>WB</b>: Write</div>
+            <div class="p-1.5 rounded border stage-stall"><b>STALL</b>: NOP</div>
+          </div>
+        </div>
+
+        <!-- Right: Register File & Hazard Diagnostics -->
+        <div class="lg:col-span-4 space-y-6">
+          
+          <!-- Diagnostics & Hazard Log -->
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between border-b border-indigo-950 pb-2">
+              <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Hazard-Analyse &amp; Takt-Log</h3>
+              <span id="pipeline-cycle-badge" class="font-mono text-xs text-indigo-400 font-bold">Takt: C0</span>
+            </div>
+            <div id="pipeline-log" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 text-xs leading-relaxed text-slate-300 space-y-2">
+              Klicke auf „Takt weiter“, um den ersten Befehl in die IF-Stufe zu laden.
+            </div>
+            <div id="forwarding-indicator" class="p-2.5 bg-indigo-950/40 rounded-lg border border-indigo-500/30 text-[11px] text-indigo-200 font-mono">
+              Forwarding Unit: Inaktiv
+            </div>
+          </div>
+
+          <!-- Register File Display (x0 - x7) -->
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+            <div class="text-xs font-bold text-slate-200 uppercase tracking-wider">Register File ($x_0 - x_7$)</div>
+            <div class="grid grid-cols-4 gap-2 font-mono text-xs" id="register-file-grid">
+              <!-- Dynamically populated -->
+            </div>
+            <p class="text-[10px] text-slate-500 italic">$x_0$ ist im RISC-V Standard hardwaremäßig fest mit 0 verdrahtet (Hardwired Zero).</p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 2: CPU-CACHE MEMORY SIMULATOR                     -->
+    <!-- ======================================================== -->
+    <section id="section-cache" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Cache Configuration & Address Breakdown -->
+        <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
+          <div class="border-b border-indigo-950 pb-3">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>💾</span> Cache-Architektur &amp; Adress-Dekodierung
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Aufteilung einer 32-Bit Speicheradresse in Tag, Set-Index und Byte-Offset</p>
+          </div>
+
+          <!-- Cache Parameters Form -->
+          <div class="grid grid-cols-3 gap-3 text-xs">
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">Cache-Kapazität</label>
+              <select id="cache-size-select" onchange="updateCacheParams()" class="w-full bg-[#070919] border border-indigo-900 rounded-lg p-2 text-white outline-none font-mono">
+                <option value="64">64 Bytes</option>
+                <option value="128" selected>128 Bytes</option>
+                <option value="256">256 Bytes</option>
+                <option value="512">512 Bytes</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">Block-Größe</label>
+              <select id="block-size-select" onchange="updateCacheParams()" class="w-full bg-[#070919] border border-indigo-900 rounded-lg p-2 text-white outline-none font-mono">
+                <option value="8">8 Bytes</option>
+                <option value="16" selected>16 Bytes</option>
+                <option value="32">32 Bytes</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-slate-400 text-[11px] mb-1">Assoziativität</label>
+              <select id="assoc-select" onchange="updateCacheParams()" class="w-full bg-[#070919] border border-indigo-900 rounded-lg p-2 text-white outline-none font-mono">
+                <option value="1">Direct Mapped (1-Way)</option>
+                <option value="2" selected>2-Way Set-Associative</option>
+                <option value="4">4-Way Set-Associative</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Bit Breakdown Visual Box -->
+          <div class="bg-[#070919] rounded-xl border border-indigo-950 p-4 space-y-3">
+            <div class="text-xs font-bold text-slate-300 uppercase tracking-wider">32-Bit Adressaufteilung:</div>
+            <div class="grid grid-cols-12 gap-1 font-mono text-xs text-center">
+              <div class="col-span-7 p-2 rounded bg-indigo-950/80 border border-indigo-500/30 text-indigo-300">
+                <span class="block text-[10px] text-slate-400">Tag Bits</span>
+                <span id="bit-tag-count" class="font-bold text-sm">25 Bits</span>
+              </div>
+              <div class="col-span-3 p-2 rounded bg-amber-950/60 border border-amber-500/30 text-amber-300">
+                <span class="block text-[10px] text-slate-400">Set Index</span>
+                <span id="bit-index-count" class="font-bold text-sm">3 Bits (8 Sets)</span>
+              </div>
+              <div class="col-span-2 p-2 rounded bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
+                <span class="block text-[10px] text-slate-400">Offset</span>
+                <span id="bit-offset-count" class="font-bold text-sm">4 Bits</span>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-400 space-y-1 font-mono pt-1">
+              <div>&bull; $\text{Offset Bits} = \log_2(\text{BlockSize}) = \log_2(16) = 4$</div>
+              <div>&bull; $\text{Sets} = \frac{\text{CacheSize}}{\text{BlockSize} \times \text{Assoziativität}} = \frac{128}{16 \times 2} = 4 \implies 2\text{ Bits}$</div>
+              <div>&bull; $\text{Tag Bits} = 32 - (\text{Index} + \text{Offset}) = 32 - 6 = 26\text{ Bits}$</div>
+            </div>
+          </div>
+
+          <!-- Memory Access Trigger -->
+          <div class="space-y-3 pt-2">
+            <label class="block text-xs font-semibold text-slate-300">Speicheradresse anfragen (Hex oder Dezimal):</label>
+            <div class="flex gap-2">
+              <input type="text" id="cache-addr-input" value="0x1A4" placeholder="z.B. 0x1A4 oder 420" class="flex-1 bg-[#070919] border border-indigo-900 rounded-lg px-3 py-2 text-xs text-white outline-none font-mono">
+              <button onclick="accessCache()" class="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow">
+                Zugriff ausführen
+              </button>
+            </div>
+            <!-- Preset Address Sequences -->
+            <div class="flex flex-wrap gap-1.5 items-center text-[11px]">
+              <span class="text-slate-500">Muster:</span>
+              <button onclick="runAccessSequence(['0x10', '0x14', '0x18', '0x10'])" class="px-2 py-1 rounded bg-[#070919] border border-indigo-950 text-indigo-300 hover:text-white transition">
+                Räumliche Lokalität (Hits)
+              </button>
+              <button onclick="runAccessSequence(['0x00', '0x80', '0x100', '0x00'])" class="px-2 py-1 rounded bg-[#070919] border border-indigo-950 text-amber-300 hover:text-white transition">
+                Konflikt-Misses (Thrashing)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Live Cache Sets & Hit/Miss Stats -->
+        <div class="lg:col-span-6 space-y-6">
+          
+          <!-- Hit / Miss Statistics -->
+          <div class="grid grid-cols-4 gap-3 font-mono text-center text-xs">
+            <div class="bg-[#0b0e26] border border-indigo-950 p-3 rounded-xl">
+              <span class="text-slate-400 block text-[10px]">Zugriffe</span>
+              <span id="stat-cache-accesses" class="font-bold text-sm text-white">0</span>
+            </div>
+            <div class="bg-[#0b0e26] border border-indigo-950 p-3 rounded-xl">
+              <span class="text-slate-400 block text-[10px]">Hits</span>
+              <span id="stat-cache-hits" class="font-bold text-sm text-emerald-400">0</span>
+            </div>
+            <div class="bg-[#0b0e26] border border-indigo-950 p-3 rounded-xl">
+              <span class="text-slate-400 block text-[10px]">Misses</span>
+              <span id="stat-cache-misses" class="font-bold text-sm text-rose-400">0</span>
+            </div>
+            <div class="bg-[#0b0e26] border border-indigo-950 p-3 rounded-xl">
+              <span class="text-slate-400 block text-[10px]">Hit-Rate</span>
+              <span id="stat-cache-hitrate" class="font-bold text-sm text-indigo-300">0%</span>
+            </div>
+          </div>
+
+          <!-- Cache Lines Table View -->
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between border-b border-indigo-950 pb-2">
+              <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Cache-Inhalt (Sets &amp; Ways)</h3>
+              <button onclick="resetCacheState()" class="text-[11px] text-slate-400 hover:text-white underline">Cache leeren</button>
+            </div>
+            <div class="overflow-x-auto custom-scrollbar max-h-72">
+              <table class="w-full text-xs text-left font-mono" id="cache-table">
+                <!-- Dynamically populated -->
+              </table>
+            </div>
+            <div id="cache-access-log" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 text-xs text-slate-300">
+              Noch kein Speicherzugriff erfolgt.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 3: IEEE-754 & BIT CONVERTER                      -->
+    <!-- ======================================================== -->
+    <section id="section-ieee" class="space-y-6 hidden">
+      <div class="max-w-4xl mx-auto space-y-6">
+        
+        <!-- IEEE 754 32-Bit Single Precision Visualizer -->
+        <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-950 pb-3">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🔢</span> IEEE-754 Gleitkommazahlen (32-Bit Single Precision)
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Formel: $(-1)^s \times (1.\text{Mantisse})_2 \times 2^{e - 127}$</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <input type="number" step="any" id="float-decimal-input" value="13.375" placeholder="Dezimalzahl (z.B. -12.75)" class="w-44 bg-[#070919] border border-indigo-900 rounded-lg px-3 py-1.5 text-xs text-white outline-none font-mono">
+              <button onclick="convertDecimalToIEEE()" class="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow">
+                In IEEE-754 wandeln
+              </button>
+            </div>
+          </div>
+
+          <!-- Preset floats -->
+          <div class="flex flex-wrap gap-2 items-center text-xs">
+            <span class="text-slate-400 font-semibold">Sonderfälle:</span>
+            <button onclick="loadFloatPreset(0)" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-indigo-300 hover:text-white transition">0.0</button>
+            <button onclick="loadFloatPreset(-1.0)" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-indigo-300 hover:text-white transition">-1.0</button>
+            <button onclick="loadFloatPreset(13.375)" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-indigo-300 hover:text-white transition">13.375 ($1101.011_2$)</button>
+            <button onclick="loadFloatPreset(Infinity)" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-rose-300 hover:text-white transition">+Infinity</button>
+            <button onclick="loadFloatPreset(NaN)" class="px-2.5 py-1 rounded bg-[#070919] border border-indigo-950 text-amber-300 hover:text-white transition">NaN (Not a Number)</button>
+          </div>
+
+          <!-- Interactive 32-Bit Row -->
+          <div class="space-y-3 bg-[#070919] p-4 rounded-xl border border-indigo-950">
+            <div class="text-xs font-bold text-slate-300">Klicke auf beliebige Bits, um sie zu kippen (0 &harr; 1):</div>
+            
+            <!-- Bit Buttons Container -->
+            <div class="flex flex-wrap gap-1 items-center justify-between" id="ieee-bits-row">
+              <!-- Dynamically populated 32 bits -->
+            </div>
+
+            <!-- Bit Field Labels -->
+            <div class="grid grid-cols-32 gap-1 text-[10px] font-mono text-center pt-2 border-t border-indigo-950">
+              <div class="flex items-center gap-4 text-xs">
+                <span class="text-rose-400 font-bold">Bit 31: Vorzeichen $s$</span>
+                <span class="text-amber-400 font-bold">Bits 30-23: Exponent $e$ (8 Bits, Bias 127)</span>
+                <span class="text-sky-400 font-bold">Bits 22-0: Mantisse $f$ (23 Bits)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mathematical Reconstruction Box -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+            <div class="bg-[#070919] p-3.5 rounded-xl border border-indigo-950 space-y-1">
+              <span class="text-slate-400 block text-[10px]">Vorzeichenfaktor $(-1)^s$</span>
+              <span id="ieee-sign-calc" class="font-bold text-rose-300 text-sm">(-1)^0 = +1</span>
+            </div>
+            <div class="bg-[#070919] p-3.5 rounded-xl border border-indigo-950 space-y-1">
+              <span class="text-slate-400 block text-[10px]">Echter Exponent $2^{e - 127}$</span>
+              <span id="ieee-exp-calc" class="font-bold text-amber-300 text-sm">2^(130 - 127) = 2^3</span>
+            </div>
+            <div class="bg-[#070919] p-3.5 rounded-xl border border-indigo-950 space-y-1">
+              <span class="text-slate-400 block text-[10px]">Reeller Dezimalwert</span>
+              <span id="ieee-dec-result" class="font-bold text-emerald-400 text-sm">13.375</span>
+            </div>
+          </div>
+
+          <!-- Hex Representation -->
+          <div class="flex justify-between items-center text-xs font-mono bg-[#070919] p-3 rounded-xl border border-indigo-950">
+            <span class="text-slate-400">Hexadezimale Codierung (32-Bit):</span>
+            <span id="ieee-hex-result" class="text-indigo-300 font-bold text-sm">0x41560000</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 4: AMDAHL'S LAW & KLAUSUR-QUIZ                   -->
+    <!-- ======================================================== -->
+    <section id="section-performance" class="space-y-6 hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left: Amdahl's Law Speedup Calculator -->
+        <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
+          <div class="border-b border-indigo-950 pb-3">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>🚀</span> Amdahl'sches Gesetz (Speedup-Rechner)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Maximal erreichbare Beschleunigung durch Parallelisierung</p>
+          </div>
+
+          <div class="p-3 bg-[#070919] rounded-xl border border-indigo-950 font-mono text-xs text-indigo-300 text-center">
+            $\text{Speedup } S(p) = \frac{1}{(1 - f) + \frac{f}{p}}$
+          </div>
+
+          <div class="space-y-4 text-xs font-mono">
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <span>Parallelisierbarer Anteil $f$:</span>
+                <span id="amdahl-f-val" class="font-bold text-indigo-400">80% ($f = 0.80$)</span>
+              </div>
+              <input type="range" id="amdahl-f" min="0" max="1" step="0.05" value="0.8" oninput="calcAmdahl()" class="w-full accent-indigo-600">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-slate-300 mb-1">
+                <span>Anzahl Prozessorkerne $p$:</span>
+                <span id="amdahl-p-val" class="font-bold text-emerald-400">8 Kerne</span>
+              </div>
+              <input type="range" id="amdahl-p" min="1" max="64" step="1" value="8" oninput="calcAmdahl()" class="w-full accent-emerald-500">
+            </div>
+          </div>
+
+          <!-- Amdahl Results -->
+          <div class="grid grid-cols-2 gap-3 font-mono text-center text-xs">
+            <div class="bg-[#070919] p-3 rounded-xl border border-indigo-950">
+              <span class="text-slate-400 block text-[10px]">Speedup mit $p$ Kernen</span>
+              <span id="amdahl-speedup-result" class="font-bold text-emerald-400 text-lg">3.33x</span>
+            </div>
+            <div class="bg-[#070919] p-3 rounded-xl border border-indigo-950">
+              <span class="text-slate-400 block text-[10px]">Max. Speedup ($p \to \infty$)</span>
+              <span id="amdahl-max-speedup" class="font-bold text-amber-400 text-lg">5.00x</span>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Selbst mit unendlich vielen Prozessoren kann die Gesamtlaufzeit wegen des sequentiellen Rests ($1-f = 20\%$) maximal um den Faktor $1 / 0.20 = 5$ beschleunigt werden.
+          </p>
+        </div>
+
+        <!-- Right: RO Klausur-Quiz -->
+        <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-6 shadow-xl">
+          <div class="flex items-center justify-between border-b border-indigo-950 pb-4">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🎯</span> Rechnerorganisation Klausur-Quiz
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Pipelining, Cache-Misses und Gleitkommazahlen</p>
+            </div>
+            <span id="ro-quiz-score" class="font-mono text-xs font-bold text-indigo-400">0 / 5 Punkte</span>
+          </div>
+
+          <div id="ro-quiz-card" class="space-y-4">
+            <div class="bg-[#070919] p-4 rounded-xl border border-indigo-950 space-y-2">
+              <span class="text-[10px] font-mono uppercase tracking-wider text-indigo-400 font-bold" id="ro-quiz-q-num">Frage 1 von 5</span>
+              <p id="ro-quiz-q-text" class="text-sm font-semibold text-white leading-relaxed">
+                Warum benötigt ein Load-Use Hazard in einer klassischen 5-Stufen RISC-V Pipeline trotz Forwarding einen Stall (1 NOP)?
+              </p>
+            </div>
+
+            <div id="ro-quiz-options" class="grid grid-cols-1 gap-2 text-xs">
+              <!-- Dynamically populated -->
+            </div>
+
+            <div id="ro-quiz-feedback" class="hidden p-3 rounded-xl text-xs font-medium"></div>
+
+            <div class="flex justify-end pt-2">
+              <button onclick="nextROQuestion()" id="btn-ro-quiz-next" class="hidden px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition">
+                Nächste Frage &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-[#04060e] border-t border-indigo-950/80 text-center py-6 text-xs text-slate-500 space-y-2 mt-12">
+    <div>Rechnerorganisation &amp; Architektur Lab • Lehrmaterial Suite von Artjom Becker • TU Darmstadt</div>
+    <div class="flex justify-center gap-4 text-indigo-400 text-[11px]">
+      <a href="../" class="hover:underline">Alle Fachbereiche</a>
+      <span>•</span>
+      <a href="../relationale-algebra/" class="hover:underline">Relationale Algebra</a>
+      <span>•</span>
+      <a href="../algorithmen-datenstrukturen/" class="hover:underline">Algorithmen &amp; Datenstrukturen</a>
+      <span>•</span>
+      <a href="/" class="hover:underline">Portfolio</a>
+    </div>
+  </footer>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    /* ==========================================================================
+       TAB SWITCHING
+       ========================================================================== */
+    function switchROTab(tabId) {
+      const tabs = ['pipeline', 'cache', 'ieee', 'performance'];
+      tabs.forEach(t => {
+        const sec = document.getElementById('section-' + t);
+        const btn = document.getElementById('tab-btn-' + t);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+        if (btn) {
+          if (t === tabId) {
+            btn.className = 'ro-tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold transition shadow';
+          } else {
+            btn.className = 'ro-tab-btn px-4 py-2 rounded-lg bg-[#0b0e26] text-slate-300 hover:text-white border border-indigo-950 transition';
+          }
+        }
+      });
+      if (tabId === 'pipeline') renderPipelineTable();
+      if (tabId === 'cache') updateCacheParams();
+      if (tabId === 'ieee') renderIEEEBits();
+      if (tabId === 'performance') calcAmdahl();
+    }
+
+    /* ==========================================================================
+       1. 5-STAGE RISC-V PIPELINE SIMULATOR
+       ========================================================================== */
+    const PIPELINE_PRESETS = {
+      forwarding: {
+        title: "Data Hazard mit Forwarding (kein Stall)",
+        instructions: [
+          { asm: "ADD x1, x2, x3", rD: "x1", rS1: "x2", rS2: "x3" },
+          { asm: "SUB x4, x1, x5", rD: "x4", rS1: "x1", rS2: "x5" },
+          { asm: "AND x6, x1, x7", rD: "x6", rS1: "x1", rS2: "x7" }
+        ]
+      },
+      load_use: {
+        title: "Load-Use Hazard (1 Stall / NOP nötig)",
+        instructions: [
+          { asm: "LW x1, 0(x2)", rD: "x1", rS1: "x2", isLoad: true },
+          { asm: "ADD x3, x1, x4", rD: "x3", rS1: "x1", rS2: "x4" },
+          { asm: "OR x5, x3, x6", rD: "x5", rS1: "x3", rS2: "x6" }
+        ]
+      },
+      branch: {
+        title: "Branch Control Hazard (Branch Taken & Flush)",
+        instructions: [
+          { asm: "BEQ x1, x2, target", isBranch: true },
+          { asm: "ADD x3, x4, x5", rD: "x3", isFlushed: true },
+          { asm: "SUB x6, x7, x8", rD: "x6", isTarget: true }
+        ]
+      },
+      ideal: {
+        title: "Ideale Pipeline (keine Abhängigkeiten, CPI = 1.0)",
+        instructions: [
+          { asm: "ADD x1, x2, x3", rD: "x1", rS1: "x2", rS2: "x3" },
+          { asm: "SUB x4, x5, x6", rD: "x4", rS1: "x5", rS2: "x6" },
+          { asm: "ORI x7, x0, 10", rD: "x7", rS1: "x0" }
+        ]
+      }
+    };
+
+    let currentPreset = 'forwarding';
+    let currentCycle = 0;
+    const MAX_CYCLES = 8;
+    let registers = { x0: 0, x1: 5, x2: 10, x3: 15, x4: 0, x5: 3, x6: 0, x7: 7 };
+
+    function loadPipelinePreset(key) {
+      currentPreset = key;
+      resetPipeline();
+    }
+
+    function resetPipeline() {
+      currentCycle = 0;
+      registers = { x0: 0, x1: 5, x2: 10, x3: 15, x4: 0, x5: 3, x6: 0, x7: 7 };
+      document.getElementById('pipeline-cycle-badge').innerText = 'Takt: C0';
+      document.getElementById('pipeline-log').innerHTML = `Preset „${PIPELINE_PRESETS[currentPreset].title}“ geladen. Klicke auf „Takt weiter“, um die Simulation zu starten.`;
+      document.getElementById('forwarding-indicator').innerText = 'Forwarding Unit: Bereit';
+      renderRegisterFile();
+      renderPipelineTable();
+    }
+
+    function stepPipeline() {
+      if (currentCycle >= MAX_CYCLES) return;
+      currentCycle++;
+      document.getElementById('pipeline-cycle-badge').innerText = `Takt: C${currentCycle}`;
+
+      let log = `<b>Takt C${currentCycle}:</b><br>`;
+      let fwd = 'Forwarding Unit: Inaktiv';
+
+      if (currentPreset === 'forwarding') {
+        if (currentCycle === 3) {
+          log += `&bull; Befehl 1 (ADD) ist in <b>EX</b>-Stufe.<br>&bull; Befehl 2 (SUB) ist in <b>ID</b>-Stufe (braucht x1).`;
+        } else if (currentCycle === 4) {
+          log += `&bull; <b>Data Hazard erkannt!</b> Befehl 2 (SUB in EX) benötigt x1 aus Befehl 1 (in MEM).<br>&bull; <b>EX/MEM &rarr; EX Forwarding</b> leitet Zwischenergebnis direkt an die ALU weiter. <i>Kein Stall nötig!</i>`;
+          fwd = 'Forwarding aktiv: EX/MEM &rarr; EX (x1)';
+        } else if (currentCycle === 5) {
+          log += `&bull; <b>MEM/WB &rarr; EX Forwarding</b> versorgt Befehl 3 (AND in EX) mit x1.<br>&bull; Befehl 1 schreibt x1 in WB-Stufe ins Register File.`;
+          fwd = 'Forwarding aktiv: MEM/WB &rarr; EX (x1)';
+          registers.x1 = 25;
+        }
+      } else if (currentPreset === 'load_use') {
+        if (currentCycle === 3) {
+          log += `&bull; <b>Load-Use Hazard erkannt!</b> Daten aus LW stehen erst nach MEM-Stufe (Takt 4) bereit.<br>&bull; <b>Hardware-Stall</b>: 1 Takt NOP eingefügt.`;
+          fwd = 'Hazard Unit: 1 Stall (NOP) inserted';
+        } else if (currentCycle === 5) {
+          log += `&bull; Daten aus LW wurden aus Speicher gelesen und per <b>MEM/WB &rarr; EX Forwarding</b> an ADD übergeben.`;
+          fwd = 'Forwarding aktiv: MEM/WB &rarr; EX (x1)';
+        }
+      } else if (currentPreset === 'branch') {
+        if (currentCycle === 3) {
+          log += `&bull; Branch-Entscheidung in ID/EX: Sprung wird <b>genommen (Taken)</b>.<br>&bull; Nachfolgender Befehl (ADD) in IF wird <b>verworfen (Pipeline Flush)</b>.`;
+        }
+      } else {
+        log += `&bull; Alle Instruktionen laufen ohne Verzögerung durch die 5 Stufen.`;
+      }
+
+      document.getElementById('pipeline-log').innerHTML = log;
+      document.getElementById('forwarding-indicator').innerText = fwd;
+      renderRegisterFile();
+      renderPipelineTable();
+    }
+
+    function renderRegisterFile() {
+      const grid = document.getElementById('register-file-grid');
+      grid.innerHTML = '';
+      Object.keys(registers).forEach(reg => {
+        grid.innerHTML += `
+          <div class="bg-[#070919] p-2 rounded border border-indigo-950 flex justify-between">
+            <span class="text-slate-400">${reg}</span>
+            <span class="text-indigo-300 font-bold">${registers[reg]}</span>
+          </div>
+        `;
+      });
+    }
+
+    function renderPipelineTable() {
+      const table = document.getElementById('pipeline-table');
+      const instrs = PIPELINE_PRESETS[currentPreset].instructions;
+      
+      let html = `
+        <thead>
+          <tr class="bg-indigo-950/40 text-indigo-300">
+            <th class="p-2 text-left border-b border-indigo-900/40 w-44">Befehl</th>
+      `;
+      for (let c = 1; c <= MAX_CYCLES; c++) {
+        const isCur = c === currentCycle;
+        html += `<th class="p-2 border-b border-indigo-900/40 ${isCur ? 'bg-indigo-600/30 text-white font-bold' : ''}">C${c}</th>`;
+      }
+      html += `</tr></thead><tbody class="divide-y divide-indigo-950/60 text-slate-300">`;
+
+      const stages = ['IF', 'ID', 'EX', 'MEM', 'WB'];
+
+      instrs.forEach((inst, iIdx) => {
+        html += `<tr><td class="p-2 text-left font-bold text-slate-200">${inst.asm}</td>`;
+        
+        let startCycle = iIdx + 1;
+        if (currentPreset === 'load_use' && iIdx >= 1) startCycle += 1; // 1 Stall
+        if (currentPreset === 'branch' && iIdx === 1) startCycle = 2;
+
+        for (let c = 1; c <= MAX_CYCLES; c++) {
+          const stageIdx = c - startCycle;
+          let cellContent = '-';
+          let cellClass = 'text-slate-600';
+
+          if (c <= currentCycle && stageIdx >= 0 && stageIdx < stages.length) {
+            if (currentPreset === 'branch' && inst.isFlushed && stageIdx >= 1) {
+              cellContent = 'FLUSH';
+              cellClass = 'stage-stall font-bold';
+            } else {
+              const st = stages[stageIdx];
+              cellContent = st;
+              cellClass = st === 'IF' ? 'stage-if font-bold' : st === 'ID' ? 'stage-id font-bold' : st === 'EX' ? 'stage-ex font-bold' : st === 'MEM' ? 'stage-mem font-bold' : 'stage-wb font-bold';
+            }
+          }
+
+          if (currentPreset === 'load_use' && iIdx === 1 && c === 3 && c <= currentCycle) {
+            // Stall block
+            cellContent = 'STALL';
+            cellClass = 'stage-stall font-bold';
+          }
+
+          html += `<td class="p-2 ${cellClass}">${cellContent}</td>`;
+        }
+        html += `</tr>`;
+      });
+
+      html += `</tbody>`;
+      table.innerHTML = html;
+    }
+
+    /* ==========================================================================
+       2. CPU-CACHE MEMORY SIMULATOR
+       ========================================================================== */
+    let cacheConfig = { size: 128, block: 16, assoc: 2 };
+    let cacheStats = { accesses: 0, hits: 0, misses: 0 };
+    let cacheSets = [];
+
+    function updateCacheParams() {
+      cacheConfig.size = parseInt(document.getElementById('cache-size-select').value);
+      cacheConfig.block = parseInt(document.getElementById('block-size-select').value);
+      cacheConfig.assoc = parseInt(document.getElementById('assoc-select').value);
+
+      const offsetBits = Math.log2(cacheConfig.block);
+      const numSets = cacheConfig.size / (cacheConfig.block * cacheConfig.assoc);
+      const indexBits = Math.log2(numSets);
+      const tagBits = 32 - (indexBits + offsetBits);
+
+      document.getElementById('bit-offset-count').innerText = `${offsetBits} Bits`;
+      document.getElementById('bit-index-count').innerText = `${indexBits} Bits (${numSets} Sets)`;
+      document.getElementById('bit-tag-count').innerText = `${tagBits} Bits`;
+
+      resetCacheState();
+    }
+
+    function resetCacheState() {
+      cacheStats = { accesses: 0, hits: 0, misses: 0 };
+      const numSets = cacheConfig.size / (cacheConfig.block * cacheConfig.assoc);
+      cacheSets = [];
+      for (let s = 0; s < numSets; s++) {
+        const ways = [];
+        for (let w = 0; w < cacheConfig.assoc; w++) {
+          ways.push({ valid: false, tag: null, lru: 0 });
+        }
+        cacheSets.push(ways);
+      }
+      updateCacheStatsUI();
+      renderCacheTable();
+      document.getElementById('cache-access-log').innerHTML = 'Cache initialisiert.';
+    }
+
+    function accessCache(customAddr = null) {
+      const input = document.getElementById('cache-addr-input');
+      let rawVal = customAddr !== null ? customAddr : input.value.trim();
+      let addr = 0;
+      if (rawVal.startsWith('0x') || rawVal.startsWith('0X')) {
+        addr = parseInt(rawVal, 16);
+      } else {
+        addr = parseInt(rawVal, 10);
+      }
+      if (isNaN(addr)) return;
+
+      cacheStats.accesses++;
+
+      const offsetBits = Math.log2(cacheConfig.block);
+      const numSets = cacheConfig.size / (cacheConfig.block * cacheConfig.assoc);
+      const indexBits = Math.log2(numSets);
+
+      const offset = addr & ((1 << offsetBits) - 1);
+      const setIndex = (addr >> offsetBits) & ((1 << indexBits) - 1);
+      const tag = addr >> (offsetBits + indexBits);
+
+      const set = cacheSets[setIndex];
+      let hit = false;
+      let hitWay = -1;
+
+      for (let w = 0; w < set.length; w++) {
+        if (set[w].valid && set[w].tag === tag) {
+          hit = true;
+          hitWay = w;
+          set[w].lru = cacheStats.accesses;
+          break;
+        }
+      }
+
+      if (hit) {
+        cacheStats.hits++;
+        document.getElementById('cache-access-log').innerHTML = `
+          <b class="text-emerald-400">CACHE HIT!</b> Adresse <span class="font-mono text-indigo-300">0x${addr.toString(16).toUpperCase()}</span> in Set <b>${setIndex}</b>, Way <b>${hitWay}</b> gefunden (Tag: 0x${tag.toString(16).toUpperCase()}).
+        `;
+      } else {
+        cacheStats.misses++;
+        // Find victim (invalid line or min LRU)
+        let victimWay = 0;
+        let minLRU = Infinity;
+        for (let w = 0; w < set.length; w++) {
+          if (!set[w].valid) {
+            victimWay = w;
+            break;
+          }
+          if (set[w].lru < minLRU) {
+            minLRU = set[w].lru;
+            victimWay = w;
+          }
+        }
+        set[victimWay] = { valid: true, tag: tag, lru: cacheStats.accesses };
+        document.getElementById('cache-access-log').innerHTML = `
+          <b class="text-rose-400">CACHE MISS!</b> Adresse <span class="font-mono text-indigo-300">0x${addr.toString(16).toUpperCase()}</span> geladen in Set <b>${setIndex}</b>, Way <b>${victimWay}</b> (Tag: 0x${tag.toString(16).toUpperCase()}).
+        `;
+      }
+
+      updateCacheStatsUI();
+      renderCacheTable();
+    }
+
+    function runAccessSequence(seq) {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < seq.length) {
+          accessCache(seq[i]);
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 500);
+    }
+
+    function updateCacheStatsUI() {
+      document.getElementById('stat-cache-accesses').innerText = cacheStats.accesses;
+      document.getElementById('stat-cache-hits').innerText = cacheStats.hits;
+      document.getElementById('stat-cache-misses').innerText = cacheStats.misses;
+      const rate = cacheStats.accesses > 0 ? ((cacheStats.hits / cacheStats.accesses) * 100).toFixed(1) : '0';
+      document.getElementById('stat-cache-hitrate').innerText = `${rate}%`;
+    }
+
+    function renderCacheTable() {
+      const table = document.getElementById('cache-table');
+      let html = `
+        <thead>
+          <tr class="bg-indigo-950/40 text-indigo-300 text-[11px]">
+            <th class="p-2 border-b border-indigo-900/40">Set Index</th>
+      `;
+      for (let w = 0; w < cacheConfig.assoc; w++) {
+        html += `<th class="p-2 border-b border-indigo-900/40">Way ${w} (Valid | Tag | LRU)</th>`;
+      }
+      html += `</tr></thead><tbody class="divide-y divide-indigo-950/60 text-slate-300">`;
+
+      cacheSets.forEach((set, sIdx) => {
+        html += `<tr><td class="p-2 font-bold text-indigo-400">Set ${sIdx}</td>`;
+        set.forEach(way => {
+          if (way.valid) {
+            html += `<td class="p-2 text-emerald-300"><span class="text-emerald-400 font-bold">1</span> | 0x${way.tag.toString(16).toUpperCase()} | <span class="text-slate-400">${way.lru}</span></td>`;
+          } else {
+            html += `<td class="p-2 text-slate-600">0 | - | -</td>`;
+          }
+        });
+        html += `</tr>`;
+      });
+      html += `</tbody>`;
+      table.innerHTML = html;
+    }
+
+    /* ==========================================================================
+       3. IEEE-754 32-BIT FLOATING POINT LAB
+       ========================================================================== */
+    let ieeeBits = new Array(32).fill(0);
+
+    function renderIEEEBits() {
+      const container = document.getElementById('ieee-bits-row');
+      container.innerHTML = '';
+      for (let i = 31; i >= 0; i--) {
+        const val = ieeeBits[i];
+        const btn = document.createElement('button');
+        const isSign = i === 31;
+        const isExp = i >= 23 && i < 31;
+        
+        let colorClass = val === 1 
+          ? (isSign ? 'bg-rose-600 text-white' : isExp ? 'bg-amber-600 text-white' : 'bg-sky-600 text-white')
+          : 'bg-[#0b0e26] text-slate-500 border-indigo-950';
+
+        btn.className = `w-6 h-8 rounded text-xs font-bold border ${colorClass} transition hover:scale-105`;
+        btn.innerText = val;
+        btn.onclick = () => {
+          ieeeBits[i] = ieeeBits[i] === 1 ? 0 : 1;
+          recalculateIEEEFromBits();
+        };
+        container.appendChild(btn);
+      }
+      recalculateIEEEFromBits();
+    }
+
+    function recalculateIEEEFromBits() {
+      const sign = ieeeBits[31];
+      let exp = 0;
+      for (let i = 30; i >= 23; i--) {
+        exp = (exp << 1) | ieeeBits[i];
+      }
+      let mantissaVal = 0;
+      for (let i = 22; i >= 0; i--) {
+        if (ieeeBits[i] === 1) {
+          mantissaVal += Math.pow(2, i - 23);
+        }
+      }
+
+      // Convert to hex
+      let uint32 = 0;
+      for (let i = 31; i >= 0; i--) {
+        uint32 = (uint32 << 1) | ieeeBits[i];
+        if (i === 0) uint32 = uint32 >>> 0;
+      }
+      const hex = '0x' + (uint32 >>> 0).toString(16).toUpperCase().padStart(8, '0');
+      document.getElementById('ieee-hex-result').innerText = hex;
+
+      // Special cases
+      let dec = 0;
+      if (exp === 255) {
+        if (mantissaVal === 0) {
+          dec = sign === 1 ? -Infinity : Infinity;
+        } else {
+          dec = NaN;
+        }
+      } else if (exp === 0) {
+        if (mantissaVal === 0) {
+          dec = sign === 1 ? -0 : 0;
+        } else {
+          // Subnormal
+          dec = Math.pow(-1, sign) * mantissaVal * Math.pow(2, -126);
+        }
+      } else {
+        dec = Math.pow(-1, sign) * (1 + mantissaVal) * Math.pow(2, exp - 127);
+      }
+
+      document.getElementById('ieee-sign-calc').innerText = `(-1)^${sign} = ${sign === 1 ? '-1' : '+1'}`;
+      document.getElementById('ieee-exp-calc').innerText = exp === 255 ? 'Exp = 255 (Sonderfall)' : exp === 0 ? 'Exp = 0 (Subnormal)' : `2^(${exp} - 127) = 2^${exp - 127}`;
+      document.getElementById('ieee-dec-result').innerText = dec;
+    }
+
+    function convertDecimalToIEEE() {
+      const val = parseFloat(document.getElementById('float-decimal-input').value);
+      if (isNaN(val)) return;
+      loadFloatPreset(val);
+    }
+
+    function loadFloatPreset(val) {
+      const buf = new ArrayBuffer(4);
+      const f32 = new Float32Array(buf);
+      const u32 = new Uint32Array(buf);
+      f32[0] = val;
+      const bits = u32[0];
+
+      for (let i = 0; i < 32; i++) {
+        ieeeBits[i] = (bits >> i) & 1;
+      }
+      renderIEEEBits();
+    }
+
+    /* ==========================================================================
+       4. AMDAHL'S LAW & RO QUIZ
+       ========================================================================== */
+    function calcAmdahl() {
+      const f = parseFloat(document.getElementById('amdahl-f').value);
+      const p = parseInt(document.getElementById('amdahl-p').value);
+
+      document.getElementById('amdahl-f-val').innerText = `${Math.round(f * 100)}% (f = ${f.toFixed(2)})`;
+      document.getElementById('amdahl-p-val').innerText = `${p} Kerne`;
+
+      const speedup = 1 / ((1 - f) + (f / p));
+      const maxSpeedup = f === 1 ? Infinity : 1 / (1 - f);
+
+      document.getElementById('amdahl-speedup-result').innerText = `${speedup.toFixed(2)}x`;
+      document.getElementById('amdahl-max-speedup').innerText = maxSpeedup === Infinity ? '∞' : `${maxSpeedup.toFixed(2)}x`;
+    }
+
+    const RO_QUIZ_QUESTIONS = [
+      {
+        q: "Warum benötigt ein Load-Use Hazard in einer 5-Stufen RISC-V Pipeline trotz Forwarding einen Stall (1 NOP)?",
+        options: [
+          "Weil der Speicherzugriff erst in der MEM-Stufe abgeschlossen ist und die Daten erst für den darauffolgenden Takt bereitstehen.",
+          "Weil das Register File in der ID-Stufe nicht beschrieben werden darf.",
+          "Weil die ALU keinen Addierer für Speicheradressen besitzt.",
+          "Weil der Befehlszähler (PC) bei jedem Load angehalten werden muss."
+        ],
+        correct: 0,
+        exp: "Ein LW-Befehl liest die Daten erst in der MEM-Stufe aus. Ein direkt nachfolgender ALU-Befehl benötigt die Daten bereits am Anfang seiner EX-Stufe, was einen Zeitversatz von 1 Takt erfordert."
+      },
+      {
+        q: "Wie viele Sets besitzt ein 256-Byte Cache mit 16-Byte Blockgröße bei 4-facher Assoziativität (4-Way)?",
+        options: ["16 Sets", "4 Sets", "8 Sets", "32 Sets"],
+        correct: 1,
+        exp: "Anzahl Sets = Cache-Größe / (Blockgröße * Assoziativität) = 256 / (16 * 4) = 256 / 64 = 4 Sets."
+      },
+      {
+        q: "Wie wird die Zahl +Infinity im IEEE-754 32-Bit Gleitkommaformat codiert?",
+        options: [
+          "Vorzeichen 0, Exponent = 255 (alle 1), Mantisse = 0 (alle 0)",
+          "Vorzeichen 1, Exponent = 255, Mantisse = 0",
+          "Vorzeichen 0, Exponent = 0, Mantisse = alle 1",
+          "Vorzeichen 0, Exponent = 127, Mantisse = alle 1"
+        ],
+        correct: 0,
+        exp: "Infinity hat Exponent 255 (11111111_2) und Mantisse 0. Mit Vorzeichen 0 ist es +Infinity, mit Vorzeichen 1 ist es -Infinity."
+      },
+      {
+        q: "Ein Programm besteht zu 75% aus parallelisierbarem Code. Welcher maximale Speedup ist nach Amdahl's Law mit unendlich vielen Prozessoren theoretisch erreichbar?",
+        options: ["4x", "3x", "1.33x", "7.5x"],
+        correct: 0,
+        exp: "Max. Speedup = 1 / (1 - f) = 1 / (1 - 0.75) = 1 / 0.25 = 4.0x."
+      },
+      {
+        q: "Welche Funktion erfüllt das Register x0 in der RISC-V Architektur?",
+        options: [
+          "Es dient als Stack Pointer (SP).",
+          "Es speichert die Rücksprungadresse von Funktionsaufrufen (RA).",
+          "Es ist hardwaremäßig fest auf den Wert 0 verdrahtet (Hardwired Zero).",
+          "Es speichert das aktuelle Flag-Register der ALU."
+        ],
+        correct: 2,
+        exp: "In RISC-V liefert x0 beim Lesen immer 0 und Schreibzugriffe auf x0 werden ignoriert. Dadurch werden Pseudoinstruktionen wie NOP (ADDI x0, x0, 0) oder MV elegant realisiert."
+      }
+    ];
+
+    let currentROQIdx = 0;
+    let roQuizScore = 0;
+
+    function renderROQuestion() {
+      const q = RO_QUIZ_QUESTIONS[currentROQIdx];
+      document.getElementById('ro-quiz-q-num').innerText = `Frage ${currentROQIdx + 1} von ${RO_QUIZ_QUESTIONS.length}`;
+      document.getElementById('ro-quiz-q-text').innerText = q.q;
+      const optContainer = document.getElementById('ro-quiz-options');
+      optContainer.innerHTML = '';
+      document.getElementById('ro-quiz-feedback').className = 'hidden';
+      document.getElementById('btn-ro-quiz-next').className = 'hidden';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'p-3 rounded-lg bg-[#070919] hover:bg-indigo-950/60 border border-indigo-950 text-left text-slate-200 font-medium transition';
+        btn.innerText = opt;
+        btn.onclick = () => selectROAnswer(idx);
+        optContainer.appendChild(btn);
+      });
+    }
+
+    function selectROAnswer(idx) {
+      const q = RO_QUIZ_QUESTIONS[currentROQIdx];
+      const fb = document.getElementById('ro-quiz-feedback');
+      const isCorrect = idx === q.correct;
+      if (isCorrect) roQuizScore++;
+
+      document.getElementById('ro-quiz-score').innerText = `${roQuizScore} / ${RO_QUIZ_QUESTIONS.length} Punkte`;
+      fb.className = `p-3.5 rounded-xl text-xs leading-relaxed ${isCorrect ? 'bg-emerald-950/70 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/70 border border-rose-500/30 text-rose-200'}`;
+      fb.innerHTML = `<b>${isCorrect ? 'Richtig!' : 'Leider falsch.'}</b> ${q.exp}`;
+      document.getElementById('btn-ro-quiz-next').className = 'px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition';
+    }
+
+    function nextROQuestion() {
+      currentROQIdx++;
+      if (currentROQIdx < RO_QUIZ_QUESTIONS.length) {
+        renderROQuestion();
+      } else {
+        document.getElementById('ro-quiz-card').innerHTML = `
+          <div class="text-center p-8 space-y-3 bg-[#070919] rounded-xl border border-indigo-950">
+            <h3 class="text-xl font-bold text-white">Quiz abgeschlossen!</h3>
+            <p class="text-indigo-300 font-mono text-base">Ergebnis: ${roQuizScore} von ${RO_QUIZ_QUESTIONS.length} Fragen richtig beantwortet.</p>
+            <button onclick="currentROQIdx=0;roQuizScore=0;renderROQuestion()" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold transition">Nochmal versuchen</button>
+          </div>
+        `;
+      }
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      resetPipeline();
+      updateCacheParams();
+      loadFloatPreset(13.375);
+      calcAmdahl();
+      renderROQuestion();
+    });
+  </script>
+</body>
+</html>
