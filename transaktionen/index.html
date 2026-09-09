@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#060818] text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaktionen, 2PL & Serialisierbarkeit | Lehrmaterial</title>
+  <meta name="description" content="Interaktiver Transaktions- und 2PL Scheduler: Konfliktgraphen, Serialisierbarkeits-Prüfung, Zyklen-Erkennung und ACID-Anomalien.">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glass-panel {
+      background: rgba(11, 14, 38, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #060818; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e254d; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#060818] text-slate-100 antialiased custom-scrollbar">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-indigo-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="/lehrmaterial/" class="flex items-center space-x-2 text-indigo-400 hover:text-white transition group">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-mono font-bold text-sm text-indigo-300 group-hover:scale-105 transition">
+            AB
+          </div>
+          <span class="font-heading font-bold text-slate-200 tracking-tight">Lehrmaterial</span>
+        </a>
+        <span class="text-slate-600">•</span>
+        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+          Modul 5: Transaktionen &amp; 2PL
+        </span>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <a href="/lehrmaterial/" class="text-xs sm:text-sm font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>←</span> Alle Module
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Title & Intro -->
+    <div class="space-y-3">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-500/30 text-xs font-mono text-indigo-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Nebenläufigkeitskontrolle &amp; Serialisierbarkeits-Graphen
+      </div>
+      <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+        Transaktionen, 2PL &amp; <span class="text-indigo-400">Konfliktgraphen</span>
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+        Analysieren Sie verzahnte Ablaufpläne (Schedules) interaktiv auf <b>Konflikt-Serialisierbarkeit</b>, erkennen Sie Zyklen im Abhängigkeitsgraphen ($G$), berechnen Sie topologische Sortierungen und simulieren Sie das <b>2-Phasen-Sperrprotokoll (2PL / Strict 2PL)</b> mit Deadlock-Erkennung.
+      </p>
+    </div>
+
+    <!-- Presets Selector -->
+    <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-xl">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Klausur-Schedules:</span>
+        <div class="flex flex-wrap gap-2" id="tx-presets">
+          <button onclick="loadTxPreset('serializable_3tx')" class="tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500" data-id="serializable_3tx">
+            ✓ Serialisierbar (3 Transaktionen)
+          </button>
+          <button onclick="loadTxPreset('cycle_conflict')" class="tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="cycle_conflict">
+            ✗ Nicht serialisierbar (Zyklus T1 ⇄ T2)
+          </button>
+          <button onclick="loadTxPreset('dirty_read')" class="tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="dirty_read">
+            ⚠️ Dirty Read (Lesen vor Abort)
+          </button>
+          <button onclick="loadTxPreset('deadlock_2pl')" class="tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="deadlock_2pl">
+            🔒 Deadlock unter 2PL
+          </button>
+        </div>
+      </div>
+      <button onclick="analyzeSchedule()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5">
+        <span>⚡</span> Schedule Prüfen &amp; Graph Generieren
+      </button>
+    </div>
+
+    <!-- Schedule Input & Matrix -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      
+      <div class="md:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-2">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>⏱️</span> Schedule-Eingabe (Ablaufprotokoll)
+          </h2>
+          <span class="text-xs text-slate-400">Syntax: <code>r1(A), w2(A), c1...</code></span>
+        </div>
+        <div>
+          <textarea id="schedule-input" rows="3" class="w-full bg-[#070919] border border-indigo-950 rounded-xl p-3 text-xs sm:text-sm font-mono text-emerald-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed custom-scrollbar">r1(A), r2(B), w1(A), w2(B), r3(A), w3(C), c1, c2, c3</textarea>
+        </div>
+        <div class="text-[11px] text-slate-400">
+          Operationen: <b>r_i(X)</b> = Read von $X$ in $T_i$, <b>w_i(X)</b> = Write auf $X$ in $T_i$, <b>c_i</b> = Commit, <b>a_i</b> = Abort.
+        </div>
+      </div>
+
+      <!-- Schedule Timeline Grid -->
+      <div class="md:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-2">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>📊</span> Transaktions-Timeline
+          </h2>
+          <span id="tx-count-badge" class="text-xs font-mono text-indigo-300">3 Transaktionen</span>
+        </div>
+        <div id="timeline-container" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 overflow-x-auto custom-scrollbar font-mono text-xs">
+          <!-- Dynamically populated table -->
+        </div>
+        <div class="text-[11px] text-slate-500">
+          Zeitachse verläuft chronologisch von links nach rechts ($t_1 \to t_n$).
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Konflikt-Serialisierbar?</span>
+        <div id="stat-serializable" class="text-base font-bold text-emerald-400">Ja (Kreisfrei)</div>
+      </div>
+      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Konflikt-Kanten ($E$)</span>
+        <div id="stat-conflicts-count" class="text-base font-bold font-mono text-amber-300">2 Kanten</div>
+      </div>
+      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Äquivalenter Serieller Plan</span>
+        <div id="stat-serial-order" class="text-base font-bold font-mono text-sky-300">T1 ➔ T2 ➔ T3</div>
+      </div>
+      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">2PL Lock-Einhaltung</span>
+        <div id="stat-2pl-status" class="text-base font-bold text-indigo-300">Konform (Strict 2PL)</div>
+      </div>
+    </div>
+
+    <!-- Conflict Graph & Detail Analysis -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Graph Canvas -->
+      <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🕸️</span> Konfliktgraph $G = (V, E)$
+          </h2>
+          <span class="text-xs font-mono text-slate-400">Knoten: $T_i$ • Kanten: Konflikte</span>
+        </div>
+
+        <div id="graph-visual-canvas" class="p-6 bg-[#070919] rounded-xl border border-indigo-950 min-h-[300px] flex items-center justify-center font-mono text-xs">
+          <!-- Graph Nodes -->
+        </div>
+
+        <div class="space-y-1.5 text-xs text-slate-400">
+          <div class="font-bold text-slate-300">Konflikt-Bedingungen ($op_i(X)$ vor $op_j(X)$):</div>
+          <div>• <b>Read-Write:</b> $r_i(X) < w_j(X) \implies T_i \to T_j$</div>
+          <div>• <b>Write-Read:</b> $w_i(X) < r_j(X) \implies T_i \to T_j$</div>
+          <div>• <b>Write-Write:</b> $w_i(X) < w_j(X) \implies T_i \to T_j$</div>
+        </div>
+      </div>
+
+      <!-- Conflicts List & 2PL Analyzer -->
+      <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🔍</span> Gefundene Konflikt-Paare
+          </h2>
+          <span class="text-xs font-mono text-slate-400">Ausführliche Begründung</span>
+        </div>
+
+        <div id="conflicts-detail-list" class="space-y-2.5 max-h-[320px] overflow-y-auto custom-scrollbar">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div class="p-4 bg-[#070919] rounded-xl border border-indigo-950 space-y-2 text-xs">
+          <div class="font-bold text-indigo-300">🎯 Klausur-Satz:</div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            Ein Schedule $S$ ist genau dann <b>konflikt-serialisierbar</b>, wenn sein Konfliktgraph $G(S)$ <b>azyklisch</b> (kreisfrei) ist. Jede topologische Sortierung von $G(S)$ liefert einen konflikt-äquivalenten seriellen Schedule.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-[#04060e] border-t border-indigo-950/80 text-center py-6 text-xs text-slate-500 space-y-2 mt-12">
+    <div>Transaktionen &amp; 2PL Scheduler • Lehrmaterial Suite von Artjom Becker • TU Darmstadt</div>
+    <div class="flex justify-center gap-4 text-indigo-400 text-[11px]">
+      <a href="/lehrmaterial/" class="hover:underline">Alle Module</a>
+      <span>•</span>
+      <a href="/lehrmaterial/relationale-algebra/" class="hover:underline">Relationale Algebra Explorer</a>
+      <span>•</span>
+      <a href="/lehrmaterial/query-optimizer/" class="hover:underline">SQL Query Optimizer</a>
+      <span>•</span>
+      <a href="/lehrmaterial/normalisierung/" class="hover:underline">Normalisierungs-Coach</a>
+      <span>•</span>
+      <a href="/lehrmaterial/b-tree/" class="hover:underline">B+ Tree Playground</a>
+    </div>
+  </footer>
+
+  <script>
+    const TX_PRESETS = {
+      serializable_3tx: "r1(A), r2(B), w1(A), w2(B), r3(A), w3(C), c1, c2, c3",
+      cycle_conflict: "r1(A), w2(A), r2(B), w1(B), c1, c2",
+      dirty_read: "w1(A), r2(A), w2(A), a1, c2",
+      deadlock_2pl: "r1(A), r2(B), w1(B), w2(A), c1, c2"
+    };
+
+    function loadTxPreset(key) {
+      const p = TX_PRESETS[key];
+      if (!p) return;
+      document.getElementById("schedule-input").value = p;
+
+      document.querySelectorAll(".tx-btn").forEach(b => {
+        if (b.dataset.id === key) {
+          b.className = "tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 shadow-sm";
+        } else {
+          b.className = "tx-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white";
+        }
+      });
+
+      analyzeSchedule();
+    }
+
+    function parseSchedule(input) {
+      const items = input.split(",").map(s => s.trim()).filter(Boolean);
+      const ops = [];
+      const txSet = new Set();
+
+      items.forEach((item, idx) => {
+        // e.g. r1(A), w2(B), c1, a2
+        const match = item.match(/^([rwca])(\d+)(?:\(([A-Za-z0-9_]+)\))?$/);
+        if (match) {
+          const type = match[1];
+          const tx = parseInt(match[2], 10);
+          const itemKey = match[3] || null;
+          txSet.add(tx);
+          ops.push({ raw: item, type, tx, item: itemKey, index: idx });
+        }
+      });
+
+      return { ops, transactions: Array.from(txSet).sort((a, b) => a - b) };
+    }
+
+    function analyzeSchedule() {
+      const text = document.getElementById("schedule-input").value;
+      const { ops, transactions } = parseSchedule(text);
+
+      document.getElementById("tx-count-badge").textContent = `${transactions.length} Transaktionen (${ops.length} Operationen)`;
+
+      // Build Timeline HTML
+      let tlHTML = `<table class="w-full text-center border-collapse"><thead><tr class="border-b border-indigo-950 text-slate-400">`;
+      tlHTML += `<th class="p-2 text-left">Zeit</th>`;
+      transactions.forEach(t => {
+        tlHTML += `<th class="p-2 text-indigo-300">T${t}</th>`;
+      });
+      tlHTML += `</tr></thead><tbody>`;
+
+      ops.forEach((op, tStep) => {
+        tlHTML += `<tr class="border-b border-indigo-950/40 hover:bg-[#0d1028]"><td class="p-1.5 text-left text-slate-500 font-mono text-[10px]">t${tStep + 1}</td>`;
+        transactions.forEach(t => {
+          if (op.tx === t) {
+            let color = "bg-indigo-950 text-indigo-200 border-indigo-500/40";
+            if (op.type === 'w') color = "bg-rose-950/60 text-rose-300 border-rose-500/40 font-bold";
+            if (op.type === 'c') color = "bg-emerald-950/60 text-emerald-300 border-emerald-500/40 font-bold";
+            if (op.type === 'a') color = "bg-amber-950/60 text-amber-300 border-amber-500/40 font-bold";
+            tlHTML += `<td class="p-1.5"><span class="px-2 py-0.5 rounded border ${color}">${op.raw}</span></td>`;
+          } else {
+            tlHTML += `<td class="p-1.5 text-slate-700">-</td>`;
+          }
+        });
+        tlHTML += `</tr>`;
+      });
+      tlHTML += `</tbody></table>`;
+      document.getElementById("timeline-container").innerHTML = tlHTML;
+
+      // Find Conflicts
+      const conflicts = [];
+      const adj = {};
+      transactions.forEach(t => adj[t] = new Set());
+
+      for (let i = 0; i < ops.length; i++) {
+        for (let j = i + 1; j < ops.length; j++) {
+          const op1 = ops[i];
+          const op2 = ops[j];
+          if (op1.tx !== op2.tx && op1.item && op2.item && op1.item === op2.item) {
+            // Conflict if at least one write
+            if (op1.type === 'w' || op2.type === 'w') {
+              conflicts.push({
+                from: op1.tx,
+                to: op2.tx,
+                op1: op1.raw,
+                op2: op2.raw,
+                item: op1.item,
+                type: `${op1.type === 'w' ? 'Write' : 'Read'}-${op2.type === 'w' ? 'Write' : 'Read'}`
+              });
+              adj[op1.tx].add(op2.tx);
+            }
+          }
+        }
+      }
+
+      document.getElementById("stat-conflicts-count").textContent = `${conflicts.length} Kanten`;
+
+      // Cycle Detection (DFS)
+      const visited = {};
+      const recStack = {};
+      let hasCycle = false;
+
+      function isCyclic(v) {
+        visited[v] = true;
+        recStack[v] = true;
+        for (let neighbor of adj[v]) {
+          if (!visited[neighbor]) {
+            if (isCyclic(neighbor)) return true;
+          } else if (recStack[neighbor]) {
+            return true;
+          }
+        }
+        recStack[v] = false;
+        return false;
+      }
+
+      for (let t of transactions) {
+        if (!visited[t]) {
+          if (isCyclic(t)) {
+            hasCycle = true;
+            break;
+          }
+        }
+      }
+
+      // Topological Sort if Acyclic
+      let serialOrder = "Keine (Zyklus vorhanden)";
+      if (!hasCycle) {
+        const topOrder = [];
+        const inDegree = {};
+        transactions.forEach(t => inDegree[t] = 0);
+        transactions.forEach(u => {
+          adj[u].forEach(v => inDegree[v]++);
+        });
+        const q = transactions.filter(t => inDegree[t] === 0);
+        while (q.length > 0) {
+          const curr = q.shift();
+          topOrder.push(`T${curr}`);
+          adj[curr].forEach(neighbor => {
+            inDegree[neighbor]--;
+            if (inDegree[neighbor] === 0) q.push(neighbor);
+          });
+        }
+        serialOrder = topOrder.join(" ➔ ");
+      }
+
+      const isSerial = !hasCycle;
+      document.getElementById("stat-serializable").textContent = isSerial ? "Ja (Azyklisch)" : "Nein (Zyklus entdeckt!)";
+      document.getElementById("stat-serializable").className = isSerial ? "text-base font-bold text-emerald-400" : "text-base font-bold text-rose-400";
+      document.getElementById("stat-serial-order").textContent = serialOrder;
+
+      // Render Graph HTML
+      let graphHTML = `<div class="flex items-center justify-center gap-8 flex-wrap">`;
+      transactions.forEach(t => {
+        const targets = Array.from(adj[t]);
+        graphHTML += `
+          <div class="flex flex-col items-center bg-[#0d1028] border border-indigo-500/40 p-4 rounded-2xl shadow-xl min-w-[120px]">
+            <span class="w-10 h-10 rounded-xl bg-indigo-600/30 border border-indigo-400 flex items-center justify-center font-bold text-white text-base">
+              T${t}
+            </span>
+            <div class="mt-2 text-[10px] text-slate-400">
+              ${targets.length > 0 ? `➔ Zeigt auf: <b class="text-amber-400">${targets.map(x => `T${x}`).join(", ")}</b>` : 'Keine ausgehenden Kanten'}
+            </div>
+          </div>
+        `;
+      });
+      graphHTML += `</div>`;
+      document.getElementById("graph-visual-canvas").innerHTML = graphHTML;
+
+      // Conflicts Detail
+      if (conflicts.length === 0) {
+        document.getElementById("conflicts-detail-list").innerHTML = `
+          <div class="p-4 bg-[#070919] rounded-xl border border-indigo-950 text-slate-400 text-center text-xs">
+            Keine Konfliktpaare gefunden. Alle Operationen laufen unabhängig voneinander.
+          </div>
+        `;
+      } else {
+        let confHTML = "";
+        conflicts.forEach((c, idx) => {
+          confHTML += `
+            <div class="p-3 bg-[#070919] rounded-xl border border-indigo-950 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 font-mono font-bold">#${idx + 1}</span>
+                <span class="text-white font-mono">T${c.from} ➔ T${c.to}</span>
+                <span class="text-slate-400 text-[11px]">über Attribut <b class="text-amber-300">${c.item}</b></span>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">
+                ${c.op1} vor ${c.op2} (${c.type})
+              </span>
+            </div>
+          `;
+        });
+        document.getElementById("conflicts-detail-list").innerHTML = confHTML;
+      }
+
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    window.onload = function() {
+      loadTxPreset("serializable_3tx");
+    };
+  </script>
+</body>
+</html>

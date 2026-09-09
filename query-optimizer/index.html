@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#060818] text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL Query Optimizer & AST Visualizer | Lehrmaterial</title>
+  <meta name="description" content="Interaktiver SQL Query Optimizer: Visualisierung von logischen und physischen Ausführungsplänen, Pushdown-Heuristiken und Kostenreduktion.">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glass-panel {
+      background: rgba(11, 14, 38, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #060818; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e254d; border-radius: 4px; }
+    .tree-node {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tree-node:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#060818] text-slate-100 antialiased custom-scrollbar">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-indigo-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="/lehrmaterial/" class="flex items-center space-x-2 text-indigo-400 hover:text-white transition group">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-mono font-bold text-sm text-indigo-300 group-hover:scale-105 transition">
+            AB
+          </div>
+          <span class="font-heading font-bold text-slate-200 tracking-tight">Lehrmaterial</span>
+        </a>
+        <span class="text-slate-600">•</span>
+        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+          Modul 2: SQL Query Optimizer
+        </span>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <a href="/lehrmaterial/" class="text-xs sm:text-sm font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>←</span> Alle Module
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Title & Intro -->
+    <div class="space-y-3">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-500/30 text-xs font-mono text-indigo-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Heuristische &amp; Kostenbasierte Anfrageoptimierung
+      </div>
+      <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+        SQL Query Optimizer &amp; <span class="text-indigo-400">Operatorbaum AST</span>
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+        Visualisieren Sie Schritt für Schritt, wie eine relationale Datenbank (RDBMS) eine deklarative SQL-Abfrage in einen logischen Operatorbaum übersetzt, teure Kreuzprodukte durch Joins ersetzt und Selektionen ($\sigma$) sowie Projektionen ($\pi$) frühzeitig nach unten schiebt (Pushdown).
+      </p>
+    </div>
+
+    <!-- Presets Selector & Control Bar -->
+    <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Klausur-Abfrage auswählen:</label>
+          <div class="flex flex-wrap gap-2" id="preset-buttons">
+            <button onclick="selectPreset('uni_sokrates')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500" data-id="uni_sokrates">
+              🎓 Vorlesungen von Sokrates
+            </button>
+            <button onclick="selectPreset('ecommerce_nike')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="ecommerce_nike">
+              👟 Nike-Bestellungen &gt; 100€
+            </button>
+            <button onclick="selectPreset('bib_kemper')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="bib_kemper">
+              📚 Bücher von Prof. Kemper
+            </button>
+            <button onclick="selectPreset('airline_frankfurt')" class="preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="airline_frankfurt">
+              ✈️ Flüge ab Frankfurt
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-start md:self-end">
+          <button onclick="prevStep()" id="btn-prev-step" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition border border-slate-700 disabled:opacity-40 disabled:cursor-not-allowed">
+            ◀ Vorheriger Schritt
+          </button>
+          <button onclick="nextStep()" id="btn-next-step" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-indigo-600/30 disabled:opacity-40 disabled:cursor-not-allowed">
+            Nächster Heuristik-Schritt ▶
+          </button>
+        </div>
+      </div>
+
+      <!-- SQL Box -->
+      <div class="bg-[#070919] p-4 rounded-xl border border-indigo-950/80 font-mono text-xs text-emerald-300 space-y-1">
+        <div class="text-[11px] text-slate-500 uppercase font-bold flex justify-between items-center">
+          <span>Eingabe SQL-Statement (SFW-Block)</span>
+          <span id="opt-stats-badge" class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-500/30 font-sans text-[10px] font-bold"></span>
+        </div>
+        <pre id="sql-code-display" class="whitespace-pre-wrap leading-relaxed"></pre>
+      </div>
+    </div>
+
+    <!-- Stepper Navigation Progress Bar -->
+    <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4">
+      <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+        <span id="step-count-text" class="font-bold text-indigo-300">Schritt 1 von 5</span>
+        <span id="step-rule-name" class="font-mono text-amber-300 font-semibold">Regel 1: Kanonische Übersetzung</span>
+      </div>
+      <div class="w-full bg-[#070919] rounded-full h-2 overflow-hidden border border-indigo-950">
+        <div id="step-progress-bar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full transition-all duration-300" style="width: 20%"></div>
+      </div>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Visual Operator Tree (AST) -->
+      <div class="lg:col-span-7 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 flex flex-col justify-between space-y-6 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🌳</span> Logischer Operatorbaum (AST)
+          </h2>
+          <span class="text-xs font-mono text-slate-400">Auswertung: Blätter ➔ Wurzel</span>
+        </div>
+
+        <!-- Rendered Tree Canvas / HTML Nodes -->
+        <div id="tree-canvas-container" class="p-4 bg-[#070919] rounded-xl border border-indigo-950/80 min-h-[360px] flex items-center justify-center overflow-x-auto custom-scrollbar font-mono text-xs">
+          <!-- Populated dynamically -->
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-indigo-950">
+          <span>💡 Farbcodierung: <b class="text-amber-400">Selektion (σ)</b> • <b class="text-sky-400">Projektion (π)</b> • <b class="text-indigo-400">Join (⋈)</b> • <b class="text-emerald-400">Relation</b></span>
+        </div>
+      </div>
+
+      <!-- Detail Explanation & Cost Metrics -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- Algebra Expression Box -->
+        <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Algebra-Formel (KaTeX):</span>
+            <span id="cost-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Kosten: ~100k Tupel</span>
+          </div>
+          <div id="latex-output" class="p-4 bg-[#070919] rounded-xl border border-indigo-950 overflow-x-auto custom-scrollbar text-sm font-semibold text-center text-indigo-100 min-h-[60px] flex items-center justify-center">
+            <!-- KaTeX here -->
+          </div>
+        </div>
+
+        <!-- Explanation Step Box -->
+        <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
+          <div class="flex items-center gap-2 border-b border-indigo-950 pb-3">
+            <span class="text-base">📝</span>
+            <h3 class="text-sm font-bold text-white" id="step-title">Schritterklärung</h3>
+          </div>
+          <div id="step-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed space-y-2">
+            <!-- Populated dynamically -->
+          </div>
+          
+          <div class="p-3.5 bg-indigo-950/30 rounded-xl border border-indigo-500/20 space-y-1.5 text-xs">
+            <div class="font-bold text-indigo-300 flex items-center gap-1.5">
+              <span>🎯</span> Klausur-Regel:
+            </div>
+            <p id="rule-tip" class="text-slate-300 text-[11px] leading-relaxed"></p>
+          </div>
+        </div>
+
+        <!-- Cost Reduction Comparison -->
+        <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+          <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Kosten-Schätzung (Zwischenergebnisse)</div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400">Initiale Kreuzprodukt-Kardinalität:</span>
+              <span id="card-initial" class="font-mono font-bold text-rose-400">100.000 Tupel</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-400">Aktueller Zwischenspeicherbedarf:</span>
+              <span id="card-current" class="font-mono font-bold text-emerald-400">120 Tupel</span>
+            </div>
+            <div class="w-full bg-[#070919] rounded-full h-2 overflow-hidden border border-indigo-950">
+              <div id="cost-bar" class="bg-emerald-500 h-full" style="width: 1%"></div>
+            </div>
+            <p id="cost-summary" class="text-[11px] text-slate-400 italic pt-1"></p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-[#04060e] border-t border-indigo-950/80 text-center py-6 text-xs text-slate-500 space-y-2 mt-12">
+    <div>SQL Query Optimizer • Lehrmaterial Suite von Artjom Becker • TU Darmstadt</div>
+    <div class="flex justify-center gap-4 text-indigo-400 text-[11px]">
+      <a href="/lehrmaterial/" class="hover:underline">Alle Module</a>
+      <span>•</span>
+      <a href="/lehrmaterial/relationale-algebra/" class="hover:underline">Relationale Algebra Explorer</a>
+      <span>•</span>
+      <a href="/" class="hover:underline">Portfolio</a>
+    </div>
+  </footer>
+
+  <script>
+    const PRESETS = {
+      uni_sokrates: {
+        title: "Vorlesungen von Prof. Sokrates",
+        sql: "SELECT v.Titel, p.Name\nFROM ProfessorIn p, Vorlesung v\nWHERE p.PersNr = v.gelesenVon\n  AND p.Name = 'Sokrates';",
+        stats: "2 Tabellen • 1 Selektion • 1 Join-Prädikat",
+        steps: [
+          {
+            title: "Schritt 1: Kanonische Übersetzung (Naiv)",
+            rule: "Regel 1: SFW ➔ π(σ(×))",
+            tip: "Jeder SQL SFW-Block wird zunächst naiv in ein kartesisches Produkt aller FROM-Tabellen, gefolgt von der gesamten WHERE-Klausel und der abschließenden SELECT-Projektion überführt.",
+            latex: "\\pi_{\\text{Titel, Name}}(\\sigma_{\\text{p.PersNr=v.gelesenVon} \\land \\text{p.Name='Sokrates'}}(\\text{ProfessorIn} \\times \\text{Vorlesung}))",
+            cardinality: "100.000 Tupel",
+            costPercent: 100,
+            summary: "Das kartesische Produkt erzeugt 10.000 x 10.000 = 100.000 Zwischenzeilen im Hauptspeicher.",
+            tree: {
+              op: "π [Titel, Name]",
+              type: "pi",
+              child: {
+                op: "σ [p.PersNr = v.gelesenVon ∧ p.Name = 'Sokrates']",
+                type: "sigma",
+                child: {
+                  op: "× [Kreuzprodukt]",
+                  type: "cross",
+                  left: { op: "ProfessorIn (p)", type: "rel" },
+                  right: { op: "Vorlesung (v)", type: "rel" }
+                }
+              }
+            },
+            desc: "Die Datenbank bildet zunächst das ungefilterte kartesische Produkt $p \\times v$. Erst danach wird die kombinierte Selektionsbedingung geprüft."
+          },
+          {
+            title: "Schritt 2: Aufspalten der Selektionsprädikate (Kaskade)",
+            rule: "Regel 2: σ_{c1 ∧ c2}(R) ≡ σ_c1(σ_c2(R))",
+            tip: "Konjunktive Selektionsbedingungen werden in einzelne, hintereinander geschaltete Selektionen zerlegt, damit sie unabhängig verschoben werden können.",
+            latex: "\\pi_{\\text{Titel, Name}}(\\sigma_{\\text{p.PersNr=v.gelesenVon}}(\\sigma_{\\text{p.Name='Sokrates'}}(\\text{ProfessorIn} \\times \\text{Vorlesung})))",
+            cardinality: "100.000 Tupel",
+            costPercent: 100,
+            summary: "Bedingungen sind aufgespalten und bereit für den Pushdown.",
+            tree: {
+              op: "π [Titel, Name]",
+              type: "pi",
+              child: {
+                op: "σ [p.PersNr = v.gelesenVon]",
+                type: "sigma",
+                child: {
+                  op: "σ [p.Name = 'Sokrates']",
+                  type: "sigma",
+                  child: {
+                    op: "× [Kreuzprodukt]",
+                    type: "cross",
+                    left: { op: "ProfessorIn (p)", type: "rel" },
+                    right: { op: "Vorlesung (v)", type: "rel" }
+                  }
+                }
+              }
+            },
+            desc: "Das Prädikat `p.Name = 'Sokrates'` hängt nur von Tabelle `p` ab, während `p.PersNr = v.gelesenVon` beide Tabellen verknüpft."
+          },
+          {
+            title: "Schritt 3: Pushdown von Selektionen (Selection Pushdown)",
+            rule: "Regel 4: σ_c(R × S) ≡ (σ_c(R)) × S (wenn c nur Attribute aus R enthält)",
+            tip: "Selektionen werden so weit wie möglich zu den Blattknoten geschoben, um Datenmengen vor der Verknüpfung drastisch zu reduzieren!",
+            latex: "\\pi_{\\text{Titel, Name}}(\\sigma_{\\text{p.PersNr=v.gelesenVon}}((\\sigma_{\\text{p.Name='Sokrates'}}(\\text{ProfessorIn})) \\times \\text{Vorlesung}))",
+            cardinality: "150 Tupel",
+            costPercent: 1.5,
+            summary: "Durch den Pushdown verbleibt nur 1 Professor (Sokrates), wodurch das Kreuzprodukt auf 1 x 150 = 150 Zeilen schrumpft!",
+            tree: {
+              op: "π [Titel, Name]",
+              type: "pi",
+              child: {
+                op: "σ [p.PersNr = v.gelesenVon]",
+                type: "sigma",
+                child: {
+                  op: "× [Kreuzprodukt]",
+                  type: "cross",
+                  left: {
+                    op: "σ [p.Name = 'Sokrates']",
+                    type: "sigma",
+                    child: { op: "ProfessorIn (p)", type: "rel" }
+                  },
+                  right: { op: "Vorlesung (v)", type: "rel" }
+                }
+              }
+            },
+            desc: "Die Selektion auf `Name = 'Sokrates'` wird direkt auf der Relation `ProfessorIn` ausgeführt. Es verbleibt exakt 1 Tupel."
+          },
+          {
+            title: "Schritt 4: Join-Ersetzung (Theta- / Equi-Join)",
+            rule: "Regel 12: σ_c(R × S) ≡ R ⋈_c S",
+            tip: "Das teure Kreuzprodukt gefolgt von einer Gleichheitsselektion wird durch einen optimierten Hash- oder Index-Join ersetzt.",
+            latex: "\\pi_{\\text{Titel, Name}}((\\sigma_{\\text{p.Name='Sokrates'}}(\\text{ProfessorIn})) \\bowtie_{\\text{PersNr=gelesenVon}} \\text{Vorlesung})",
+            cardinality: "4 Tupel",
+            costPercent: 0.04,
+            summary: "Der Join navigiert direkt über den Index von Vorlesung. Ergebnisgröße: 4 Vorlesungen.",
+            tree: {
+              op: "π [Titel, Name]",
+              type: "pi",
+              child: {
+                op: "⋈ [p.PersNr = v.gelesenVon]",
+                type: "join",
+                left: {
+                  op: "σ [p.Name = 'Sokrates']",
+                  type: "sigma",
+                  child: { op: "ProfessorIn (p)", type: "rel" }
+                },
+                right: { op: "Vorlesung (v)", type: "rel" }
+              }
+            },
+            desc: "Das Kreuzprodukt wird eliminiert. Die Verknüpfung erfolgt direkt über das Fremdschlüssel-Joinprädikat."
+          },
+          {
+            title: "Schritt 5: Pushdown von Projektionen (Projektions-Kaskade)",
+            rule: "Regel 6: π_A(R ⋈ S) ≡ π_A(π_B(R) ⋈ π_C(S))",
+            tip: "Nicht benötigte Spalten (z. B. Raum, SWS, Rang) werden vor dem Join verworfen, um Tupelgrößen im Hauptspeicher zu minimieren.",
+            latex: "\\pi_{\\text{Titel, Name}}((\\pi_{\\text{PersNr, Name}}(\\sigma_{\\text{p.Name='Sokrates'}}(\\text{ProfessorIn}))) \\bowtie_{\\text{PersNr=gelesenVon}} (\\pi_{\\text{Titel, gelesenVon}}(\\text{Vorlesung})))",
+            cardinality: "4 Tupel (Optimale minimale Bytebreite)",
+            costPercent: 0.01,
+            summary: "Optimaler Plan erreicht: Minimale Zeilenzahl und minimale Bytebreite je Tupel.",
+            tree: {
+              op: "π [Titel, Name]",
+              type: "pi",
+              child: {
+                op: "⋈ [p.PersNr = v.gelesenVon]",
+                type: "join",
+                left: {
+                  op: "π [PersNr, Name]",
+                  type: "pi",
+                  child: {
+                    op: "σ [p.Name = 'Sokrates']",
+                    type: "sigma",
+                    child: { op: "ProfessorIn (p)", type: "rel" }
+                  }
+                },
+                right: {
+                  op: "π [Titel, gelesenVon]",
+                  type: "pi",
+                  child: { op: "Vorlesung (v)", type: "rel" }
+                }
+              }
+            },
+            desc: "Fertiger physischer Ausführungsplan mit maximaler Ausführungsgeschwindigkeit und 99.9% Speicherersparnis."
+          }
+        ]
+      },
+      ecommerce_nike: {
+        title: "Nike-Bestellungen über 100 €",
+        sql: "SELECT b.BestellNr, p.Name, b.Preis\nFROM Kunde k, Bestellung b, Produkt p\nWHERE k.Knr = b.KundeNr\n  AND b.ProduktId = p.Id\n  AND p.Hersteller = 'Nike'\n  AND b.Preis > 100;",
+        stats: "3 Tabellen • 2 Selektionen • 2 Join-Prädikate",
+        steps: [
+          {
+            title: "Schritt 1: Kanonische Übersetzung",
+            rule: "Regel 1: SFW ➔ π(σ(×))",
+            tip: "3-faches Kreuzprodukt aus Kunde, Bestellung und Produkt.",
+            latex: "\\pi_{\\text{BestellNr, Name, Preis}}(\\sigma_{\\dots}(\\text{Kunde} \\times \\text{Bestellung} \\times \\text{Produkt}))",
+            cardinality: "1.000.000 Tupel",
+            costPercent: 100,
+            summary: "Naives 3-Wege-Kreuzprodukt erzeugt riesige Datenmengen.",
+            tree: {
+              op: "π [BestellNr, Name, Preis]",
+              type: "pi",
+              child: {
+                op: "σ [k.Knr=b.KundeNr ∧ b.ProduktId=p.Id ∧ p.Hersteller='Nike' ∧ b.Preis>100]",
+                type: "sigma",
+                child: {
+                  op: "×",
+                  type: "cross",
+                  left: { op: "Kunde (k)", type: "rel" },
+                  right: {
+                    op: "×",
+                    type: "cross",
+                    left: { op: "Bestellung (b)", type: "rel" },
+                    right: { op: "Produkt (p)", type: "rel" }
+                  }
+                }
+              }
+            },
+            desc: "Initiale Repräsentation mit vollem Kreuzprodukt."
+          },
+          {
+            title: "Schritt 2: Pushdown & Join-Ersetzung",
+            rule: "Regeln 4 & 12: Selektionspushdown vor Join",
+            tip: "Filtere Nike-Produkte und Bestellungen > 100€ direkt vor der Verknüpfung!",
+            latex: "\\pi_{\\text{BestellNr, Name, Preis}}((\\sigma_{\\text{Preis}>100}(\\text{Bestellung})) \\bowtie_{\\text{ProduktId}=\\text{Id}} (\\sigma_{\\text{Hersteller}='Nike'}(\\text{Produkt})))",
+            cardinality: "25 Tupel",
+            costPercent: 0.05,
+            summary: "Tabelle Kunde wird als ungenutzt eliminiert, Joins auf minimale Vorfilter angewendet.",
+            tree: {
+              op: "π [BestellNr, Name, Preis]",
+              type: "pi",
+              child: {
+                op: "⋈ [b.ProduktId = p.Id]",
+                type: "join",
+                left: {
+                  op: "σ [Preis > 100]",
+                  type: "sigma",
+                  child: { op: "Bestellung (b)", type: "rel" }
+                },
+                right: {
+                  op: "σ [Hersteller = 'Nike']",
+                  type: "sigma",
+                  child: { op: "Produkt (p)", type: "rel" }
+                }
+              }
+            },
+            desc: "Kunde enthält keine projizierten Attribute und wird wegoptimiert. Die beiden Selektionen reduzieren den Verbund auf ein Minimum."
+          }
+        ]
+      },
+      bib_kemper: {
+        title: "Bücher von Prof. Kemper",
+        sql: "SELECT b.Titel, b.ISBN\nFROM Autor a, BuchAutor ba, Buch b\nWHERE a.Id = ba.AutorId\n  AND ba.BuchISBN = b.ISBN\n  AND a.Nachname = 'Kemper';",
+        stats: "3 Tabellen • N:M Beziehung • 1 Selektion",
+        steps: [
+          {
+            title: "Schritt 1: Naive Übersetzung",
+            rule: "Kanonische Form",
+            tip: "Kartesisches Produkt der 3 Relationen.",
+            latex: "\\pi_{\\text{Titel, ISBN}}(\\sigma_{\\text{a.Id=ba.AutorId} \\land \\text{ba.BuchISBN=b.ISBN} \\land \\text{Nachname='Kemper'}}(\\text{Autor} \\times \\text{BuchAutor} \\times \\text{Buch}))",
+            cardinality: "500.000 Tupel",
+            costPercent: 100,
+            summary: "Naives Produkt über N:M Verknüpfungstabelle.",
+            tree: {
+              op: "π [Titel, ISBN]",
+              type: "pi",
+              child: {
+                op: "σ [Join & Selektion]",
+                type: "sigma",
+                child: {
+                  op: "×",
+                  type: "cross",
+                  left: { op: "Autor (a)", type: "rel" },
+                  right: {
+                    op: "×",
+                    type: "cross",
+                    left: { op: "BuchAutor (ba)", type: "rel" },
+                    right: { op: "Buch (b)", type: "rel" }
+                  }
+                }
+              }
+            },
+            desc: "Kanonische Form vor Anwendung der Heuristiken."
+          },
+          {
+            title: "Schritt 2: Optimierter Ausführungsplan",
+            rule: "Pushdown & Join-Pipeline",
+            tip: "Selektion filtert zuerst den Autor Kemper, danach Verbund über BuchAutor und Buch.",
+            latex: "\\pi_{\\text{Titel, ISBN}}(((\\sigma_{\\text{Nachname}='Kemper'}(\\text{Autor})) \\bowtie \\text{BuchAutor}) \\bowtie \\text{Buch})",
+            cardinality: "3 Tupel",
+            costPercent: 0.01,
+            summary: "Pipeline greift direkt über Fremdschlüssel-Indizes zu.",
+            tree: {
+              op: "π [Titel, ISBN]",
+              type: "pi",
+              child: {
+                op: "⋈ [ba.BuchISBN = b.ISBN]",
+                type: "join",
+                left: {
+                  op: "⋈ [a.Id = ba.AutorId]",
+                  type: "join",
+                  left: {
+                    op: "σ [Nachname = 'Kemper']",
+                    type: "sigma",
+                    child: { op: "Autor (a)", type: "rel" }
+                  },
+                  right: { op: "BuchAutor (ba)", type: "rel" }
+                },
+                right: { op: "Buch (b)", type: "rel" }
+              }
+            },
+            desc: "Auswertungsschlanke N:M Navigation von Kemper zu seinen Büchern."
+          }
+        ]
+      },
+      airline_frankfurt: {
+        title: "Flüge ab Frankfurt (FRA)",
+        sql: "SELECT f.FlugNr, a.Stadt, f.Abflug\nFROM Flug f, Flughafen a\nWHERE f.Von = a.Code\n  AND a.Code = 'FRA'\n  AND f.Status = 'OnTime';",
+        stats: "2 Tabellen • 2 Selektionen • 1 Join",
+        steps: [
+          {
+            title: "Schritt 1: Kanonische Form",
+            rule: "SFW zu Operatorbaum",
+            tip: "Kreuzprodukt gefolgt von Selektionen.",
+            latex: "\\pi_{\\text{FlugNr, Stadt, Abflug}}(\\sigma_{\\text{f.Von=a.Code} \\land \\text{a.Code='FRA'} \\land \\text{f.Status='OnTime'}}(\\text{Flug} \\times \\text{Flughafen}))",
+            cardinality: "200.000 Tupel",
+            costPercent: 100,
+            summary: "Alle Flüge x alle Flughäfen.",
+            tree: {
+              op: "π [FlugNr, Stadt, Abflug]",
+              type: "pi",
+              child: {
+                op: "σ [f.Von=a.Code ∧ a.Code='FRA' ∧ f.Status='OnTime']",
+                type: "sigma",
+                child: {
+                  op: "×",
+                  type: "cross",
+                  left: { op: "Flug (f)", type: "rel" },
+                  right: { op: "Flughafen (a)", type: "rel" }
+                }
+              }
+            },
+            desc: "Naives Kreuzprodukt."
+          },
+          {
+            title: "Schritt 2: Paralleler Selektionspushdown & Verbund",
+            rule: "Pushdown auf beiden Ästen",
+            tip: "Beide Tabellen werden vor dem Verbund isoliert gefiltert.",
+            latex: "\\pi_{\\text{FlugNr, Stadt, Abflug}}((\\sigma_{\\text{Status}='OnTime'}(\\text{Flug})) \\bowtie_{\\text{Von}=\\text{Code}} (\\sigma_{\\text{Code}='FRA'}(\\text{Flughafen})))",
+            cardinality: "12 Tupel",
+            costPercent: 0.02,
+            summary: "Exakt 1 Flughafen (FRA) wird mit den pünktlichen Flügen gejoint.",
+            tree: {
+              op: "π [FlugNr, Stadt, Abflug]",
+              type: "pi",
+              child: {
+                op: "⋈ [f.Von = a.Code]",
+                type: "join",
+                left: {
+                  op: "σ [Status = 'OnTime']",
+                  type: "sigma",
+                  child: { op: "Flug (f)", type: "rel" }
+                },
+                right: {
+                  op: "σ [Code = 'FRA']",
+                  type: "sigma",
+                  child: { op: "Flughafen (a)", type: "rel" }
+                }
+              }
+            },
+            desc: "Beide Relationen werden sofort vorfiltriert."
+          }
+        ]
+      }
+    };
+
+    let currentPresetKey = "uni_sokrates";
+    let currentStepIndex = 0;
+
+    function selectPreset(key) {
+      currentPresetKey = key;
+      currentStepIndex = 0;
+      
+      document.querySelectorAll(".preset-btn").forEach(btn => {
+        if (btn.dataset.id === key) {
+          btn.className = "preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 shadow-sm";
+        } else {
+          btn.className = "preset-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white";
+        }
+      });
+
+      renderCurrentStep();
+    }
+
+    function prevStep() {
+      if (currentStepIndex > 0) {
+        currentStepIndex--;
+        renderCurrentStep();
+      }
+    }
+
+    function nextStep() {
+      const preset = PRESETS[currentPresetKey];
+      if (currentStepIndex < preset.steps.length - 1) {
+        currentStepIndex++;
+        renderCurrentStep();
+      }
+    }
+
+    function renderTreeHTML(node) {
+      if (!node) return "";
+
+      let nodeColor = "border-indigo-500/40 bg-[#0d1028] text-indigo-200";
+      if (node.type === "sigma") nodeColor = "border-amber-500/50 bg-amber-950/30 text-amber-200";
+      if (node.type === "pi") nodeColor = "border-sky-500/50 bg-sky-950/30 text-sky-200";
+      if (node.type === "join") nodeColor = "border-indigo-400 bg-indigo-950/50 text-indigo-100 font-bold";
+      if (node.type === "cross") nodeColor = "border-rose-500/50 bg-rose-950/30 text-rose-200";
+      if (node.type === "rel") nodeColor = "border-emerald-500/50 bg-emerald-950/30 text-emerald-200 font-bold";
+
+      let childrenHTML = "";
+      if (node.child) {
+        childrenHTML = `
+          <div class="w-px h-6 bg-indigo-500/40 mx-auto"></div>
+          <div>${renderTreeHTML(node.child)}</div>
+        `;
+      } else if (node.left && node.right) {
+        childrenHTML = `
+          <div class="w-px h-5 bg-indigo-500/40 mx-auto"></div>
+          <div class="flex items-start justify-center gap-6 relative">
+            <div class="absolute top-0 left-1/4 right-1/4 h-px bg-indigo-500/40"></div>
+            <div class="pt-3">${renderTreeHTML(node.left)}</div>
+            <div class="pt-3">${renderTreeHTML(node.right)}</div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="flex flex-col items-center">
+          <div class="tree-node px-3.5 py-1.5 rounded-xl border text-xs shadow-md ${nodeColor} whitespace-nowrap">
+            ${node.op}
+          </div>
+          ${childrenHTML}
+        </div>
+      `;
+    }
+
+    function renderCurrentStep() {
+      const preset = PRESETS[currentPresetKey];
+      const step = preset.steps[currentStepIndex];
+      const totalSteps = preset.steps.length;
+
+      document.getElementById("sql-code-display").textContent = preset.sql;
+      document.getElementById("opt-stats-badge").textContent = preset.stats;
+
+      document.getElementById("step-count-text").textContent = `Schritt ${currentStepIndex + 1} von ${totalSteps}`;
+      document.getElementById("step-rule-name").textContent = step.rule;
+      document.getElementById("step-progress-bar").style.width = `${((currentStepIndex + 1) / totalSteps) * 100}%`;
+
+      document.getElementById("btn-prev-step").disabled = currentStepIndex === 0;
+      document.getElementById("btn-next-step").disabled = currentStepIndex === totalSteps - 1;
+
+      document.getElementById("tree-canvas-container").innerHTML = renderTreeHTML(step.tree);
+
+      document.getElementById("step-title").textContent = step.title;
+      document.getElementById("step-desc").innerHTML = `<p>${step.desc}</p>`;
+      document.getElementById("rule-tip").textContent = step.tip;
+
+      document.getElementById("card-initial").textContent = preset.steps[0].cardinality;
+      document.getElementById("card-current").textContent = step.cardinality;
+      document.getElementById("cost-badge").textContent = `Kosten: ~${step.cardinality}`;
+      document.getElementById("cost-bar").style.width = `${Math.max(1, step.costPercent)}%`;
+      document.getElementById("cost-summary").textContent = step.summary;
+
+      // KaTeX
+      const latexEl = document.getElementById("latex-output");
+      if (window.katex) {
+        try {
+          katex.render(step.latex, latexEl, { displayMode: true, throwOnError: false });
+        } catch(e) {
+          latexEl.textContent = step.latex;
+        }
+      } else {
+        latexEl.textContent = step.latex;
+      }
+
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    window.onload = function() {
+      selectPreset("uni_sokrates");
+    };
+  </script>
+</body>
+</html>

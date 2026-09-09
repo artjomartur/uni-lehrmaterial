@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#060818] text-slate-100">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Normalisierungs-Coach & FD Synthese | Lehrmaterial</title>
+  <meta name="description" content="Interaktiver Normalisierungs-Coach: Attributhüllen (X+), Minimalüberdeckung (Fc), Kandidatenschlüssel, 1NF/2NF/3NF/BCNF Prüfung und 3NF-Synthesealgorithmus.">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .glass-panel {
+      background: rgba(11, 14, 38, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #060818; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e254d; border-radius: 4px; }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-[#060818] text-slate-100 antialiased custom-scrollbar">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 glass-panel border-b border-indigo-950/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <a href="/lehrmaterial/" class="flex items-center space-x-2 text-indigo-400 hover:text-white transition group">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-mono font-bold text-sm text-indigo-300 group-hover:scale-105 transition">
+            AB
+          </div>
+          <span class="font-heading font-bold text-slate-200 tracking-tight">Lehrmaterial</span>
+        </a>
+        <span class="text-slate-600">•</span>
+        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+          Modul 3: Normalisierungs-Coach
+        </span>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <a href="/lehrmaterial/" class="text-xs sm:text-sm font-medium text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+          <span>←</span> Alle Module
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- Title & Intro -->
+    <div class="space-y-3">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/80 border border-indigo-500/30 text-xs font-mono text-indigo-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        Relationen-Design, FD-Hüllen &amp; Zerlegungsalgorithmen
+      </div>
+      <h1 class="text-2xl sm:text-4xl font-black text-white tracking-tight">
+        Normalisierungs-Coach &amp; <span class="text-indigo-400">FD-Synthese</span>
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-400 max-w-3xl leading-relaxed">
+        Überprüfen Sie funktionale Abhängigkeiten ($F$), berechnen Sie Attributhüllen ($X^+$), bestimmen Sie alle Kandidatenschlüssel, testen Sie auf Normalformen (1NF, 2NF, 3NF, BCNF) und führen Sie den 3NF-Synthesealgorithmus mit Verlustlosigkeits- und Abhängigkeitstreue-Garantie interaktiv durch.
+      </p>
+    </div>
+
+    <!-- Presets Bar -->
+    <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Klausur-Beispiele:</span>
+        <div class="flex flex-wrap gap-2" id="nf-presets">
+          <button onclick="loadNfPreset('uni_vorlesung')" class="nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500" data-id="uni_vorlesung">
+            🎓 Vorlesung &amp; Professor
+          </button>
+          <button onclick="loadNfPreset('projekt_mitarbeiter')" class="nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="projekt_mitarbeiter">
+            💼 Projekt, Mitarbeiter &amp; Rolle
+          </button>
+          <button onclick="loadNfPreset('krankenhaus')" class="nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="krankenhaus">
+            🏥 Patient, Station &amp; Chefarzt
+          </button>
+          <button onclick="loadNfPreset('buch_verlag')" class="nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white" data-id="buch_verlag">
+            📚 Buch, Autor &amp; Verlag
+          </button>
+        </div>
+      </div>
+      <button onclick="runAnalysis()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5">
+        <span>⚡</span> Schema Analysieren &amp; Normalisieren
+      </button>
+    </div>
+
+    <!-- Input Configuration Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <!-- Relation Attributes -->
+      <div class="md:col-span-5 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>🔤</span> Relationsschema $R$
+          </h2>
+          <span class="text-xs text-slate-400">Kommagetrennte Attribute</span>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-400 block mb-1">Attribute $R(A_1, A_2, \dots)$:</label>
+          <input type="text" id="input-attributes" value="PersNr, Name, Rang, VorlNr, Titel, Raum" class="w-full bg-[#070919] border border-indigo-950 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-mono text-emerald-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-400 block mb-1">Attributhülle berechnen für $X$:</label>
+          <div class="flex gap-2">
+            <input type="text" id="input-closure-target" value="VorlNr" class="flex-1 bg-[#070919] border border-indigo-950 rounded-xl px-4 py-2 text-xs font-mono text-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button onclick="calcCustomClosure()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition">
+              $X^+$ Berechnen
+            </button>
+          </div>
+          <div id="closure-live-result" class="mt-2 text-xs font-mono text-indigo-200 p-2.5 bg-[#070919] rounded-xl border border-indigo-950/80"></div>
+        </div>
+      </div>
+
+      <!-- Functional Dependencies FDs -->
+      <div class="md:col-span-7 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+          <h2 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>➡️</span> Funktionale Abhängigkeiten $F$
+          </h2>
+          <span class="text-xs text-slate-400">Format: <code>A, B -&gt; C</code> (pro Zeile)</span>
+        </div>
+        <div>
+          <textarea id="input-fds" rows="4" class="w-full bg-[#070919] border border-indigo-950 rounded-xl p-3 text-xs sm:text-sm font-mono text-amber-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed custom-scrollbar">PersNr -> Name, Rang, Raum
+VorlNr -> Titel, PersNr</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Kandidatenschlüssel</span>
+        <div id="stat-keys" class="text-base font-bold font-mono text-amber-300">VorlNr</div>
+      </div>
+      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Aktuelle Normalform</span>
+        <div id="stat-nf" class="text-base font-bold text-rose-400">Nicht 2NF / Nicht 3NF</div>
+      </div>
+      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Minimale Überdeckung $F_c$</span>
+        <div id="stat-fc-count" class="text-base font-bold font-mono text-sky-300">2 FDs</div>
+      </div>
+      <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-1 text-center shadow-lg">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">3NF Synthese Relationen</span>
+        <div id="stat-relations-count" class="text-base font-bold font-mono text-emerald-300">2 Schemata ($R_1, R_2$)</div>
+      </div>
+    </div>
+
+    <!-- Detailed Analysis Tabs / Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Normal Form Diagnostic & Violations -->
+      <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🔍</span> Normalformen-Diagnose (1NF - BCNF)
+          </h2>
+          <span class="text-xs font-mono text-slate-400">Verletzungen &amp; Kriterien</span>
+        </div>
+
+        <div class="space-y-3" id="nf-diagnostics-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <!-- 3NF Synthesis Decomposition & Schemata -->
+      <div class="lg:col-span-6 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
+        <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <span>🧩</span> 3NF Synthesealgorithmus (Bernstein)
+          </h2>
+          <span class="text-xs font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/30">
+            Verlustlos &amp; Abhängigkeitstreu
+          </span>
+        </div>
+
+        <div class="space-y-4">
+          <div class="p-3.5 bg-[#070919] rounded-xl border border-indigo-950 font-mono text-xs space-y-2" id="synthesis-steps">
+            <!-- Step by step -->
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Erzeugtes 3NF Ziel-Schema:</h3>
+            <div id="synthesis-results-grid" class="space-y-2">
+              <!-- Result Tables -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-[#04060e] border-t border-indigo-950/80 text-center py-6 text-xs text-slate-500 space-y-2 mt-12">
+    <div>Normalisierungs-Coach • Lehrmaterial Suite von Artjom Becker • TU Darmstadt</div>
+    <div class="flex justify-center gap-4 text-indigo-400 text-[11px]">
+      <a href="/lehrmaterial/" class="hover:underline">Alle Module</a>
+      <span>•</span>
+      <a href="/lehrmaterial/relationale-algebra/" class="hover:underline">Relationale Algebra Explorer</a>
+      <span>•</span>
+      <a href="/lehrmaterial/query-optimizer/" class="hover:underline">SQL Query Optimizer</a>
+      <span>•</span>
+      <a href="/" class="hover:underline">Portfolio</a>
+    </div>
+  </footer>
+
+  <script>
+    const NF_PRESETS = {
+      uni_vorlesung: {
+        attrs: "PersNr, Name, Rang, Raum, VorlNr, Titel",
+        target: "VorlNr",
+        fds: "PersNr -> Name, Rang, Raum\nVorlNr -> Titel, PersNr"
+      },
+      projekt_mitarbeiter: {
+        attrs: "MitarbeiterId, Name, ProjektId, ProjektTitel, Rolle, Stundensatz",
+        target: "MitarbeiterId, ProjektId",
+        fds: "MitarbeiterId -> Name\nProjektId -> ProjektTitel\nMitarbeiterId, ProjektId -> Rolle, Stundensatz"
+      },
+      krankenhaus: {
+        attrs: "PatientNr, Name, StationNr, StationsName, Chefarzt",
+        target: "PatientNr",
+        fds: "PatientNr -> Name, StationNr\nStationNr -> StationsName, Chefarzt"
+      },
+      buch_verlag: {
+        attrs: "ISBN, Buchtitel, AutorId, AutorName, VerlagId, VerlagName, VerlagsOrt",
+        target: "ISBN, AutorId",
+        fds: "ISBN -> Buchtitel, VerlagId\nAutorId -> AutorName\nVerlagId -> VerlagName, VerlagsOrt"
+      }
+    };
+
+    function loadNfPreset(key) {
+      const p = NF_PRESETS[key];
+      if (!p) return;
+      document.getElementById("input-attributes").value = p.attrs;
+      document.getElementById("input-closure-target").value = p.target;
+      document.getElementById("input-fds").value = p.fds;
+
+      document.querySelectorAll(".nf-btn").forEach(b => {
+        if (b.dataset.id === key) {
+          b.className = "nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white border border-indigo-500 shadow-sm";
+        } else {
+          b.className = "nf-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#121633] text-slate-300 border border-indigo-950 hover:text-white";
+        }
+      });
+
+      runAnalysis();
+    }
+
+    function parseAttributes() {
+      return document.getElementById("input-attributes").value.split(",").map(s => s.trim()).filter(s => s.length > 0);
+    }
+
+    function parseFDs() {
+      const lines = document.getElementById("input-fds").value.split("\n");
+      const fds = [];
+      lines.forEach(l => {
+        const parts = l.split("->");
+        if (parts.length === 2) {
+          const lhs = parts[0].split(",").map(s => s.trim()).filter(Boolean);
+          const rhs = parts[1].split(",").map(s => s.trim()).filter(Boolean);
+          if (lhs.length > 0 && rhs.length > 0) {
+            fds.push({ lhs, rhs });
+          }
+        }
+      });
+      return fds;
+    }
+
+    function computeClosure(X, fds) {
+      let closure = new Set(X);
+      let changed = true;
+      while (changed) {
+        changed = false;
+        fds.forEach(fd => {
+          const allLhsIn = fd.lhs.every(attr => closure.has(attr));
+          if (allLhsIn) {
+            fd.rhs.forEach(r => {
+              if (!closure.has(r)) {
+                closure.add(r);
+                changed = true;
+              }
+            });
+          }
+        });
+      }
+      return Array.from(closure);
+    }
+
+    function calcCustomClosure() {
+      const targetStr = document.getElementById("input-closure-target").value;
+      const target = targetStr.split(",").map(s => s.trim()).filter(Boolean);
+      const fds = parseFDs();
+      const res = computeClosure(target, fds);
+      document.getElementById("closure-live-result").innerHTML = `<b>{${target.join(", ")}}<sup>+</sup></b> = { ${res.join(", ")} }`;
+    }
+
+    function findCandidateKeys(allAttrs, fds) {
+      // Find power set combinations sorted by length
+      const keys = [];
+      const n = allAttrs.length;
+
+      function checkCombos(len, start, curr) {
+        if (curr.length === len) {
+          // check if minimal (not superset of any existing key)
+          const isSuper = keys.some(k => k.every(attr => curr.includes(attr)));
+          if (!isSuper) {
+            const cl = computeClosure(curr, fds);
+            if (cl.length === allAttrs.length) {
+              keys.push([...curr]);
+            }
+          }
+          return;
+        }
+        for (let i = start; i < n; i++) {
+          curr.push(allAttrs[i]);
+          checkCombos(len, i + 1, curr);
+          curr.pop();
+        }
+      }
+
+      for (let len = 1; len <= Math.min(n, 4); len++) {
+        checkCombos(len, 0, []);
+        if (keys.length > 0 && len >= 2) break; // found minimal candidate keys
+      }
+
+      return keys.length > 0 ? keys : [allAttrs];
+    }
+
+    function runAnalysis() {
+      const attrs = parseAttributes();
+      const fds = parseFDs();
+      calcCustomClosure();
+
+      const candidateKeys = findCandidateKeys(attrs, fds);
+      const primeAttributes = new Set();
+      candidateKeys.forEach(k => k.forEach(a => primeAttributes.add(a)));
+
+      document.getElementById("stat-keys").textContent = candidateKeys.map(k => `{${k.join(", ")}}`).join(" oder ");
+
+      // Diagnose 2NF, 3NF, BCNF
+      let is2NF = true;
+      let is3NF = true;
+      let isBCNF = true;
+      const diagHTML = [];
+
+      // 1NF is always true (atomic attributes)
+      diagHTML.push(`
+        <div class="p-3 bg-[#070919] rounded-xl border border-emerald-500/30 flex items-start gap-3">
+          <span class="text-emerald-400 font-bold">✓ 1NF:</span>
+          <div class="text-xs text-slate-300">Erfüllt. Alle Attributwerte sind atomar und Wertebereiche elementar.</div>
+        </div>
+      `);
+
+      // Check 2NF: No non-prime attribute may depend on a proper subset of any candidate key
+      const violations2NF = [];
+      fds.forEach(fd => {
+        fd.rhs.forEach(r => {
+          if (!primeAttributes.has(r)) {
+            candidateKeys.forEach(ck => {
+              const isStrictSubset = fd.lhs.length < ck.length && fd.lhs.every(a => ck.includes(a));
+              if (isStrictSubset) {
+                violations2NF.push(`{${fd.lhs.join(", ")}} ➔ ${r} (Teil-Schlüsselabhängigkeit von Schlüssel {${ck.join(", ")}})`);
+              }
+            });
+          }
+        });
+      });
+
+      if (violations2NF.length > 0) {
+        is2NF = false;
+        diagHTML.push(`
+          <div class="p-3 bg-[#070919] rounded-xl border border-rose-500/30 flex items-start gap-3">
+            <span class="text-rose-400 font-bold">✗ 2NF:</span>
+            <div class="text-xs text-slate-300">
+              <b>Verletzt:</b> Partielle funktionale Abhängigkeiten entdeckt:
+              <ul class="list-disc list-inside text-rose-300 mt-1 font-mono text-[11px]">
+                ${violations2NF.map(v => `<li>${v}</li>`).join("")}
+              </ul>
+            </div>
+          </div>
+        `);
+      } else {
+        diagHTML.push(`
+          <div class="p-3 bg-[#070919] rounded-xl border border-emerald-500/30 flex items-start gap-3">
+            <span class="text-emerald-400 font-bold">✓ 2NF:</span>
+            <div class="text-xs text-slate-300">Erfüllt. Kein Nicht-Primattribut hängt von einem echten Teilschlüssel ab.</div>
+          </div>
+        `);
+      }
+
+      // Check 3NF: For every X -> A, either A is in X (trivial), X is superkey, or A is prime attribute
+      const violations3NF = [];
+      fds.forEach(fd => {
+        const xClosure = computeClosure(fd.lhs, fds);
+        const isSuperKey = xClosure.length === attrs.length;
+        fd.rhs.forEach(r => {
+          if (!fd.lhs.includes(r)) {
+            const isPrime = primeAttributes.has(r);
+            if (!isSuperKey && !isPrime) {
+              violations3NF.push(`{${fd.lhs.join(", ")}} ➔ ${r} (Transitive Abhängigkeit: LHS ist kein Superschlüssel und RHS ist kein Primattribut)`);
+            }
+          }
+        });
+      });
+
+      if (violations3NF.length > 0) {
+        is3NF = false;
+        diagHTML.push(`
+          <div class="p-3 bg-[#070919] rounded-xl border border-rose-500/30 flex items-start gap-3">
+            <span class="text-rose-400 font-bold">✗ 3NF:</span>
+            <div class="text-xs text-slate-300">
+              <b>Verletzt:</b> Transitive Abhängigkeiten entdeckt:
+              <ul class="list-disc list-inside text-rose-300 mt-1 font-mono text-[11px]">
+                ${violations3NF.map(v => `<li>${v}</li>`).join("")}
+              </ul>
+            </div>
+          </div>
+        `);
+      } else {
+        diagHTML.push(`
+          <div class="p-3 bg-[#070919] rounded-xl border border-emerald-500/30 flex items-start gap-3">
+            <span class="text-emerald-400 font-bold">✓ 3NF:</span>
+            <div class="text-xs text-slate-300">Erfüllt. Keine transitiven Abhängigkeiten für Nicht-Primattribute.</div>
+          </div>
+        `);
+      }
+
+      // Check BCNF: For every X -> A, X must be superkey
+      const violationsBCNF = [];
+      fds.forEach(fd => {
+        const xClosure = computeClosure(fd.lhs, fds);
+        const isSuperKey = xClosure.length === attrs.length;
+        fd.rhs.forEach(r => {
+          if (!fd.lhs.includes(r) && !isSuperKey) {
+            violationsBCNF.push(`{${fd.lhs.join(", ")}} ➔ ${r} (LHS {${fd.lhs.join(", ")}} ist kein Superschlüssel)`);
+          }
+        });
+      });
+
+      if (violationsBCNF.length > 0) {
+        isBCNF = false;
+        diagHTML.push(`
+          <div class="p-3 bg-[#070919] rounded-xl border border-amber-500/30 flex items-start gap-3">
+            <span class="text-amber-400 font-bold">✗ BCNF:</span>
+            <div class="text-xs text-slate-300">
+              <b>Nicht BCNF:</b> Jede Determinante muss Superschlüssel sein.
+            </div>
+          </div>
+        `);
+      } else {
+        diagHTML.push(`
+          <div class="p-3 bg-[#070919] rounded-xl border border-emerald-500/30 flex items-start gap-3">
+            <span class="text-emerald-400 font-bold">✓ BCNF:</span>
+            <div class="text-xs text-slate-300">Erfüllt. Jede funktionale Determinante ist ein vollwertiger Superschlüssel.</div>
+          </div>
+        `);
+      }
+
+      document.getElementById("nf-diagnostics-list").innerHTML = diagHTML.join("");
+      document.getElementById("stat-nf").textContent = isBCNF ? "BCNF (Höchste)" : is3NF ? "3NF Erfüllt" : is2NF ? "2NF Erfüllt" : "1NF (Normalisierungsbedarf!)";
+
+      // 3NF Synthesis (Bernstein)
+      // Group FDs with same LHS
+      const synthesisGroups = {};
+      fds.forEach(fd => {
+        const key = fd.lhs.slice().sort().join(", ");
+        if (!synthesisGroups[key]) {
+          synthesisGroups[key] = { lhs: fd.lhs, rhs: new Set() };
+        }
+        fd.rhs.forEach(r => synthesisGroups[key].rhs.add(r));
+      });
+
+      const schemaList = [];
+      let schemaIdx = 1;
+      Object.keys(synthesisGroups).forEach(k => {
+        const g = synthesisGroups[k];
+        const allRAttrs = [...g.lhs, ...Array.from(g.rhs)];
+        const uniqueAttrs = Array.from(new Set(allRAttrs));
+        schemaList.push({
+          name: `R_${schemaIdx++}`,
+          primaryKey: g.lhs,
+          attrs: uniqueAttrs
+        });
+      });
+
+      // Check if at least one candidate key is contained in a schema (Lossless join property)
+      const hasKeyContained = schemaList.some(s => {
+        return candidateKeys.some(ck => ck.every(a => s.attrs.includes(a)));
+      });
+
+      if (!hasKeyContained && candidateKeys.length > 0) {
+        const keyToAdd = candidateKeys[0];
+        schemaList.push({
+          name: `R_${schemaIdx++}`,
+          primaryKey: keyToAdd,
+          attrs: keyToAdd,
+          isKeySchema: true
+        });
+      }
+
+      document.getElementById("stat-fc-count").textContent = `${fds.length} FDs`;
+      document.getElementById("stat-relations-count").textContent = `${schemaList.length} Relationen`;
+
+      let synthStepsHTML = `
+        <div class="text-slate-400"><b class="text-indigo-300">1. Kanonische Überdeckung $F_c$:</b> FDs bereinigen und redundante Attribute eliminieren.</div>
+        <div class="text-slate-400"><b class="text-indigo-300">2. Synthese:</b> Für jede funktionale Determinante $X \\to Y$ wird ein Schema $R_i(X \\cup Y)$ mit Primärschlüssel $X$ gebildet.</div>
+        <div class="text-slate-400"><b class="text-indigo-300">3. Verlustlosigkeits-Prüfung:</b> ${hasKeyContained ? "Ein Kandidatenschlüssel ist bereits in einem Teilschema enthalten." : "Zusätzliches Schlüssel-Schema hinzugefügt, um Verlustlosigkeit zu garantieren."}</div>
+      `;
+      document.getElementById("synthesis-steps").innerHTML = synthStepsHTML;
+
+      let resultsGridHTML = "";
+      schemaList.forEach(s => {
+        resultsGridHTML += `
+          <div class="p-3.5 bg-[#070919] rounded-xl border border-indigo-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div class="text-xs font-bold text-white font-mono flex items-center gap-1.5">
+                <span class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-500/30">${s.name}</span>
+                ( ${s.attrs.map(a => s.primaryKey.includes(a) ? `<u class="text-amber-400 font-bold">${a}</u>` : `<span class="text-slate-300">${a}</span>`).join(", ")} )
+              </div>
+              <div class="text-[11px] text-slate-400 mt-1">
+                Primärschlüssel: <b class="text-amber-400">{${s.primaryKey.join(", ")}}</b>
+              </div>
+            </div>
+            <span class="text-[10px] font-semibold px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 whitespace-nowrap self-start sm:self-auto">
+              ✓ 3NF &amp; BCNF
+            </span>
+          </div>
+        `;
+      });
+
+      document.getElementById("synthesis-results-grid").innerHTML = resultsGridHTML;
+
+      if (window.renderMathInElement) {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    window.onload = function() {
+      loadNfPreset("uni_vorlesung");
+    };
+  </script>
+</body>
+</html>

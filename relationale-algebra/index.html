@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Relationale Algebra - Join & Aggregation Explorer | Uni Lehrmaterial</title>
+  <meta name="description" content="Interaktiver Relationale Algebra Join- & Aggregations-Explorer für Informatik-Studierende. Verstehen Sie Equi-, Outer-, Semi- und Anti-Joins, GROUP BY (γ), MIN/MAX und ORDER BY (τ) visuell.">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- KaTeX for math typography & Auto-render extension -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    code, pre, .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.4);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.7);
+    }
+  </style>
+</head>
+<body class="bg-[#070915] text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- Topmost Meta Bar (TU Darmstadt & Portfolio breadcrumbs) -->
+  <div class="bg-[#04060e] border-b border-indigo-950/60 text-[11px] text-slate-400 py-1.5 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center space-x-3">
+        <a href="/" class="hover:text-indigo-300 transition flex items-center gap-1 font-medium">
+          <span>←</span> Zurück zum Portfolio
+        </a>
+        <span class="text-slate-700">·</span>
+        <a href="/lehrmaterial/" class="text-slate-400 hover:text-indigo-300 transition flex items-center gap-1">
+          <span>📚</span> Alle Lehrmaterialien (Sammlung)
+        </a>
+      </div>
+      <div class="text-slate-400 font-medium tracking-wide">
+        TU Darmstadt • Datenbanken &amp; Informationsmanagement
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="bg-[#0b0e26]/90 backdrop-blur-md border-b border-indigo-950/80 sticky top-0 z-50 shadow-lg shadow-black/40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white text-xl shadow-lg shadow-indigo-600/30 ring-1 ring-white/10 shrink-0">
+          ⋈
+        </div>
+        <div>
+          <h1 class="font-bold text-base sm:text-lg text-white leading-tight flex items-center gap-2">
+            Relationale Algebra
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Lern-Tool</span>
+          </h1>
+          <p class="text-xs text-slate-400">Joins, Aggregation (γ), Sortierung (τ) &amp; Optimierung</p>
+        </div>
+      </div>
+
+      <!-- Desktop Nav Tabs -->
+      <nav class="hidden lg:flex items-center space-x-1 font-medium text-xs">
+        <button onclick="switchTab('simulator')" id="nav-simulator" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Join-Simulator</button>
+        <button onclick="switchTab('aggregation')" id="nav-aggregation" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">GROUP BY &amp; Aggregation (γ)</button>
+        <button onclick="switchTab('wizard')" id="nav-wizard" class="tab-btn px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white transition shadow-sm font-semibold">Entscheidungsbaum</button>
+        <button onclick="switchTab('catalog')" id="nav-catalog" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Operator-Katalog</button>
+        <button onclick="switchTab('optimizer')" id="nav-optimizer" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Anfragebaum &amp; Pushdown</button>
+        <button onclick="switchTab('prompts')" id="nav-prompts" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Aufgaben-Trainer</button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition">Wissenstest</button>
+      </nav>
+
+      <!-- Mobile/Tablet Nav Selector -->
+      <div class="lg:hidden">
+        <select id="mobile-nav" onchange="switchTab(this.value)" class="bg-slate-900 border border-slate-700 text-white rounded-lg px-3 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+          <option value="wizard">Entscheidungsbaum</option>
+          <option value="simulator">Join-Simulator</option>
+          <option value="aggregation">GROUP BY &amp; Aggregation (γ)</option>
+          <option value="catalog">Operator-Katalog</option>
+          <option value="optimizer">Anfragebaum &amp; Pushdown</option>
+          <option value="prompts">Aufgaben-Trainer</option>
+          <option value="quiz">Wissenstest</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+
+    <!-- ======================================================== -->
+    <!-- SECTION 1: ENTSCHEIDUNGSBAUM (WIZARD)                    -->
+    <!-- ======================================================== -->
+    <section id="sec-wizard" class="space-y-6">
+      
+      <!-- Top Title Banner -->
+      <div class="bg-[#121633] border border-indigo-900/60 rounded-2xl p-6 shadow-xl space-y-2">
+        <h2 class="text-xl font-bold flex items-center gap-2.5 text-white">
+          <span>🌳</span> Interaktiver Join-Entscheidungsbaum
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          Beantworten Sie die folgenden Fragen zu Ihrer Aufgabenstellung, um Schritt für Schritt exakt die Join-Art zu ermitteln, die Sie in der Relationalen Algebra benötigen.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Decision Questions / Completion Box (Clean Dark Theme) -->
+        <div class="lg:col-span-7 bg-[#121633] border border-indigo-900/60 rounded-2xl p-6 shadow-xl space-y-6">
+          <div id="wizard-step-container" class="space-y-6">
+            <!-- Populated dynamically -->
+          </div>
+
+          <!-- Bottom bar: Back, Step Counter, Reset -->
+          <div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-medium">
+            <button onclick="wizardGoBack()" id="btn-wizard-back" class="px-3.5 py-1.5 rounded-lg border border-indigo-950 bg-[#090b1c] hover:bg-slate-800 text-slate-300 font-semibold transition flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed">
+              <span>←</span> Zurück
+            </button>
+            <span id="wizard-progress-text" class="font-mono text-slate-400">Schritt 1 von 3</span>
+            <button onclick="resetWizard()" class="hover:text-indigo-400 transition flex items-center gap-1.5 font-semibold text-slate-400">
+              <span>🔄</span> Neustart
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Recommendation Card (Deep Navy/Indigo) -->
+        <div class="lg:col-span-5 space-y-4">
+          <div id="wizard-result-card" class="bg-[#141838] border border-indigo-500/40 rounded-2xl p-6 space-y-4 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-extrabold uppercase tracking-widest text-indigo-300">Empfohlener Join</span>
+              <span id="wizard-badge-sub" class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-200 border border-indigo-500/30">Codd-Erweiterung</span>
+            </div>
+
+            <h3 id="wizard-result-title" class="text-2xl font-black text-white tracking-tight">Linker Semi-Join</h3>
+
+            <!-- Latex formula display box -->
+            <div class="p-4 bg-[#0a0d24] rounded-xl border border-indigo-900/80 text-center text-xl text-indigo-200 shadow-inner flex items-center justify-center min-h-[64px]" id="wizard-result-latex">
+              <!-- Rendered via KaTeX -->
+            </div>
+
+            <p id="wizard-result-desc" class="text-xs text-slate-300 leading-relaxed min-h-[44px]">
+              Filtert R basierend auf der Existenz von Partnern in S. Verhindert Duplikate!
+            </p>
+
+            <!-- Exam trap alert box -->
+            <div id="wizard-warning-box" class="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs leading-relaxed space-y-1.5">
+              <div class="font-bold flex items-center gap-1.5 text-amber-300">
+                <span>⚠️</span> Klausurfalle: Semi-Join vs. Left Join
+              </div>
+              <div class="leading-relaxed">
+                Ein <b>Left Outer Join</b> (<span class="font-mono text-amber-300 font-bold">⟕</span>) filtert <b>nicht</b>! Er behält alle Zeilen der linken Tabelle und füllt partnerlose Zeilen mit <code class="bg-slate-900/80 px-1 py-0.5 rounded text-amber-300 font-mono">NULL</code> auf. Für reine Positivfilterungen ist nur der <b>Semi-Join</b> (<span class="font-mono text-emerald-300 font-bold">⋉</span>) korrekt.
+              </div>
+            </div>
+
+            <!-- Big emerald CTA button -->
+            <button id="wizard-apply-btn" onclick="applyWizardToSimulator()" class="w-full py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 font-bold text-white text-sm shadow-lg shadow-emerald-500/25 transition transform active:scale-[0.98] flex items-center justify-center gap-2">
+              <span>Im Simulator ausprobieren</span>
+              <span>➔</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 2: JOIN-SIMULATOR (WITH 9 JOIN TYPES)            -->
+    <!-- ======================================================== -->
+    <section id="sec-simulator" class="hidden space-y-6">
+      
+      <!-- Top Preset & Custom Table Selector Bar -->
+      <div class="bg-[#121633] border border-indigo-900/60 rounded-2xl p-5 shadow-2xl space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2.5">
+              <span>🔬</span> Interaktiver Join-Simulator
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Wähle beliebige Relationen und Attribute aus, um das Verhalten aller 9 Verbundarten live zu beobachten.</p>
+          </div>
+
+          <!-- Scenario Dropdown -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Szenario:</span>
+            <select id="preset-selector" onchange="loadPreset(this.value)" class="bg-[#090b1c] border border-indigo-500/50 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="nike_shop">👟 Schuhversand: Bestellposten &amp; Produkt (Nike)</option>
+              <option value="bib_exemplar">📚 Bibliothek: Buch &amp; Exemplar</option>
+              <option value="bib_autor">✍️ Bibliothek: Autor &amp; BuchAutor</option>
+              <option value="bib_leser">👤 Bibliothek: Leser &amp; Exemplar</option>
+              <option value="univ">🎓 Universität: ProfessorIn &amp; Vorlesung</option>
+              <option value="company">🏢 Unternehmen: Mitarbeiter &amp; Abteilung</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4 Column Selectors: Left Table, Left Col, Right Table, Right Col -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-800">
+          <!-- Left Relation R -->
+          <div class="bg-[#0b0e26] p-3 rounded-xl border border-indigo-950">
+            <label class="block text-[11px] font-bold text-indigo-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Linke Tabelle (R)</span>
+              <span class="text-[10px] text-slate-500 font-mono">Relation 1</span>
+            </label>
+            <select id="select-table-r" onchange="onTableRChanged()" class="w-full bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-indigo-400"></select>
+          </div>
+
+          <!-- Join Column R -->
+          <div class="bg-[#0b0e26] p-3 rounded-xl border border-indigo-950">
+            <label class="block text-[11px] font-bold text-indigo-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Join-Attribut R</span>
+              <span class="text-[10px] text-slate-500 font-mono">c₁</span>
+            </label>
+            <select id="select-col-r" onchange="onColChanged()" class="w-full bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-indigo-400"></select>
+          </div>
+
+          <!-- Right Relation S -->
+          <div class="bg-[#0b0e26] p-3 rounded-xl border border-indigo-950">
+            <label class="block text-[11px] font-bold text-violet-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Rechte Tabelle (S)</span>
+              <span class="text-[10px] text-slate-500 font-mono">Relation 2</span>
+            </label>
+            <select id="select-table-s" onchange="onTableSChanged()" class="w-full bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-violet-400"></select>
+          </div>
+
+          <!-- Join Column S -->
+          <div class="bg-[#0b0e26] p-3 rounded-xl border border-indigo-950">
+            <label class="block text-[11px] font-bold text-violet-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Join-Attribut S</span>
+              <span class="text-[10px] text-slate-500 font-mono">c₂</span>
+            </label>
+            <select id="select-col-s" onchange="onColChanged()" class="w-full bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-violet-400"></select>
+          </div>
+        </div>
+
+        <!-- Join Type Button Matrix -->
+        <div class="space-y-2 pt-2 border-t border-slate-800/80">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Join-Operator auswählen:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2" id="join-type-buttons">
+            <!-- Buttons dynamically generated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Warning/Info Alert for Misconceptions -->
+      <div id="join-alert-box" class="hidden rounded-xl p-4 border text-xs font-medium transition-all"></div>
+
+      <!-- Tables and Results Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Input Tables Preview (R and S) -->
+        <div class="lg:col-span-5 space-y-5">
+          <!-- Table R View -->
+          <div class="bg-[#121633] border border-indigo-950 rounded-2xl overflow-hidden shadow-lg">
+            <div class="bg-indigo-950/70 px-4 py-2.5 border-b border-indigo-900/60 flex justify-between items-center">
+              <span class="font-bold text-xs text-indigo-200 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
+                Tabelle R: <span id="label-table-r" class="text-white font-mono font-bold"></span>
+              </span>
+              <span id="badge-count-r" class="text-[11px] bg-indigo-900 text-indigo-200 px-2 py-0.5 rounded-full font-mono"></span>
+            </div>
+            <div class="overflow-x-auto custom-scrollbar max-h-56 bg-[#0a0c1e]">
+              <table class="w-full text-left text-xs" id="table-r-view"></table>
+            </div>
+          </div>
+
+          <!-- Table S View -->
+          <div class="bg-[#121633] border border-indigo-950 rounded-2xl overflow-hidden shadow-lg">
+            <div class="bg-purple-950/70 px-4 py-2.5 border-b border-purple-900/60 flex justify-between items-center">
+              <span class="font-bold text-xs text-purple-200 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>
+                Tabelle S: <span id="label-table-s" class="text-white font-mono font-bold"></span>
+              </span>
+              <span id="badge-count-s" class="text-[11px] bg-purple-900 text-purple-200 px-2 py-0.5 rounded-full font-mono"></span>
+            </div>
+            <div class="overflow-x-auto custom-scrollbar max-h-56 bg-[#0a0c1e]">
+              <table class="w-full text-left text-xs" id="table-s-view"></table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Output Box -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="bg-[#121633] border border-indigo-950 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full">
+            <div class="bg-[#0d1028] p-4 border-b border-indigo-950 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 text-[11px] font-bold uppercase tracking-wider">Ergebnis-Relation</span>
+                  <span id="result-tuple-count" class="text-xs text-slate-400 font-mono"></span>
+                </div>
+                <div id="join-name-badge" class="text-xs px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 font-semibold"></div>
+              </div>
+
+              <!-- LaTeX Formula Display -->
+              <div class="p-3 bg-[#070919] rounded-xl border border-indigo-950/80 flex items-center justify-between overflow-x-auto custom-scrollbar">
+                <div id="latex-output" class="text-sm sm:text-base text-indigo-200"></div>
+              </div>
+
+              <!-- SQL Equivalent Display -->
+              <div class="p-2.5 bg-[#070919]/60 rounded-lg border border-slate-800 flex items-center gap-2 text-xs font-mono text-slate-300 overflow-x-auto custom-scrollbar">
+                <span class="text-amber-400 font-bold">SQL:</span>
+                <span id="sql-output" class="text-slate-300"></span>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar flex-1 min-h-[260px] max-h-[380px] bg-[#090b1c]">
+              <table class="w-full text-left text-xs" id="result-table-view"></table>
+            </div>
+
+            <div class="p-3 bg-[#0d1028] border-t border-indigo-950 text-xs text-slate-400 flex items-center justify-between">
+              <span id="join-rule-info"></span>
+              <span class="text-emerald-400 font-mono text-[11px]">Relationale Algebra ist abgeschlossen ✓</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 3: GROUP BY & AGGREGATION SIMULATOR (γ & τ)      -->
+    <!-- ======================================================== -->
+    <section id="sec-aggregation" class="hidden space-y-6">
+      <div class="bg-[#121633] border border-indigo-900/60 rounded-2xl p-5 shadow-2xl space-y-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2.5">
+              <span>📊</span> Aggregation (γ), GROUP BY &amp; Sortierung (τ)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">
+              Erweiterte Relationale Algebra nach Klug: Gruppierungsoperator <code class="text-indigo-300 font-mono"><sub>G</sub>γ<sub>F</sub>(R)</code>, Aggregatfunktionen (<code class="text-indigo-300 font-mono">MIN</code>, <code class="text-indigo-300 font-mono">MAX</code>, <code class="text-indigo-300 font-mono">AVG</code>, <code class="text-indigo-300 font-mono">SUM</code>, <code class="text-indigo-300 font-mono">COUNT</code>) und Sortieroperator <code class="text-indigo-300 font-mono">τ</code>.
+            </p>
+          </div>
+
+          <!-- Preset Selector -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Preset:</span>
+            <select id="agg-preset-selector" onchange="loadAggPreset(this.value)" class="bg-[#090b1c] border border-indigo-500/50 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="produkt_hersteller">👟 Produkt: MIN / MAX / AVG Preis je Hersteller</option>
+              <option value="vorlesung_sws">🎓 Vorlesung: SUM &amp; AVG SWS je Dozent</option>
+              <option value="bestellung_anzahl">📦 Bestellposten: SUM Anzahl &amp; MIN/MAX Größe</option>
+              <option value="mitarbeiter_abt">🏢 Mitarbeiter: COUNT Mitarbeiter je Abteilung</option>
+              <option value="global_produkt">🌐 Gesamttabelle (Ohne GROUP BY): MIN, MAX, AVG &amp; COUNT</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Controls: Table, Group By Column, Aggregates, Order By -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-800">
+          <!-- Table Selector -->
+          <div class="bg-[#0b0e26] p-3 rounded-xl border border-indigo-950">
+            <label class="block text-[11px] font-bold text-indigo-400 uppercase tracking-wider mb-1.5">
+              Basistabelle (R)
+            </label>
+            <select id="agg-select-table" onchange="onAggTableChanged()" class="w-full bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-indigo-400"></select>
+          </div>
+
+          <!-- Group By Column -->
+          <div class="bg-[#0b0e26] p-3 rounded-xl border border-indigo-950">
+            <label class="block text-[11px] font-bold text-indigo-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>GROUP BY Spalte (γ)</span>
+              <span class="text-[10px] text-slate-500 font-mono">G</span>
+            </label>
+            <select id="agg-select-groupby" onchange="renderAggregation()" class="w-full bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-indigo-400"></select>
+          </div>
+
+          <!-- Target Numeric Column for MIN/MAX/SUM/AVG -->
+          <div class="bg-[#0b0e26] p-3 rounded-xl border border-indigo-950">
+            <label class="block text-[11px] font-bold text-violet-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>Zielspalte für MIN/MAX/AVG/SUM</span>
+              <span class="text-[10px] text-slate-500 font-mono">F(A)</span>
+            </label>
+            <select id="agg-select-target-col" onchange="renderAggregation()" class="w-full bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-violet-400"></select>
+          </div>
+
+          <!-- ORDER BY & Sort Direction -->
+          <div class="bg-[#0b0e26] p-3 rounded-xl border border-indigo-950">
+            <label class="block text-[11px] font-bold text-violet-400 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>ORDER BY (τ)</span>
+              <span class="text-[10px] text-slate-500 font-mono">Richtung</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <select id="agg-select-orderby" onchange="renderAggregation()" class="flex-1 bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-violet-400"></select>
+              <select id="agg-select-order-dir" onchange="renderAggregation()" class="w-20 bg-[#141838] border border-indigo-900/60 rounded-lg p-2 text-xs font-semibold text-white outline-none focus:border-violet-400">
+                <option value="ASC">ASC ↑</option>
+                <option value="DESC">DESC ↓</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aggregation Functions Matrix (Checkboxes) -->
+        <div class="pt-2 border-t border-slate-800/80 space-y-2">
+          <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider">Aggregatfunktionen aktivieren:</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#090b1c] border border-indigo-950 cursor-pointer hover:bg-slate-800 transition">
+              <input type="checkbox" id="agg-fn-count" checked onchange="renderAggregation()" class="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700">
+              <span class="text-xs font-bold text-indigo-300 font-mono">COUNT(*)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#090b1c] border border-indigo-950 cursor-pointer hover:bg-slate-800 transition">
+              <input type="checkbox" id="agg-fn-min" checked onchange="renderAggregation()" class="w-4 h-4 text-emerald-600 rounded bg-slate-900 border-slate-700">
+              <span class="text-xs font-bold text-emerald-300 font-mono">MIN(col)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#090b1c] border border-indigo-950 cursor-pointer hover:bg-slate-800 transition">
+              <input type="checkbox" id="agg-fn-max" checked onchange="renderAggregation()" class="w-4 h-4 text-amber-600 rounded bg-slate-900 border-slate-700">
+              <span class="text-xs font-bold text-amber-300 font-mono">MAX(col)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#090b1c] border border-indigo-950 cursor-pointer hover:bg-slate-800 transition">
+              <input type="checkbox" id="agg-fn-avg" checked onchange="renderAggregation()" class="w-4 h-4 text-cyan-600 rounded bg-slate-900 border-slate-700">
+              <span class="text-xs font-bold text-cyan-300 font-mono">AVG(col)</span>
+            </label>
+            <label class="flex items-center gap-2 p-2.5 rounded-xl bg-[#090b1c] border border-indigo-950 cursor-pointer hover:bg-slate-800 transition">
+              <input type="checkbox" id="agg-fn-sum" onchange="renderAggregation()" class="w-4 h-4 text-purple-600 rounded bg-slate-900 border-slate-700">
+              <span class="text-xs font-bold text-purple-300 font-mono">SUM(col)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aggregation Results & Origin Tables -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Input Table with Highlighted Groups -->
+        <div class="lg:col-span-5 space-y-5">
+          <div class="bg-[#121633] border border-indigo-950 rounded-2xl overflow-hidden shadow-lg">
+            <div class="bg-indigo-950/70 px-4 py-2.5 border-b border-indigo-900/60 flex justify-between items-center">
+              <span class="font-bold text-xs text-indigo-200 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
+                Ausgangstabelle mit Gruppenfarben
+              </span>
+              <span id="agg-badge-count-orig" class="text-[11px] bg-indigo-900 text-indigo-200 px-2 py-0.5 rounded-full font-mono"></span>
+            </div>
+            <div class="overflow-x-auto custom-scrollbar max-h-72 bg-[#0a0c1e]">
+              <table class="w-full text-left text-xs" id="agg-table-orig-view"></table>
+            </div>
+          </div>
+
+          <!-- Formula & Rules Explainer -->
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-4 space-y-2.5 text-xs text-slate-300">
+            <div class="font-bold text-indigo-300 flex items-center gap-1.5">
+              <span>💡</span> Klausur-Regeln zu γ und τ:
+            </div>
+            <div class="space-y-1.5 text-[11px] leading-relaxed">
+              <div>• <b>Syntax:</b> <code class="text-indigo-300 font-mono"><sub>G₁, ..., Gₖ</sub>γ<sub>F₁(A₁), ..., Fₘ(Aₘ)</sub>(R)</code></div>
+              <div>• <b>Single-Value Rule (SQL):</b> Jedes Attribut in der Projektion π bzw. im `SELECT` muss <i>entweder</i> in `GROUP BY` stehen <i>oder</i> innerhalb einer Aggregatfunktion verwendet werden!</div>
+              <div>• <b>Sortierung:</b> <code class="text-indigo-300 font-mono">τ<sub>Attribut</sub>(R)</code> sortiert das Ergebnis. Sortierung ändert nur die Tupelreihenfolge.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculated Aggregated Table Output -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="bg-[#121633] border border-indigo-950 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-full">
+            <div class="bg-[#0d1028] p-4 border-b border-indigo-950 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 rounded-md bg-purple-500/20 text-purple-300 text-[11px] font-bold uppercase tracking-wider">Aggregierte Relation</span>
+                  <span id="agg-result-tuple-count" class="text-xs text-slate-400 font-mono"></span>
+                </div>
+                <div class="text-xs px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 font-semibold font-mono">
+                  Operator: γ (Gamma) &amp; τ (Tau)
+                </div>
+              </div>
+
+              <!-- LaTeX Formula Display -->
+              <div class="p-3 bg-[#070919] rounded-xl border border-indigo-950/80 flex items-center justify-between overflow-x-auto custom-scrollbar">
+                <div id="agg-latex-output" class="text-sm sm:text-base text-indigo-200"></div>
+              </div>
+
+              <!-- SQL Equivalent Display -->
+              <div class="p-2.5 bg-[#070919]/60 rounded-lg border border-slate-800 flex items-center gap-2 text-xs font-mono text-slate-300 overflow-x-auto custom-scrollbar">
+                <span class="text-amber-400 font-bold">SQL:</span>
+                <span id="agg-sql-output" class="text-slate-300"></span>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto custom-scrollbar flex-1 min-h-[240px] max-h-[380px] bg-[#090b1c]">
+              <table class="w-full text-left text-xs" id="agg-result-table-view"></table>
+            </div>
+
+            <div class="p-3 bg-[#0d1028] border-t border-indigo-950 text-xs text-slate-400 flex items-center justify-between">
+              <span id="agg-rule-info">Aggregationsoperatoren verdichten mehrere Tupel zu einer Kennzahl.</span>
+              <span class="text-emerald-400 font-mono text-[11px]">Berechnung aktiv ✓</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 4: QUERY TREE & PUSHDOWN OPTIMIZER               -->
+    <!-- ======================================================== -->
+    <section id="sec-optimizer" class="hidden space-y-6">
+      <div class="bg-[#121633] border border-indigo-950 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-indigo-950 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <span>🌳</span> Anfragebaum &amp; Regelbasierte Optimierung
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Schrittweise Transformation: Kanonische Form → Selektionsaufspaltung → Pushdown → Join-Ersetzung.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold text-slate-400">Abfrage:</span>
+            <select id="opt-preset-select" onchange="loadOptimizerPreset(this.value)" class="bg-[#090b1c] border border-indigo-500/50 rounded-xl px-3 py-1.5 text-xs sm:text-sm text-white font-medium outline-none">
+              <option value="bib_exemplar_opt">📚 Bibliothek: Ausleihen über 30 €</option>
+              <option value="nike_orders">👟 Schuhversand: Nike-Bestellposten</option>
+              <option value="sokrates">🎓 Universität: Sokrates Vorlesungen</option>
+              <option value="kemper_books">📖 Bibliothek: Bücher von Kemper</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- SQL Block -->
+        <div class="bg-[#070919] p-4 rounded-xl border border-indigo-950 font-mono text-xs sm:text-sm text-emerald-300">
+          <div class="text-[11px] text-slate-500 uppercase font-semibold mb-1">Eingabe SQL (SFW-Block):</div>
+          <pre id="opt-sql-display" class="whitespace-pre-wrap"></pre>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-[#0a0c20] p-3 rounded-xl border border-indigo-950">
+            <div class="flex items-center space-x-2">
+              <span id="opt-step-badge" class="px-3 py-1 rounded-lg bg-indigo-600 text-white font-bold text-xs"></span>
+              <span id="opt-step-name" class="text-xs sm:text-sm font-semibold text-slate-200"></span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="changeOptStep(-1)" id="btn-opt-prev" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition border border-slate-700">◀ Vorheriger Schritt</button>
+              <button onclick="changeOptStep(1)" id="btn-opt-next" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition">Nächster Schritt ▶</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-7 bg-[#070919] border border-indigo-950 rounded-2xl p-6 flex flex-col items-center justify-center min-h-[340px] shadow-inner" id="opt-tree-container"></div>
+            <div class="lg:col-span-5 space-y-4 flex flex-col justify-center">
+              <div class="bg-[#0d1028] p-4 rounded-xl border border-indigo-950 space-y-2">
+                <span class="text-xs font-bold text-indigo-400 uppercase tracking-wider">Algebra-Ausdruck:</span>
+                <div id="opt-latex-display" class="overflow-x-auto custom-scrollbar text-xs sm:text-sm py-2"></div>
+              </div>
+              <div class="bg-[#0d1028] p-4 rounded-xl border border-indigo-950 space-y-2 text-xs sm:text-sm text-slate-300 leading-relaxed" id="opt-explanation"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 5: OPERATOR / JOIN-KATALOG                       -->
+    <!-- ======================================================== -->
+    <section id="sec-catalog" class="hidden space-y-6">
+      <div class="bg-[#121633] border border-indigo-950 rounded-2xl p-6 shadow-xl space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-indigo-950 pb-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <span>📖</span> Relationale Algebra &amp; Operator-Katalog
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Formale Definitionen, mathematische Äquivalenzen und Praxisszenarien.</p>
+          </div>
+          <div class="flex items-center space-x-1 bg-[#090b1c] p-1 rounded-xl border border-indigo-950 text-xs">
+            <button onclick="filterCatalog('all', event)" class="cat-filter-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium">Alle</button>
+            <button onclick="filterCatalog('codd', event)" class="cat-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">Codd-Basis</button>
+            <button onclick="filterCatalog('inner', event)" class="cat-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">Inner Joins</button>
+            <button onclick="filterCatalog('semi', event)" class="cat-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">Semi &amp; Anti</button>
+            <button onclick="filterCatalog('outer', event)" class="cat-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">Outer Joins</button>
+            <button onclick="filterCatalog('agg', event)" class="cat-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white">Aggregation (γ) &amp; Sortierung (τ)</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="catalog-cards-container"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 6: AUFGABEN-TRAINER                              -->
+    <!-- ======================================================== -->
+    <section id="sec-prompts" class="hidden space-y-6">
+      <div class="bg-[#121633] border border-indigo-950 rounded-2xl p-6 shadow-xl space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span>🎯</span> Aufgaben-Trainer: Signalwörter &amp; Übersetzung
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">Welcher Operator gehört zu welcher Klausurformulierung? Schnellsuche nach typischen Fragestellungen.</p>
+        </div>
+
+        <div class="relative">
+          <input type="text" id="prompt-search-input" onkeyup="filterPrompts(this.value)" placeholder="Suche nach Textphrasen (z. B. 'Nike', 'Durchschnitt', 'pro Hersteller', 'in allen', 'noch nie', 'Sortierung')..." class="w-full bg-[#090b1c] border border-indigo-950 rounded-xl px-4 py-3 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="space-y-3" id="prompt-cards-container"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 7: WISSENSTEST & TUPEL-VERGLEICH                 -->
+    <!-- ======================================================== -->
+    <section id="sec-quiz" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Interactive Quiz -->
+        <div class="lg:col-span-7 bg-[#121633] border border-indigo-950 rounded-2xl p-6 shadow-xl space-y-6">
+          <div class="flex items-center justify-between border-b border-indigo-950 pb-4">
+            <div>
+              <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                <span>📝</span> Wissenstest: Klausurfragen
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Teste dein Verständnis zu Joins, Aggregationen, Äquivalenzregeln und Auswertungsreihenfolgen.</p>
+            </div>
+            <span id="quiz-score-badge" class="px-3 py-1 rounded-full bg-indigo-900/60 border border-indigo-500/40 text-indigo-300 font-mono text-xs font-bold">0 / 6 Punkte</span>
+          </div>
+
+          <div id="quiz-questions-list" class="space-y-5"></div>
+        </div>
+
+        <!-- Chart Analytics Container -->
+        <div class="lg:col-span-5 bg-[#121633] border border-indigo-950 rounded-2xl p-6 shadow-xl space-y-6">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>📊</span> Tupel-Mengen im Vergleich
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Vergleicht die Ergebnis-Tupelanzahl der verschiedenen Joins für die aktuell ausgewählten Beispieldaten.</p>
+          </div>
+          
+          <div class="h-64 relative">
+            <canvas id="tupleChart"></canvas>
+          </div>
+
+          <div id="kardinalitaeten-box" class="bg-[#090b1c] p-4 rounded-xl border border-indigo-950 text-xs text-slate-300 space-y-2">
+            <div class="font-bold text-indigo-400">Klausur-Merksatz Kardinalitäten &amp; Aggregation:</div>
+            <div>• $0 \le |R \ltimes S| \le |R|$ (Semi-Join vergrößert die Zeilenanzahl nie!)</div>
+            <div>• $|R| \le |R \mathbin{\sqsubset\!\bowtie} S| \le |R \times S|$ (Left Outer Join behält immer alle Zeilen aus $R$).</div>
+            <div>• $|{}_{G}\gamma_{F}(R)| = \text{Anzahl distinkter Gruppen in } G$ (ohne GROUP BY exakt 1 Zeile!).</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Footer -->
+  <footer class="bg-[#04060e] border-t border-indigo-950/60 text-center py-6 text-xs text-slate-400 space-y-2">
+    <div class="max-w-7xl mx-auto px-4 space-y-1.5">
+      <div class="font-semibold text-slate-300">Relationale Algebra &amp; Datenbank-Explorer</div>
+      <div class="text-[11px] text-slate-500">
+        Entwickelt von Artjom Becker • TU Darmstadt • Lehrmaterial Datenbanken
+      </div>
+      <div class="text-[11px] text-indigo-400/80 flex items-center justify-center gap-3 pt-1">
+        <a href="/lehrmaterial/" class="hover:underline flex items-center gap-1">
+          <span>📚</span> Alle Lehrmaterialien
+        </a>
+        <span>·</span>
+        <a href="/" class="hover:underline flex items-center gap-1">
+          <span>🏠</span> Portfolio Startseite
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /* ==========================================================================
+       1. DATABASE TABLES
+       ========================================================================== */
+    const TABLES = {
+      Produkt: {
+        cols: ["Name", "Hersteller", "Preis"],
+        rows: [
+          { Name: "Air Max", Hersteller: "Nike", Preis: "129.99 €" },
+          { Name: "Air Force 1", Hersteller: "Nike", Preis: "109.99 €" },
+          { Name: "Stan Smith", Hersteller: "Adidas", Preis: "95.00 €" },
+          { Name: "Superstar", Hersteller: "Adidas", Preis: "89.99 €" },
+          { Name: "Clyde", Hersteller: "Puma", Preis: "79.99 €" }
+        ]
+      },
+      Vorlesung: {
+        cols: ["VorlNr", "Titel", "SWS", "gelesenVon"],
+        rows: [
+          { VorlNr: 5001, Titel: "Grundzüge", SWS: 4, gelesenVon: 2125 },
+          { VorlNr: 5041, Titel: "Ethik", SWS: 4, gelesenVon: 2125 },
+          { VorlNr: 5049, Titel: "Mäeutik", SWS: 2, gelesenVon: 2125 },
+          { VorlNr: 4052, Titel: "Logik", SWS: 4, gelesenVon: 2126 },
+          { VorlNr: 9999, Titel: "Kompaktkurs", SWS: 2, gelesenVon: 9999 }
+        ]
+      },
+      Bestellposten: {
+        cols: ["Bestellung", "Name", "Größe", "Anzahl"],
+        rows: [
+          { Bestellung: 101, Name: "Air Max", Größe: 43, Anzahl: 1 },
+          { Bestellung: 102, Name: "Air Force 1", Größe: 42, Anzahl: 2 },
+          { Bestellung: 103, Name: "Stan Smith", Größe: 44, Anzahl: 1 },
+          { Bestellung: 104, Name: "Superstar", Größe: 41, Anzahl: 3 },
+          { Bestellung: 105, Name: "Air Max", Größe: 45, Anzahl: 2 }
+        ]
+      },
+      Buch: {
+        cols: ["ISBN", "Titel", "Preis"],
+        rows: [
+          { ISBN: "978-3-1", Titel: "Datenbanksysteme", Preis: "39.95 €" },
+          { ISBN: "978-3-2", Titel: "Relationale Algebra", Preis: "24.90 €" },
+          { ISBN: "978-3-3", Titel: "Informationsmanagement", Preis: "49.00 €" },
+          { ISBN: "978-3-4", Titel: "SQL Grundlagen", Preis: "19.99 €" }
+        ]
+      },
+      Exemplar: {
+        cols: ["ExemplarNr", "ISBN", "Bibliothek", "Leser"],
+        rows: [
+          { ExemplarNr: 1, ISBN: "978-3-1", Bibliothek: "Zentralbib", Leser: 201 },
+          { ExemplarNr: 2, ISBN: "978-3-1", Bibliothek: "Informatik", Leser: 202 },
+          { ExemplarNr: 3, ISBN: "978-3-2", Bibliothek: "Zentralbib", Leser: null },
+          { ExemplarNr: 4, ISBN: "978-3-9", Bibliothek: "Zentralbib", Leser: 205 }
+        ]
+      },
+      Autor: {
+        cols: ["ID", "Vorname", "Nachname"],
+        rows: [
+          { ID: 10, Vorname: "Alfons", Nachname: "Kemper" },
+          { ID: 20, Vorname: "Andre", Nachname: "Eickler" },
+          { ID: 30, Vorname: "Gottlob", Nachname: "Frege" },
+          { ID: 40, Vorname: "Ada", Nachname: "Lovelace" }
+        ]
+      },
+      BuchAutor: {
+        cols: ["ISBN", "ID"],
+        rows: [
+          { ISBN: "978-3-1", ID: 10 },
+          { ISBN: "978-3-1", ID: 20 },
+          { ISBN: "978-3-2", ID: 10 },
+          { ISBN: "978-3-5", ID: 99 }
+        ]
+      },
+      Leser: {
+        cols: ["ID", "Vorname", "Nachname"],
+        rows: [
+          { ID: 201, Vorname: "Max", Nachname: "Mustermann" },
+          { ID: 202, Vorname: "Anna", Nachname: "Schmidt" },
+          { ID: 205, Vorname: "Lisa", Nachname: "Müller" }
+        ]
+      },
+      ProfessorIn: {
+        cols: ["PersNr", "Name", "Rang"],
+        rows: [
+          { PersNr: 2125, Name: "Sokrates", Rang: "C4" },
+          { PersNr: 2126, Name: "Russel", Rang: "C4" },
+          { PersNr: 2127, Name: "Kopernikus", Rang: "C3" },
+          { PersNr: 2130, Name: "Kant", Rang: "C4" }
+        ]
+      },
+      Mitarbeiter: {
+        cols: ["MitarbeiterID", "Name", "AbtID"],
+        rows: [
+          { MitarbeiterID: 1, Name: "Schmidt", AbtID: 10 },
+          { MitarbeiterID: 2, Name: "Müller", AbtID: 10 },
+          { MitarbeiterID: 3, Name: "Becker", AbtID: 20 },
+          { MitarbeiterID: 4, Name: "Weber", AbtID: 30 }
+        ]
+      },
+      Abteilung: {
+        cols: ["AbtID", "AbtName", "Budget"],
+        rows: [
+          { AbtID: 10, AbtName: "Forschung", Budget: "200000 €" },
+          { AbtID: 20, AbtName: "Entwicklung", Budget: "350000 €" },
+          { AbtID: 30, AbtName: "Vertrieb", Budget: "150000 €" }
+        ]
+      }
+    };
+
+    const PRESETS = {
+      nike_shop: { r: "Bestellposten", s: "Produkt", colR: "Name", colS: "Name", join: "left_semi" },
+      bib_exemplar: { r: "Buch", s: "Exemplar", colR: "ISBN", colS: "ISBN", join: "equi" },
+      bib_autor: { r: "Autor", s: "BuchAutor", colR: "ID", colS: "ID", join: "natural" },
+      bib_leser: { r: "Leser", s: "Exemplar", colR: "ID", colS: "Leser", join: "equi" },
+      univ: { r: "ProfessorIn", s: "Vorlesung", colR: "PersNr", colS: "gelesenVon", join: "equi" },
+      company: { r: "Mitarbeiter", s: "Abteilung", colR: "AbtID", colS: "AbtID", join: "equi" }
+    };
+
+    const AGG_PRESETS = {
+      produkt_hersteller: {
+        table: "Produkt",
+        groupBy: "Hersteller",
+        targetCol: "Preis",
+        orderBy: "Hersteller",
+        orderDir: "ASC",
+        count: true, min: true, max: true, avg: true, sum: false
+      },
+      vorlesung_sws: {
+        table: "Vorlesung",
+        groupBy: "gelesenVon",
+        targetCol: "SWS",
+        orderBy: "gelesenVon",
+        orderDir: "ASC",
+        count: true, min: false, max: true, avg: true, sum: true
+      },
+      bestellung_anzahl: {
+        table: "Bestellposten",
+        groupBy: "Name",
+        targetCol: "Anzahl",
+        orderBy: "Name",
+        orderDir: "ASC",
+        count: true, min: true, max: true, avg: false, sum: true
+      },
+      mitarbeiter_abt: {
+        table: "Mitarbeiter",
+        groupBy: "AbtID",
+        targetCol: "MitarbeiterID",
+        orderBy: "AbtID",
+        orderDir: "ASC",
+        count: true, min: false, max: false, avg: false, sum: false
+      },
+      global_produkt: {
+        table: "Produkt",
+        groupBy: "__none__",
+        targetCol: "Preis",
+        orderBy: "__none__",
+        orderDir: "ASC",
+        count: true, min: true, max: true, avg: true, sum: false
+      }
+    };
+
+    const JOIN_TYPES = [
+      { id: "left_semi", name: "Linker Semi", sym: "R \\ltimes S", title: "Linker Semi-Join" },
+      { id: "equi", name: "Equi-Join", sym: "R \\bowtie_{c} S", title: "Equi-Join (Gleichheitsverbund)" },
+      { id: "natural", name: "Natural Join", sym: "R \\bowtie S", title: "Natürlicher Verbund" },
+      { id: "theta", name: "Theta-Join", sym: "R \\bowtie_\\theta S", title: "Theta-Join (Allgemein)" },
+      { id: "anti", name: "Anti-Join", sym: "R \\triangleright S", title: "Anti-Semi-Join" },
+      { id: "right_semi", name: "Rechter Semi", sym: "R \\rtimes S", title: "Rechter Semi-Join" },
+      { id: "outer_left", name: "Left Outer", sym: "R \\mathbin{\\sqsubset\\!\\bowtie} S", title: "Linker Äußerer Join" },
+      { id: "outer_right", name: "Right Outer", sym: "R \\mathbin{\\bowtie\\!\\sqsupset} S", title: "Rechter Äußerer Join" },
+      { id: "outer_full", name: "Full Outer", sym: "R \\mathbin{\\sqsubset\\!\\bowtie\\!\\sqsupset} S", title: "Vollständiger Äußerer Join" }
+    ];
+
+    let selectedTableRKey = "Bestellposten";
+    let selectedTableSKey = "Produkt";
+    let selectedColR = "Name";
+    let selectedColS = "Name";
+    let selectedJoinType = "left_semi";
+
+    let selectedAggTableKey = "Produkt";
+    let currentOptPresetKey = "nike_orders";
+    let currentOptStep = 0;
+    let quizUserAnswers = {};
+    let tupleChartInstance = null;
+
+    const GROUP_COLORS = [
+      { bg: "rgba(99, 102, 241, 0.18)", border: "rgba(99, 102, 241, 0.5)", text: "#a5b4fc" },
+      { bg: "rgba(168, 85, 247, 0.18)", border: "rgba(168, 85, 247, 0.5)", text: "#d8b4fe" },
+      { bg: "rgba(16, 185, 129, 0.18)", border: "rgba(16, 185, 129, 0.5)", text: "#6ee7b7" },
+      { bg: "rgba(245, 158, 11, 0.18)", border: "rgba(245, 158, 11, 0.5)", text: "#fcd34d" },
+      { bg: "rgba(236, 72, 153, 0.18)", border: "rgba(236, 72, 153, 0.5)", text: "#f472b6" },
+      { bg: "rgba(14, 165, 233, 0.18)", border: "rgba(14, 165, 233, 0.5)", text: "#7dd3fc" }
+    ];
+
+    function switchTab(tabId) {
+      const tabs = ['wizard', 'simulator', 'aggregation', 'optimizer', 'catalog', 'prompts', 'quiz'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`sec-${t}`);
+        const nav = document.getElementById(`nav-${t}`);
+        if (sec) {
+          if (t === tabId) {
+            sec.classList.remove('hidden');
+          } else {
+            sec.classList.add('hidden');
+          }
+        }
+        if (nav) {
+          if (t === tabId) {
+            nav.className = "tab-btn px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white transition shadow-sm font-semibold";
+          } else {
+            nav.className = "tab-btn px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/80 transition font-medium";
+          }
+        }
+      });
+      const mobileNav = document.getElementById('mobile-nav');
+      if (mobileNav) mobileNav.value = tabId;
+
+      if (tabId === 'quiz') {
+        setTimeout(() => {
+          renderChart();
+          renderAllMath();
+        }, 100);
+      }
+      if (tabId === 'aggregation') {
+        renderAggregation();
+      }
+    }
+
+    /* ==========================================================================
+       2. WIZARD LOGIC
+       ========================================================================== */
+    const WIZARD_STATE = {
+      needBothCols: null,
+      searchMissing: null,
+      keepUnmatched: null,
+      whichSide: null
+    };
+
+    function resetWizard() {
+      WIZARD_STATE.needBothCols = null;
+      WIZARD_STATE.searchMissing = null;
+      WIZARD_STATE.keepUnmatched = null;
+      WIZARD_STATE.whichSide = null;
+      renderWizard();
+    }
+
+    function wizardGoBack() {
+      if (WIZARD_STATE.whichSide !== null) {
+        WIZARD_STATE.whichSide = null;
+      } else if (WIZARD_STATE.keepUnmatched !== null) {
+        WIZARD_STATE.keepUnmatched = null;
+      } else if (WIZARD_STATE.searchMissing !== null) {
+        WIZARD_STATE.searchMissing = null;
+      } else if (WIZARD_STATE.needBothCols !== null) {
+        WIZARD_STATE.needBothCols = null;
+      }
+      renderWizard();
+    }
+
+    function renderWizard() {
+      const container = document.getElementById("wizard-step-container");
+      if (!container) return;
+
+      let html = "";
+      let stepNum = 1;
+      const isFinished = (WIZARD_STATE.needBothCols === false && WIZARD_STATE.searchMissing !== null) ||
+                         (WIZARD_STATE.needBothCols === true && WIZARD_STATE.keepUnmatched === false) ||
+                         (WIZARD_STATE.needBothCols === true && WIZARD_STATE.keepUnmatched === true && WIZARD_STATE.whichSide !== null);
+
+      if (isFinished) {
+        stepNum = 3;
+        html += `
+          <div class="p-5 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 space-y-2">
+            <div class="font-bold text-base flex items-center gap-2 text-emerald-300">
+              <span>✅</span> Entscheidungsfindung abgeschlossen!
+            </div>
+            <p class="text-xs text-emerald-300/80 leading-relaxed">
+              Ihre Antworten reichen bereits aus, um den optimalen Join eindeutig festzulegen. Schauen Sie auf die Empfehlungskarte rechts.
+            </p>
+          </div>
+        `;
+      } else {
+        // Question 1
+        html += `
+          <div class="space-y-3">
+            <div class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-mono font-bold">1</span>
+              Werden Spalten aus BEIDEN Relationen im Endergebnis benötigt?
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button onclick="setWizardVal('needBothCols', true)" class="p-3.5 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.needBothCols === true ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                <div class="font-bold text-sm mb-0.5 text-white">JA</div>
+                <div class="text-[11px] opacity-80">Eigenschaften beider Tabellen sollen angezeigt werden.</div>
+              </button>
+              <button onclick="setWizardVal('needBothCols', false)" class="p-3.5 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.needBothCols === false ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                <div class="font-bold text-sm mb-0.5 text-white">NEIN (Reine Filterung)</div>
+                <div class="text-[11px] opacity-80">Nur Attribute der Haupttabelle werden ausgegeben (z. B. nur Bestellnummern).</div>
+              </button>
+            </div>
+          </div>
+        `;
+
+        if (WIZARD_STATE.needBothCols === false) {
+          stepNum = 2;
+          html += `
+            <div class="space-y-3 pt-4 border-t border-slate-800">
+              <div class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-mono font-bold">2</span>
+                Suchst du nach existierenden oder FEHLENDEN Partnern?
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button onclick="setWizardVal('searchMissing', false)" class="p-3.5 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.searchMissing === false ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                  <div class="font-bold text-sm mb-0.5 text-white">EXISTENZ (Partner vorhanden)</div>
+                  <div class="text-[11px] opacity-80">z. B. Bestellposten, zu denen Nike-Produkte existieren.</div>
+                </button>
+                <button onclick="setWizardVal('searchMissing', true)" class="p-3.5 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.searchMissing === true ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                  <div class="font-bold text-sm mb-0.5 text-white">NICHT-EXISTENZ (Fehlende Partner)</div>
+                  <div class="text-[11px] opacity-80">z. B. Kunden, die noch nie bestellt haben.</div>
+                </button>
+              </div>
+            </div>
+          `;
+        } else if (WIZARD_STATE.needBothCols === true) {
+          stepNum = 2;
+          html += `
+            <div class="space-y-3 pt-4 border-t border-slate-800">
+              <div class="text-sm font-bold text-white flex items-center gap-2">
+                <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-mono font-bold">2</span>
+                Dürfen partnerlose Zeilen im Ergebnis verloren gehen?
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button onclick="setWizardVal('keepUnmatched', false)" class="p-3.5 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.keepUnmatched === false ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                  <div class="font-bold text-sm mb-0.5 text-white">JA (Nur echte Paare)</div>
+                  <div class="text-[11px] opacity-80">Beide Seiten müssen übereinstimmen (Inner Join).</div>
+                </button>
+                <button onclick="setWizardVal('keepUnmatched', true)" class="p-3.5 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.keepUnmatched === true ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                  <div class="font-bold text-sm mb-0.5 text-white">NEIN (Zeilen behalten mit NULL)</div>
+                  <div class="text-[11px] opacity-80">Partnerlose Zeilen müssen erhalten bleiben (Outer Join).</div>
+                </button>
+              </div>
+            </div>
+          `;
+
+          if (WIZARD_STATE.keepUnmatched === true) {
+            stepNum = 3;
+            html += `
+              <div class="space-y-3 pt-4 border-t border-slate-800">
+                <div class="text-sm font-bold text-white flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-mono font-bold">3</span>
+                  Welche Seite muss vor Datenverlust geschützt werden?
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <button onclick="setWizardVal('whichSide', 'left')" class="p-3 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.whichSide === 'left' ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                    <div class="font-bold mb-0.5 text-white">Nur Linke Seite (R)</div>
+                    <div class="text-[10px] opacity-80">Left Outer Join</div>
+                  </button>
+                  <button onclick="setWizardVal('whichSide', 'right')" class="p-3 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.whichSide === 'right' ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                    <div class="font-bold mb-0.5 text-white">Nur Rechte Seite (S)</div>
+                    <div class="text-[10px] opacity-80">Right Outer Join</div>
+                  </button>
+                  <button onclick="setWizardVal('whichSide', 'both')" class="p-3 rounded-xl border text-left text-xs font-semibold transition ${WIZARD_STATE.whichSide === 'both' ? 'bg-indigo-600 text-white border-indigo-400 ring-2 ring-indigo-400/50 shadow-lg' : 'bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-[#141838] hover:text-white'}">
+                    <div class="font-bold mb-0.5 text-white">Beide Seiten</div>
+                    <div class="text-[10px] opacity-80">Full Outer Join</div>
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+        }
+      }
+
+      container.innerHTML = html;
+      document.getElementById("wizard-progress-text").textContent = `Schritt ${stepNum} von 3`;
+
+      const backBtn = document.getElementById("btn-wizard-back");
+      if (backBtn) {
+        backBtn.disabled = (WIZARD_STATE.needBothCols === null);
+      }
+
+      computeWizardRecommendation();
+    }
+
+    function setWizardVal(key, val) {
+      WIZARD_STATE[key] = val;
+      if (key === 'needBothCols') {
+        WIZARD_STATE.searchMissing = null;
+        WIZARD_STATE.keepUnmatched = null;
+        WIZARD_STATE.whichSide = null;
+      }
+      if (key === 'keepUnmatched' && val === false) {
+        WIZARD_STATE.whichSide = null;
+      }
+      renderWizard();
+    }
+
+    function computeWizardRecommendation() {
+      let recJoin = "left_semi";
+      let title = "Linker Semi-Join";
+      let latex = "R \\ltimes S";
+      let desc = "Filtert R basierend auf der Existenz von Partnern in S. Verhindert Duplikate!";
+      let showWarn = true;
+
+      if (WIZARD_STATE.needBothCols === false) {
+        if (WIZARD_STATE.searchMissing === true) {
+          recJoin = "anti";
+          title = "Anti-Semi-Join (Anti-Join)";
+          latex = "R \\triangleright S \\equiv R - (R \\ltimes S)";
+          desc = "Findet Datensätze ohne jeglichen Partner. Optimal für 'hat noch nie bestellt' oder 'ohne Ausleihe'.";
+          showWarn = false;
+        } else {
+          recJoin = "left_semi";
+          title = "Linker Semi-Join";
+          latex = "R \\ltimes S \\equiv \\pi_{\\text{Attrs}(R)}(R \\bowtie S)";
+          desc = "Filtert R basierend auf der Existenz von Partnern in S. Verhindert Duplikate!";
+          showWarn = true;
+        }
+      } else if (WIZARD_STATE.needBothCols === true) {
+        if (WIZARD_STATE.keepUnmatched === false) {
+          recJoin = "equi";
+          title = "Equi-Join (Gleichheitsverbund)";
+          latex = "R \\bowtie_{c} S";
+          desc = "Klassischer Inner Join: Behält nur passende Paare beider Relationen. Partnerlose Zeilen entfallen.";
+          showWarn = false;
+        } else if (WIZARD_STATE.keepUnmatched === true) {
+          if (WIZARD_STATE.whichSide === 'right') {
+            recJoin = "outer_right";
+            title = "Right Outer Join";
+            latex = "R \\mathbin{\\bowtie\\!\\sqsupset}_{c} S";
+            desc = "Behält alle Zeilen aus S. Fehlende Daten aus R werden mit NULL aufgefüllt.";
+            showWarn = false;
+          } else if (WIZARD_STATE.whichSide === 'both') {
+            recJoin = "outer_full";
+            title = "Full Outer Join";
+            latex = "R \\mathbin{\\sqsubset\\!\\bowtie\\!\\sqsupset}_{c} S";
+            desc = "Alle Zeilen beider Relationen bleiben erhalten und werden bei Fehlversuchen mit NULL ergänzt.";
+            showWarn = false;
+          } else {
+            recJoin = "outer_left";
+            title = "Left Outer Join";
+            latex = "R \\mathbin{\\sqsubset\\!\\bowtie}_{c} S";
+            desc = "Behält alle Zeilen aus R. Fehlende Spalten aus S werden mit NULL aufgefüllt.";
+            showWarn = true;
+          }
+        }
+      }
+
+      document.getElementById("wizard-result-title").textContent = title;
+      renderKaTeX("wizard-result-latex", latex, true);
+      document.getElementById("wizard-result-desc").textContent = desc;
+
+      const warnBox = document.getElementById("wizard-warning-box");
+      if (warnBox) warnBox.classList.toggle("hidden", !showWarn);
+
+      const applyBtn = document.getElementById("wizard-apply-btn");
+      if (applyBtn) {
+        applyBtn.onclick = () => {
+          selectedJoinType = recJoin;
+          renderJoinButtons();
+          switchTab('simulator');
+        };
+      }
+    }
+
+    function applyWizardToSimulator() {
+      switchTab('simulator');
+    }
+
+    /* ==========================================================================
+       3. AGGREGATION (γ) & ORDER BY (τ) LOGIC
+       ========================================================================== */
+    function initAggTableSelectors() {
+      const selectT = document.getElementById("agg-select-table");
+      if (!selectT) return;
+
+      selectT.innerHTML = "";
+      Object.keys(TABLES).forEach(tName => {
+        const opt = document.createElement("option");
+        opt.value = tName;
+        opt.textContent = tName;
+        selectT.appendChild(opt);
+      });
+
+      selectT.value = selectedAggTableKey;
+      updateAggColumnDropdowns();
+      renderAggregation();
+    }
+
+    function updateAggColumnDropdowns() {
+      const table = TABLES[selectedAggTableKey];
+      if (!table) return;
+
+      const groupSelect = document.getElementById("agg-select-groupby");
+      const targetColSelect = document.getElementById("agg-select-target-col");
+      const orderBySelect = document.getElementById("agg-select-orderby");
+      if (!groupSelect || !targetColSelect || !orderBySelect) return;
+
+      groupSelect.innerHTML = '<option value="__none__">(Keine Gruppierung - Gesamttabelle)</option>';
+      targetColSelect.innerHTML = "";
+      orderBySelect.innerHTML = '<option value="__none__">(Keine Sortierung)</option>';
+
+      table.cols.forEach(c => {
+        const optG = document.createElement("option");
+        optG.value = c;
+        optG.textContent = `Spalte: ${c}`;
+        groupSelect.appendChild(optG);
+
+        const optT = document.createElement("option");
+        optT.value = c;
+        optT.textContent = c;
+        targetColSelect.appendChild(optT);
+
+        const optO = document.createElement("option");
+        optO.value = c;
+        optO.textContent = c;
+        orderBySelect.appendChild(optO);
+      });
+
+      if (table.cols.length > 1) {
+        groupSelect.value = table.cols[1];
+        targetColSelect.value = table.cols.find(c => c.toLowerCase().includes("preis") || c.toLowerCase().includes("sws") || c.toLowerCase().includes("anzahl") || c.toLowerCase().includes("budget")) || table.cols[table.cols.length - 1];
+        orderBySelect.value = groupSelect.value;
+      }
+    }
+
+    function onAggTableChanged() {
+      selectedAggTableKey = document.getElementById("agg-select-table").value;
+      updateAggColumnDropdowns();
+      renderAggregation();
+    }
+
+    function loadAggPreset(presetKey) {
+      const p = AGG_PRESETS[presetKey];
+      if (!p) return;
+
+      selectedAggTableKey = p.table;
+      document.getElementById("agg-select-table").value = selectedAggTableKey;
+      updateAggColumnDropdowns();
+
+      document.getElementById("agg-select-groupby").value = p.groupBy;
+      document.getElementById("agg-select-target-col").value = p.targetCol;
+      document.getElementById("agg-select-orderby").value = p.orderBy;
+      document.getElementById("agg-select-order-dir").value = p.orderDir;
+
+      document.getElementById("agg-fn-count").checked = p.count;
+      document.getElementById("agg-fn-min").checked = p.min;
+      document.getElementById("agg-fn-max").checked = p.max;
+      document.getElementById("agg-fn-avg").checked = p.avg;
+      document.getElementById("agg-fn-sum").checked = p.sum;
+
+      renderAggregation();
+    }
+
+    function parseNumeric(val) {
+      if (typeof val === 'number') return val;
+      if (typeof val === 'string') {
+        const cleaned = val.replace(/[^0-9.,-]/g, '').replace(',', '.');
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? 0 : num;
+      }
+      return 0;
+    }
+
+    function renderAggregation() {
+      const table = TABLES[selectedAggTableKey];
+      if (!table) return;
+
+      const groupCol = document.getElementById("agg-select-groupby").value;
+      const targetCol = document.getElementById("agg-select-target-col").value;
+      const orderCol = document.getElementById("agg-select-orderby").value;
+      const orderDir = document.getElementById("agg-select-order-dir").value;
+
+      const hasCount = document.getElementById("agg-fn-count").checked;
+      const hasMin = document.getElementById("agg-fn-min").checked;
+      const hasMax = document.getElementById("agg-fn-max").checked;
+      const hasAvg = document.getElementById("agg-fn-avg").checked;
+      const hasSum = document.getElementById("agg-fn-sum").checked;
+
+      const groups = {};
+      const isGrouped = groupCol !== "__none__";
+
+      table.rows.forEach(r => {
+        const key = isGrouped ? String(r[groupCol]) : "Gesamt";
+        if (!groups[key]) groups[key] = [];
+        groups[key].push(r);
+      });
+
+      const uniqueKeys = Object.keys(groups);
+      const groupColorMap = {};
+      uniqueKeys.forEach((k, idx) => {
+        groupColorMap[k] = GROUP_COLORS[idx % GROUP_COLORS.length];
+      });
+
+      // Render Highlighted Origin Table
+      const origTableEl = document.getElementById("agg-table-orig-view");
+      document.getElementById("agg-badge-count-orig").textContent = `${table.rows.length} Zeilen (${uniqueKeys.length} Gruppen)`;
+
+      let origHtml = `<thead class="bg-[#0f132e] text-slate-400 border-b border-indigo-950 font-semibold sticky top-0"><tr>`;
+      table.cols.forEach(c => {
+        const isG = isGrouped && c === groupCol;
+        const isT = c === targetCol;
+        origHtml += `<th class="px-3 py-2 ${isG ? 'text-indigo-300 bg-indigo-950/40' : isT ? 'text-violet-300 bg-violet-950/30' : ''}">${c}</th>`;
+      });
+      origHtml += `</tr></thead><tbody class="divide-y divide-indigo-950/60">`;
+
+      table.rows.forEach(r => {
+        const gKey = isGrouped ? String(r[groupCol]) : "Gesamt";
+        const cStyle = isGrouped ? groupColorMap[gKey] : null;
+        origHtml += `<tr class="hover:bg-slate-800/40 transition">`;
+        table.cols.forEach(c => {
+          const isG = isGrouped && c === groupCol;
+          const isT = c === targetCol;
+          const val = r[c] === null ? '<span class="text-slate-500 italic">NULL</span>' : r[c];
+          if (isG && cStyle) {
+            origHtml += `<td class="px-3 py-1.5 font-bold" style="color: ${cStyle.text}; background: ${cStyle.bg}; border-left: 2px solid ${cStyle.border};">${val}</td>`;
+          } else if (isT) {
+            origHtml += `<td class="px-3 py-1.5 font-semibold text-violet-200 bg-violet-950/20">${val}</td>`;
+          } else {
+            origHtml += `<td class="px-3 py-1.5 text-slate-300">${val}</td>`;
+          }
+        });
+        origHtml += `</tr>`;
+      });
+      origHtml += `</tbody>`;
+      origTableEl.innerHTML = origHtml;
+
+      // Compute Aggregation Results
+      const aggRows = [];
+      uniqueKeys.forEach(gKey => {
+        const rows = groups[gKey];
+        const rowRes = {};
+        if (isGrouped) {
+          rowRes[groupCol] = gKey;
+        }
+
+        const values = rows.map(r => parseNumeric(r[targetCol]));
+        const isCurrency = String(rows[0][targetCol]).includes("€");
+
+        if (hasCount) {
+          rowRes["COUNT(*)"] = rows.length;
+        }
+        if (hasMin) {
+          const minVal = Math.min(...values);
+          rowRes[`MIN(${targetCol})`] = isCurrency ? `${minVal.toFixed(2)} €` : minVal;
+        }
+        if (hasMax) {
+          const maxVal = Math.max(...values);
+          rowRes[`MAX(${targetCol})`] = isCurrency ? `${maxVal.toFixed(2)} €` : maxVal;
+        }
+        if (hasAvg) {
+          const sum = values.reduce((a, b) => a + b, 0);
+          const avg = sum / values.length;
+          rowRes[`AVG(${targetCol})`] = isCurrency ? `${avg.toFixed(2)} €` : avg.toFixed(2);
+        }
+        if (hasSum) {
+          const sum = values.reduce((a, b) => a + b, 0);
+          rowRes[`SUM(${targetCol})`] = isCurrency ? `${sum.toFixed(2)} €` : sum;
+        }
+
+        aggRows.push(rowRes);
+      });
+
+      // Handle Sorting (ORDER BY / Tau)
+      if (orderCol !== "__none__") {
+        aggRows.sort((a, b) => {
+          let valA = a[orderCol] !== undefined ? a[orderCol] : a[Object.keys(a)[0]];
+          let valB = b[orderCol] !== undefined ? b[orderCol] : b[Object.keys(b)[0]];
+          const numA = parseNumeric(valA);
+          const numB = parseNumeric(valB);
+          if (!isNaN(numA) && !isNaN(numB) && typeof valA !== 'string') {
+            return orderDir === "ASC" ? numA - numB : numB - numA;
+          }
+          return orderDir === "ASC" ? String(valA).localeCompare(String(valB)) : String(valB).localeCompare(String(valA));
+        });
+      }
+
+      // Render Result Table
+      const resCols = [];
+      if (isGrouped) resCols.push(groupCol);
+      if (hasCount) resCols.push("COUNT(*)");
+      if (hasMin) resCols.push(`MIN(${targetCol})`);
+      if (hasMax) resCols.push(`MAX(${targetCol})`);
+      if (hasAvg) resCols.push(`AVG(${targetCol})`);
+      if (hasSum) resCols.push(`SUM(${targetCol})`);
+
+      const resTableEl = document.getElementById("agg-result-table-view");
+      let resHtml = `<thead class="bg-[#0f132e] text-slate-300 font-semibold border-b border-indigo-950 sticky top-0"><tr>`;
+      resCols.forEach(c => {
+        resHtml += `<th class="px-3 py-2 text-xs">${c}</th>`;
+      });
+      resHtml += `</tr></thead><tbody class="divide-y divide-indigo-950/60">`;
+
+      aggRows.forEach(row => {
+        resHtml += `<tr class="hover:bg-slate-800/40 transition">`;
+        resCols.forEach(c => {
+          const val = row[c];
+          resHtml += `<td class="px-3 py-2 text-xs font-mono font-bold text-slate-200">${val}</td>`;
+        });
+        resHtml += `</tr>`;
+      });
+      resHtml += `</tbody>`;
+      resTableEl.innerHTML = resHtml;
+      document.getElementById("agg-result-tuple-count").textContent = `${aggRows.length} Zeilen berechnet`;
+
+      // Build KaTeX & SQL Strings
+      const aggFunctionsList = [];
+      if (hasCount) aggFunctionsList.push("\\text{COUNT}(*)");
+      if (hasMin) aggFunctionsList.push(`\\text{MIN}(\\text{${targetCol}})`);
+      if (hasMax) aggFunctionsList.push(`\\text{MAX}(\\text{${targetCol}})`);
+      if (hasAvg) aggFunctionsList.push(`\\text{AVG}(\\text{${targetCol}})`);
+      if (hasSum) aggFunctionsList.push(`\\text{SUM}(\\text{${targetCol}})`);
+
+      const aggFnStr = aggFunctionsList.length > 0 ? aggFunctionsList.join(", ") : "\\text{COUNT}(*)";
+      let latexExpr = "";
+      if (isGrouped) {
+        latexExpr = `{}_{\\text{${groupCol}}}\\gamma_{${aggFnStr}}(\\text{${selectedAggTableKey}})`;
+      } else {
+        latexExpr = `\\gamma_{${aggFnStr}}(\\text{${selectedAggTableKey}})`;
+      }
+
+      if (orderCol !== "__none__") {
+        const dirSym = orderDir === "ASC" ? "\\uparrow" : "\\downarrow";
+        latexExpr = `\\tau_{\\text{${orderCol}}\\,${dirSym}}(${latexExpr})`;
+      }
+
+      renderKaTeX("agg-latex-output", latexExpr, true);
+
+      // SQL Output
+      const sqlSelectCols = [];
+      if (isGrouped) sqlSelectCols.push(groupCol);
+      if (hasCount) sqlSelectCols.push("COUNT(*)");
+      if (hasMin) sqlSelectCols.push(`MIN(${targetCol})`);
+      if (hasMax) sqlSelectCols.push(`MAX(${targetCol})`);
+      if (hasAvg) sqlSelectCols.push(`AVG(${targetCol})`);
+      if (hasSum) sqlSelectCols.push(`SUM(${targetCol})`);
+
+      let sqlStr = `SELECT ${sqlSelectCols.join(", ")} FROM ${selectedAggTableKey}`;
+      if (isGrouped) {
+        sqlStr += ` GROUP BY ${groupCol}`;
+      }
+      if (orderCol !== "__none__") {
+        sqlStr += ` ORDER BY ${orderCol} ${orderDir}`;
+      }
+      sqlStr += ";";
+      document.getElementById("agg-sql-output").textContent = sqlStr;
+    }
+
+    /* ==========================================================================
+       4. SIMULATOR LOGIC
+       ========================================================================== */
+    function initTableSelectors() {
+      const selectR = document.getElementById("select-table-r");
+      const selectS = document.getElementById("select-table-s");
+      if (!selectR || !selectS) return;
+
+      selectR.innerHTML = "";
+      selectS.innerHTML = "";
+
+      Object.keys(TABLES).forEach(tName => {
+        const optR = document.createElement("option");
+        optR.value = tName;
+        optR.textContent = tName;
+        selectR.appendChild(optR);
+
+        const optS = document.createElement("option");
+        optS.value = tName;
+        optS.textContent = tName;
+        selectS.appendChild(optS);
+      });
+
+      selectR.value = selectedTableRKey;
+      selectS.value = selectedTableSKey;
+
+      updateColumnDropdowns();
+      renderJoinButtons();
+      renderSimulator();
+    }
+
+    function updateColumnDropdowns() {
+      const colSelectR = document.getElementById("select-col-r");
+      const colSelectS = document.getElementById("select-col-s");
+      if (!colSelectR || !colSelectS) return;
+
+      const rCols = TABLES[selectedTableRKey].cols;
+      const sCols = TABLES[selectedTableSKey].cols;
+
+      colSelectR.innerHTML = "";
+      colSelectS.innerHTML = "";
+
+      rCols.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        colSelectR.appendChild(opt);
+      });
+
+      sCols.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c;
+        opt.textContent = c;
+        colSelectS.appendChild(opt);
+      });
+
+      if (rCols.includes(selectedColR)) {
+        colSelectR.value = selectedColR;
+      } else {
+        selectedColR = rCols[0];
+        colSelectR.value = selectedColR;
+      }
+
+      if (sCols.includes(selectedColS)) {
+        colSelectS.value = selectedColS;
+      } else {
+        const match = sCols.find(c => c.toLowerCase() === selectedColR.toLowerCase());
+        selectedColS = match || sCols[0];
+        colSelectS.value = selectedColS;
+      }
+    }
+
+    function onTableRChanged() {
+      selectedTableRKey = document.getElementById("select-table-r").value;
+      updateColumnDropdowns();
+      renderSimulator();
+    }
+
+    function onTableSChanged() {
+      selectedTableSKey = document.getElementById("select-table-s").value;
+      updateColumnDropdowns();
+      renderSimulator();
+    }
+
+    function onColChanged() {
+      selectedColR = document.getElementById("select-col-r").value;
+      selectedColS = document.getElementById("select-col-s").value;
+      renderSimulator();
+    }
+
+    function loadPreset(presetKey) {
+      const p = PRESETS[presetKey];
+      if (!p) return;
+      selectedTableRKey = p.r;
+      selectedTableSKey = p.s;
+      selectedColR = p.colR;
+      selectedColS = p.colS;
+      selectedJoinType = p.join;
+
+      document.getElementById("select-table-r").value = selectedTableRKey;
+      document.getElementById("select-table-s").value = selectedTableSKey;
+      updateColumnDropdowns();
+      document.getElementById("select-col-r").value = selectedColR;
+      document.getElementById("select-col-s").value = selectedColS;
+
+      renderJoinButtons();
+      renderSimulator();
+    }
+
+    function renderJoinButtons() {
+      const container = document.getElementById("join-type-buttons");
+      if (!container) return;
+      container.innerHTML = "";
+
+      JOIN_TYPES.forEach(jt => {
+        const btn = document.createElement("button");
+        const isActive = jt.id === selectedJoinType;
+        btn.className = `p-2 rounded-xl text-xs font-semibold flex flex-col items-center justify-center transition border ${
+          isActive 
+            ? "bg-indigo-600 text-white border-indigo-400 shadow-lg shadow-indigo-600/30 ring-2 ring-indigo-400" 
+            : "bg-[#090b1c] text-slate-300 border-indigo-950 hover:bg-slate-800 hover:text-white"
+        }`;
+        btn.onclick = () => {
+          selectedJoinType = jt.id;
+          renderJoinButtons();
+          renderSimulator();
+        };
+
+        const symSpan = document.createElement("span");
+        symSpan.className = "text-sm py-0.5";
+        btn.appendChild(symSpan);
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "truncate w-full text-center text-[10px]";
+        nameSpan.textContent = jt.name;
+        btn.appendChild(nameSpan);
+
+        container.appendChild(btn);
+
+        if (window.katex) {
+          try {
+            katex.render(jt.sym, symSpan, { throwOnError: false });
+          } catch(e) {
+            symSpan.textContent = jt.name;
+          }
+        }
+      });
+    }
+
+    function renderSimulator() {
+      const tR = TABLES[selectedTableRKey];
+      const tS = TABLES[selectedTableSKey];
+      if (!tR || !tS) return;
+
+      document.getElementById("label-table-r").textContent = selectedTableRKey;
+      document.getElementById("label-table-s").textContent = selectedTableSKey;
+      document.getElementById("badge-count-r").textContent = `${tR.rows.length} Tupel`;
+      document.getElementById("badge-count-s").textContent = `${tS.rows.length} Tupel`;
+
+      renderSimpleTable("table-r-view", tR.cols, tR.rows, selectedColR, "indigo");
+      renderSimpleTable("table-s-view", tS.cols, tS.rows, selectedColS, "violet");
+
+      computeAndRenderJoinResult(tR, tS);
+    }
+
+    function renderSimpleTable(elemId, cols, rows, highlightCol, color) {
+      const el = document.getElementById(elemId);
+      if (!el) return;
+      let html = `<thead class="bg-[#0f132e] text-slate-400 border-b border-indigo-950 font-semibold sticky top-0"><tr>`;
+      cols.forEach(c => {
+        const isHl = c === highlightCol;
+        html += `<th class="px-3 py-2 ${isHl ? `text-${color}-300 bg-${color}-950/40` : ''}">${c}</th>`;
+      });
+      html += `</tr></thead><tbody class="divide-y divide-indigo-950/60">`;
+      rows.forEach(r => {
+        html += `<tr class="hover:bg-slate-800/40 transition">`;
+        cols.forEach(c => {
+          const val = r[c] === null ? '<span class="text-slate-500 italic">NULL</span>' : r[c];
+          const isHl = c === highlightCol;
+          html += `<td class="px-3 py-1.5 ${isHl ? `font-semibold text-${color}-200 bg-${color}-950/20` : 'text-slate-300'}">${val}</td>`;
+        });
+        html += `</tr>`;
+      });
+      html += `</tbody>`;
+      el.innerHTML = html;
+    }
+
+    function computeAndRenderJoinResult(tR, tS) {
+      const rowsR = tR.rows;
+      const rowsS = tS.rows;
+      const cR = selectedColR;
+      const cS = selectedColS;
+
+      let resultCols = [];
+      let resultRows = [];
+      let latexTex = "";
+      let sqlText = "";
+      let ruleInfo = "";
+      let alertMsg = "";
+
+      const activeJt = JOIN_TYPES.find(j => j.id === selectedJoinType) || JOIN_TYPES[0];
+      document.getElementById("join-name-badge").textContent = activeJt.title;
+
+      switch(selectedJoinType) {
+        case "left_semi": {
+          resultCols = [...tR.cols];
+          rowsR.forEach(r => {
+            const hasMatch = rowsS.some(s => s[cS] !== null && r[cR] !== null && String(r[cR]) === String(s[cS]));
+            if (hasMatch) {
+              resultRows.push({ ...r });
+            }
+          });
+          latexTex = `${selectedTableRKey} \\ltimes_{${selectedTableRKey}.${cR} = ${selectedTableSKey}.${cS}} ${selectedTableSKey}`;
+          sqlText = `SELECT * FROM ${selectedTableRKey} R WHERE EXISTS (SELECT 1 FROM ${selectedTableSKey} S WHERE R.${cR} = S.${cS});`;
+          ruleInfo = "Linker Semi-Join filtert Tabelle R auf Existenz von Partnern in S. Keine Spalten aus S!";
+          break;
+        }
+        case "equi": {
+          resultCols = [...tR.cols.map(c => `R.${c}`), ...tS.cols.map(c => `S.${c}`)];
+          rowsR.forEach(r => {
+            rowsS.forEach(s => {
+              if (r[cR] !== null && s[cS] !== null && String(r[cR]) === String(s[cS])) {
+                const combined = {};
+                tR.cols.forEach(c => combined[`R.${c}`] = r[c]);
+                tS.cols.forEach(c => combined[`S.${c}`] = s[c]);
+                resultRows.push(combined);
+              }
+            });
+          });
+          latexTex = `${selectedTableRKey} \\bowtie_{${selectedTableRKey}.${cR} = ${selectedTableSKey}.${cS}} ${selectedTableSKey}`;
+          sqlText = `SELECT * FROM ${selectedTableRKey} R JOIN ${selectedTableSKey} S ON R.${cR} = S.${cS};`;
+          ruleInfo = "Equi-Join behält nur Paare mit übereinstimmendem Schlüssel.";
+          break;
+        }
+        case "natural": {
+          const common = tR.cols.filter(c => tS.cols.includes(c));
+          const sUnique = tS.cols.filter(c => !common.includes(c));
+          resultCols = [...tR.cols, ...sUnique];
+
+          rowsR.forEach(r => {
+            rowsS.forEach(s => {
+              const match = common.every(c => r[c] !== null && s[c] !== null && String(r[c]) === String(s[c]));
+              if (match) {
+                const combined = { ...r };
+                sUnique.forEach(c => combined[c] = s[c]);
+                resultRows.push(combined);
+              }
+            });
+          });
+          latexTex = `${selectedTableRKey} \\bowtie ${selectedTableSKey}`;
+          sqlText = `SELECT * FROM ${selectedTableRKey} NATURAL JOIN ${selectedTableSKey};`;
+          ruleInfo = "Natural Join verknüpft gleichnamige Spalten und eliminiert Duplikat-Spalten.";
+          break;
+        }
+        case "theta": {
+          resultCols = [...tR.cols.map(c => `R.${c}`), ...tS.cols.map(c => `S.${c}`)];
+          rowsR.forEach(r => {
+            rowsS.forEach(s => {
+              if (r[cR] !== null && s[cS] !== null && String(r[cR]) === String(s[cS])) {
+                const combined = {};
+                tR.cols.forEach(c => combined[`R.${c}`] = r[c]);
+                tS.cols.forEach(c => combined[`S.${c}`] = s[c]);
+                resultRows.push(combined);
+              }
+            });
+          });
+          latexTex = `${selectedTableRKey} \\bowtie_{\\theta} ${selectedTableSKey} \\equiv \\sigma_{\\theta}(${selectedTableRKey} \\times ${selectedTableSKey})`;
+          sqlText = `SELECT * FROM ${selectedTableRKey} R JOIN ${selectedTableSKey} S ON R.${cR} = S.${cS};`;
+          ruleInfo = "Theta-Join entspricht kartesischem Produkt mit anschließender Prädikatsfilterung.";
+          break;
+        }
+        case "right_semi": {
+          resultCols = [...tS.cols];
+          rowsS.forEach(s => {
+            const hasMatch = rowsR.some(r => r[cR] !== null && s[cS] !== null && String(r[cR]) === String(s[cS]));
+            if (hasMatch) {
+              resultRows.push({ ...s });
+            }
+          });
+          latexTex = `${selectedTableRKey} \\rtimes_{${selectedTableRKey}.${cR} = ${selectedTableSKey}.${cS}} ${selectedTableSKey}`;
+          sqlText = `SELECT * FROM ${selectedTableSKey} S WHERE EXISTS (SELECT 1 FROM ${selectedTableRKey} R WHERE R.${cR} = S.${cS});`;
+          ruleInfo = "Rechter Semi-Join behält nur Tupel aus S, die Partner in R besitzen.";
+          break;
+        }
+        case "anti": {
+          resultCols = [...tR.cols];
+          rowsR.forEach(r => {
+            const hasMatch = rowsS.some(s => s[cS] !== null && r[cR] !== null && String(r[cR]) === String(s[cS]));
+            if (!hasMatch) {
+              resultRows.push({ ...r });
+            }
+          });
+          latexTex = `${selectedTableRKey} \\triangleright_{${selectedTableRKey}.${cR} = ${selectedTableSKey}.${cS}} ${selectedTableSKey}`;
+          sqlText = `SELECT * FROM ${selectedTableRKey} R WHERE NOT EXISTS (SELECT 1 FROM ${selectedTableSKey} S WHERE R.${cR} = S.${cS});`;
+          ruleInfo = "Anti-Join liefert alle Zeilen aus R, die KEINEN Verknüpfungspartner in S finden.";
+          break;
+        }
+        case "outer_left": {
+          resultCols = [...tR.cols.map(c => `R.${c}`), ...tS.cols.map(c => `S.${c}`)];
+          rowsR.forEach(r => {
+            const matches = rowsS.filter(s => s[cS] !== null && r[cR] !== null && String(r[cR]) === String(s[cS]));
+            if (matches.length > 0) {
+              matches.forEach(s => {
+                const combined = {};
+                tR.cols.forEach(c => combined[`R.${c}`] = r[c]);
+                tS.cols.forEach(c => combined[`S.${c}`] = s[c]);
+                resultRows.push(combined);
+              });
+            } else {
+              const combined = {};
+              tR.cols.forEach(c => combined[`R.${c}`] = r[c]);
+              tS.cols.forEach(c => combined[`S.${c}`] = null);
+              resultRows.push(combined);
+            }
+          });
+          latexTex = `${selectedTableRKey} \\mathbin{\\sqsubset\\!\\bowtie}_{${cR}=${cS}} ${selectedTableSKey}`;
+          sqlText = `SELECT * FROM ${selectedTableRKey} R LEFT JOIN ${selectedTableSKey} S ON R.${cR} = S.${cS};`;
+          ruleInfo = "Left Outer Join behält ALLE R-Tupel; partnerlose Zeilen werden mit NULL aufgefüllt.";
+          alertMsg = "⚠️ <b>Merkhilfe:</b> Ein Left Outer Join filtert Tabelle R <b>nicht</b>! Partnerlose Datensätze werden mit NULL ergänzt und verbleiben im Ergebnis.";
+          break;
+        }
+        case "outer_right": {
+          resultCols = [...tR.cols.map(c => `R.${c}`), ...tS.cols.map(c => `S.${c}`)];
+          rowsS.forEach(s => {
+            const matches = rowsR.filter(r => r[cR] !== null && s[cS] !== null && String(r[cR]) === String(s[cS]));
+            if (matches.length > 0) {
+              matches.forEach(r => {
+                const combined = {};
+                tR.cols.forEach(c => combined[`R.${c}`] = r[c]);
+                tS.cols.forEach(c => combined[`S.${c}`] = s[c]);
+                resultRows.push(combined);
+              });
+            } else {
+              const combined = {};
+              tR.cols.forEach(c => combined[`R.${c}`] = null);
+              tS.cols.forEach(c => combined[`S.${c}`] = s[c]);
+              resultRows.push(combined);
+            }
+          });
+          latexTex = `${selectedTableRKey} \\mathbin{\\bowtie\\!\\sqsupset}_{${cR}=${cS}} ${selectedTableSKey}`;
+          sqlText = `SELECT * FROM ${selectedTableRKey} R RIGHT JOIN ${selectedTableSKey} S ON R.${cR} = S.${cS};`;
+          ruleInfo = "Right Outer Join behält ALLE S-Tupel; partnerlose Zeilen erhalten NULL.";
+          break;
+        }
+        case "outer_full": {
+          resultCols = [...tR.cols.map(c => `R.${c}`), ...tS.cols.map(c => `S.${c}`)];
+          const matchedSIndices = new Set();
+          rowsR.forEach(r => {
+            const matches = [];
+            rowsS.forEach((s, idx) => {
+              if (r[cR] !== null && s[cS] !== null && String(r[cR]) === String(s[cS])) {
+                matches.push(s);
+                matchedSIndices.add(idx);
+              }
+            });
+            if (matches.length > 0) {
+              matches.forEach(s => {
+                const combined = {};
+                tR.cols.forEach(c => combined[`R.${c}`] = r[c]);
+                tS.cols.forEach(c => combined[`S.${c}`] = s[c]);
+                resultRows.push(combined);
+              });
+            } else {
+              const combined = {};
+              tR.cols.forEach(c => combined[`R.${c}`] = r[c]);
+              tS.cols.forEach(c => combined[`S.${c}`] = null);
+              resultRows.push(combined);
+            }
+          });
+          rowsS.forEach((s, idx) => {
+            if (!matchedSIndices.has(idx)) {
+              const combined = {};
+              tR.cols.forEach(c => combined[`R.${c}`] = null);
+              tS.cols.forEach(c => combined[`S.${c}`] = s[c]);
+              resultRows.push(combined);
+            }
+          });
+          latexTex = `${selectedTableRKey} \\mathbin{\\sqsubset\\!\\bowtie\\!\\sqsupset}_{${cR}=${cS}} ${selectedTableSKey}`;
+          sqlText = `SELECT * FROM ${selectedTableRKey} R FULL OUTER JOIN ${selectedTableSKey} S ON R.${cR} = S.${cS};`;
+          ruleInfo = "Full Outer Join kombiniert alle Zeilen beider Relationen mit beidseitigem NULL-Auffüllen.";
+          break;
+        }
+      }
+
+      const alertBox = document.getElementById("join-alert-box");
+      if (alertBox) {
+        if (alertMsg) {
+          alertBox.className = "rounded-xl p-4 border text-xs font-medium bg-amber-500/10 border-amber-500/30 text-amber-200 block";
+          alertBox.innerHTML = alertMsg;
+        } else {
+          alertBox.className = "hidden";
+        }
+      }
+
+      renderKaTeX("latex-output", latexTex, true);
+      document.getElementById("sql-output").textContent = sqlText;
+      document.getElementById("join-rule-info").textContent = ruleInfo;
+      document.getElementById("result-tuple-count").textContent = `${resultRows.length} Zeilen erzeugt`;
+
+      const resTable = document.getElementById("result-table-view");
+      if (resTable) {
+        let hHtml = `<thead class="bg-[#0f132e] text-slate-300 font-semibold border-b border-indigo-950 sticky top-0"><tr>`;
+        resultCols.forEach(c => {
+          hHtml += `<th class="px-3 py-2 text-xs">${c}</th>`;
+        });
+        hHtml += `</tr></thead><tbody class="divide-y divide-indigo-950/60">`;
+
+        if (resultRows.length === 0) {
+          hHtml += `<tr><td colspan="${resultCols.length}" class="px-4 py-8 text-center text-slate-500 italic">Leere Menge (Keine Tupel erfüllen das Prädikat).</td></tr>`;
+        } else {
+          resultRows.forEach(row => {
+            hHtml += `<tr class="hover:bg-slate-800/40 transition">`;
+            resultCols.forEach(c => {
+              const val = row[c];
+              if (val === null || val === undefined) {
+                hHtml += `<td class="px-3 py-1.5 text-xs text-amber-400 font-mono italic bg-amber-950/20">NULL</td>`;
+              } else {
+                hHtml += `<td class="px-3 py-1.5 text-xs text-slate-200">${val}</td>`;
+              }
+            });
+            hHtml += `</tr>`;
+          });
+        }
+        hHtml += `</tbody>`;
+        resTable.innerHTML = hHtml;
+      }
+    }
+
+    /* ==========================================================================
+       5. OPTIMIZER, CATALOG, PROMPTS & QUIZ
+       ========================================================================== */
+    const OPTIMIZER_PRESETS = {
+      nike_orders: {
+        sql: "SELECT b.Bestellung\nFROM Bestellposten b, Produkt p\nWHERE b.Name = p.Name AND p.Hersteller = 'Nike';",
+        steps: [
+          {
+            badge: "Schritt 0: Kanonische Form",
+            latex: "\\pi_{\\text{Bestellung}}(\\sigma_{b.\\text{Name}=p.\\text{Name} \\;\\wedge\\; p.\\text{Hersteller}='Nike'}(\\text{Bestellposten} \\times \\text{Produkt}))",
+            explanation: "<b>Kanonische Form:</b> Direktes Übersetzen aus SQL. Zuerst das kartesische Produkt $(Bestellposten \\times Produkt)$, gefolgt von einer zusammengesetzten Filterung $\\sigma$ und abschließender Projektion $\\pi$.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-bold shadow-md">π Bestellung</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3.5 py-1.5 rounded-lg bg-amber-500 text-white font-bold shadow-md">σ b.Name = p.Name ∧ Hersteller = 'Nike'</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3.5 py-1.5 rounded-lg bg-slate-700 text-white font-bold shadow-md">× (Kreuzprodukt)</div>
+                <div class="flex items-center space-x-8 pt-1">
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Bestellposten (b)</div>
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Produkt (p)</div>
+                </div>
+              </div>
+            `
+          },
+          {
+            badge: "Schritt 1: Selektions-Aufspaltung",
+            latex: "\\pi_{\\text{Bestellung}}(\\sigma_{b.\\text{Name}=p.\\text{Name}}(\\sigma_{p.\\text{Hersteller}='Nike'}(\\text{Bestellposten} \\times \\text{Produkt})))",
+            explanation: "<b>Regel 1:</b> Konjunktive Bedingungen $\\sigma_{c_1 \\wedge c_2}$ werden in Kaskaden aufgeteilt, um Prädikate unabhängig voneinander verschieben zu können.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-bold shadow-md">π Bestellung</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3.5 py-1.5 rounded-lg bg-amber-600 text-white font-bold shadow-md">σ b.Name = p.Name</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3.5 py-1.5 rounded-lg bg-amber-500 text-white font-bold shadow-md">σ Hersteller = 'Nike'</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3.5 py-1.5 rounded-lg bg-slate-700 text-white font-bold shadow-md">×</div>
+                <div class="flex items-center space-x-8 pt-1">
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Bestellposten</div>
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Produkt</div>
+                </div>
+              </div>
+            `
+          },
+          {
+            badge: "Schritt 2: Pushdown & Join-Ersetzung",
+            latex: "\\pi_{\\text{Bestellung}}(\\text{Bestellposten} \\bowtie_{b.\\text{Name}=p.\\text{Name}} (\\sigma_{p.\\text{Hersteller}='Nike'}(\\text{Produkt})))",
+            explanation: "<b>Pushdown & Join-Ersetzung:</b> Der Filter $Hersteller='Nike'$ wandert direkt auf $Produkt$. Das Kreuzprodukt mit Gleichheitsselektion wird zum Equi-Join zusammengefasst.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-bold shadow-md">π Bestellung</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white font-bold shadow-md">⋈ b.Name = p.Name</div>
+                <div class="flex items-start space-x-8 pt-1">
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold mt-3">Bestellposten</div>
+                  <div class="flex flex-col items-center space-y-2">
+                    <div class="px-3 py-1 rounded-lg bg-amber-500 text-white font-bold shadow-sm">σ Hersteller = 'Nike'</div>
+                    <div class="w-0.5 h-3 bg-slate-500"></div>
+                    <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Produkt</div>
+                  </div>
+                </div>
+              </div>
+            `
+          }
+        ]
+      },
+      bib_exemplar_opt: {
+        sql: "SELECT e.ExemplarNr, b.Titel, b.Preis\nFROM Buch b, Exemplar e\nWHERE b.ISBN = e.ISBN AND b.Preis > '30.00 €';",
+        steps: [
+          {
+            badge: "Schritt 0: Kanonische Form",
+            latex: "\\pi_{\\text{ExemplarNr, Titel, Preis}}(\\sigma_{b.\\text{ISBN}=e.\\text{ISBN} \\;\\wedge\\; b.\\text{Preis} > '30'}(\\text{Buch} \\times \\text{Exemplar}))",
+            explanation: "Kanonischer Aufbau mit Kreuzprodukt von Buch und Exemplar.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">π ExemplarNr, Titel, Preis</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-amber-500 text-white font-bold">σ b.ISBN = e.ISBN ∧ b.Preis > '30'</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-slate-700 text-white font-bold">×</div>
+                <div class="flex items-center space-x-8 pt-1">
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Buch (b)</div>
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Exemplar (e)</div>
+                </div>
+              </div>
+            `
+          },
+          {
+            badge: "Schritt 1: Pushdown & Join-Ersetzung",
+            latex: "\\pi_{\\text{ExemplarNr, Titel, Preis}}((\\sigma_{b.\\text{Preis} > '30'}(\\text{Buch})) \\bowtie_{b.\\text{ISBN}=e.\\text{ISBN}} \\text{Exemplar})",
+            explanation: "Die Preisprüfung wird direkt auf <i>Buch</i> angewendet (Pushdown). Anschließend wird das Kreuzprodukt durch den Equi-Join ersetzt.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">π ExemplarNr, Titel, Preis</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">⋈ b.ISBN = e.ISBN</div>
+                <div class="flex items-start space-x-6 pt-1">
+                  <div class="flex flex-col items-center space-y-2">
+                    <div class="px-3 py-1 rounded-lg bg-amber-500 text-white font-bold">σ Preis > '30'</div>
+                    <div class="w-0.5 h-3 bg-slate-500"></div>
+                    <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Buch</div>
+                  </div>
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold mt-2">Exemplar</div>
+                </div>
+              </div>
+            `
+          }
+        ]
+      },
+      sokrates: {
+        sql: "SELECT v.Titel\nFROM ProfessorIn p, Vorlesung v\nWHERE p.PersNr = v.gelesenVon AND p.Name = 'Sokrates';",
+        steps: [
+          {
+            badge: "Schritt 0: Kanonische Form",
+            latex: "\\pi_{\\text{Titel}}(\\sigma_{p.\\text{PersNr}=v.\\text{gelesenVon} \\;\\wedge\\; p.\\text{Name}='Sokrates'}(\\text{ProfessorIn} \\times \\text{Vorlesung}))",
+            explanation: "Kanonische Übersetzung aus dem SFW-Block.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">π Titel</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-amber-500 text-white font-bold">σ PersNr=gelesenVon ∧ Name='Sokrates'</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-slate-700 text-white font-bold">×</div>
+                <div class="flex items-center space-x-6 pt-1">
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">ProfessorIn</div>
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">Vorlesung</div>
+                </div>
+              </div>
+            `
+          },
+          {
+            badge: "Schritt 1: Optimierter Baum",
+            latex: "\\pi_{\\text{Titel}}((\\sigma_{p.\\text{Name}='Sokrates'}(\\text{ProfessorIn})) \\bowtie_{p.\\text{PersNr}=v.\\text{gelesenVon}} \\text{Vorlesung})",
+            explanation: "Pushdown von $\\sigma_{Name='Sokrates'}$ auf ProfessorIn, danach Equi-Join über die Personalnummer.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">π Titel</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">⋈ PersNr = gelesenVon</div>
+                <div class="flex items-start space-x-6 pt-1">
+                  <div class="flex flex-col items-center space-y-2">
+                    <div class="px-3 py-1 rounded-lg bg-amber-500 text-white font-bold">σ Name = 'Sokrates'</div>
+                    <div class="w-0.5 h-3 bg-slate-500"></div>
+                    <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold">ProfessorIn</div>
+                  </div>
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold mt-2">Vorlesung</div>
+                </div>
+              </div>
+            `
+          }
+        ]
+      },
+      kemper_books: {
+        sql: "SELECT b.ISBN, b.Titel\nFROM Autor a, BuchAutor ba, Buch b\nWHERE a.ID = ba.ID AND ba.ISBN = b.ISBN AND a.Nachname = 'Kemper';",
+        steps: [
+          {
+            badge: "Schritt 0: Kanonische Form",
+            latex: "\\pi_{\\text{ISBN, Titel}}(\\sigma_{\\dots}(\\text{Autor} \\times \\text{BuchAutor} \\times \\text{Buch}))",
+            explanation: "Dreifach-Kreuzprodukt über alle drei beteiligten Relationen.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">π ISBN, Titel</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-amber-500 text-white font-bold">σ a.ID=ba.ID ∧ ba.ISBN=b.ISBN ∧ Nachname='Kemper'</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-slate-700 text-white font-bold">× (Dreifach-Produkt)</div>
+              </div>
+            `
+          },
+          {
+            badge: "Schritt 1: Optimierter Baum",
+            latex: "\\pi_{\\text{ISBN, Titel}}(((\\sigma_{\\text{Nachname}='Kemper'}(\\text{Autor})) \\bowtie \\text{BuchAutor}) \\bowtie \\text{Buch})",
+            explanation: "Erst Filterung des Autors 'Kemper', anschließender Verbund mit BuchAutor und danach mit Buch.",
+            treeHtml: `
+              <div class="flex flex-col items-center space-y-3 font-mono text-xs">
+                <div class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-bold">π ISBN, Titel</div>
+                <div class="w-0.5 h-4 bg-slate-500"></div>
+                <div class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">⋈ ISBN</div>
+                <div class="flex items-start space-x-6 pt-1">
+                  <div class="flex flex-col items-center space-y-2">
+                    <div class="px-3 py-1 rounded-lg bg-emerald-600 text-white font-bold">⋈ ID</div>
+                    <div class="flex items-start space-x-3 pt-1">
+                      <div class="px-2 py-1 bg-amber-500 text-white rounded text-[11px]">σ Nachname='Kemper'</div>
+                      <div class="px-2 py-1 bg-[#101436] text-slate-200 border border-indigo-900 rounded text-[11px]">BuchAutor</div>
+                    </div>
+                  </div>
+                  <div class="px-3 py-1 rounded bg-[#101436] text-slate-200 border border-indigo-900 font-bold mt-2">Buch</div>
+                </div>
+              </div>
+            `
+          }
+        ]
+      }
+    };
+
+    const CATALOG_DATA = [
+      {
+        id: "gamma",
+        category: "agg",
+        name: "Aggregation & Gruppierung (Gamma)",
+        symbol: "{}_{G}\\gamma_{F}(R)",
+        desc: "Gruppiert nach Attributmenge $G$ und wendet Aggregatfunktionen $F$ (MIN, MAX, AVG, SUM, COUNT) auf die Gruppen an.",
+        sql: "SELECT G, COUNT(*), AVG(B) FROM R GROUP BY G;",
+        usecase: "Statistische Auswertungen, Kennzahlen, Summen und Minima/Maxima je Gruppe."
+      },
+      {
+        id: "tau",
+        category: "agg",
+        name: "Sortieroperator (Tau)",
+        symbol: "\\tau_{A_1 \\uparrow, A_2 \\downarrow}(R)",
+        desc: "Sortiert die Relation $R$ nach den angegebenen Attributen aufsteigend ($\\uparrow$ / ASC) oder absteigend ($\\downarrow$ / DESC).",
+        sql: "SELECT * FROM R ORDER BY A1 ASC, A2 DESC;",
+        usecase: "Ranglisten und geordnete Berichte."
+      },
+      {
+        id: "semi_left",
+        category: "semi",
+        name: "Linker Semi-Join",
+        symbol: "R \\ltimes_c S",
+        desc: "Gibt nur Tupel aus $R$ zurück, für die mindestens ein Verknüpfungspartner in $S$ existiert. Keine Spalten aus $S$, keine Duplikate!",
+        sql: "SELECT * FROM R WHERE EXISTS (SELECT 1 FROM S WHERE R.A = S.B);",
+        usecase: "Existenzfilterungen (z. B. 'Alle Bestellposten, zu denen Nike-Produkte existieren')."
+      },
+      {
+        id: "equi",
+        category: "inner",
+        name: "Equi-Join (Gleichheitsverbund)",
+        symbol: "R \\bowtie_{c} S",
+        desc: "Verknüpft Tupel aus $R$ und $S$ bei Gleichheit der angegebenen Attribute. Entspricht $\\sigma_{c}(R \\times S)$.",
+        sql: "SELECT * FROM R JOIN S ON R.A = S.B;",
+        usecase: "Klassische Primärschlüssel- / Fremdschlüssel-Navigation."
+      },
+      {
+        id: "natural",
+        category: "inner",
+        name: "Natürlicher Verbund (Natural)",
+        symbol: "R \\bowtie S",
+        desc: "Gleichheitsverbund über alle gleichnamigen Attribute. Doppelte Spalten werden automatisch eliminiert.",
+        sql: "SELECT * FROM R NATURAL JOIN S;",
+        usecase: "Einfache Verknüpfung bei wohlbenannten Schemata."
+      },
+      {
+        id: "anti",
+        category: "semi",
+        name: "Anti-Semi-Join (Anti-Join)",
+        symbol: "R \\triangleright_c S",
+        desc: "Liefert diejenigen Tupel aus $R$, die KEINEN Partner in $S$ besitzen. Entspricht $R - (R \\ltimes S)$.",
+        sql: "SELECT * FROM R WHERE NOT EXISTS (SELECT 1 FROM S WHERE R.A = S.B);",
+        usecase: "Auffinden inaktiver Datensätze (z. B. 'Kunden ohne Bestellung' oder 'Bücher ohne Exemplare')."
+      },
+      {
+        id: "outer_left",
+        category: "outer",
+        name: "Left Outer Join",
+        symbol: "R \\mathbin{\\sqsubset\\!\\bowtie}_c S",
+        desc: "Behält ALLE Tupel aus $R$. Partnerlose Zeilen aus $R$ werden mit NULL für $S$-Attribute aufgefüllt. Filtert $R$ NICHT!",
+        sql: "SELECT * FROM R LEFT JOIN S ON R.A = S.B;",
+        usecase: "Vollständige Berichte, bei denen keine Zeilen der Haupttabelle $R$ verloren gehen dürfen."
+      },
+      {
+        id: "outer_right",
+        category: "outer",
+        name: "Right Outer Join",
+        symbol: "R \\mathbin{\\bowtie\\!\\sqsupset}_c S",
+        desc: "Behält ALLE Tupel aus $S$. Partnerlose Zeilen aus $S$ erhalten NULL für $R$-Attribute.",
+        sql: "SELECT * FROM R RIGHT JOIN S ON R.A = S.B;",
+        usecase: "Vollständige Berichte mit Fokus auf die rechte Tabelle."
+      },
+      {
+        id: "outer_full",
+        category: "outer",
+        name: "Full Outer Join",
+        symbol: "R \\mathbin{\\sqsubset\\!\\bowtie\\!\\sqsupset}_c S",
+        desc: "Behält alle Datensätze aus beiden Relationen. Partnerlose Werte werden beidseitig mit NULL ergänzt.",
+        sql: "SELECT * FROM R FULL OUTER JOIN S ON R.A = S.B;",
+        usecase: "Vollständiger Datenabgleich zweier heterogener Bestände."
+      },
+      {
+        id: "sigma",
+        category: "codd",
+        name: "Selektion (Restriktion)",
+        symbol: "\\sigma_P(R)",
+        desc: "Wählt diejenigen Tupel aus Relation $R$ aus, die das Prädikat $P$ erfüllen (Zeilenfilterung).",
+        sql: "SELECT * FROM R WHERE P;",
+        usecase: "Filtern nach Attributwerten (z. B. Preis > 30 oder Name = 'Nike')."
+      },
+      {
+        id: "pi",
+        category: "codd",
+        name: "Projektion",
+        symbol: "\\pi_{A_1, \\dots, A_n}(R)",
+        desc: "Wählt eine Teilmenge der Attribute aus und eliminiert eventuell entstehende Duplikate (Spaltenfilterung).",
+        sql: "SELECT DISTINCT A1, A2 FROM R;",
+        usecase: "Ausblenden irrelevanter Spalten für das Endergebnis."
+      },
+      {
+        id: "division",
+        category: "codd",
+        name: "Relationale Division",
+        symbol: "R \\div S",
+        desc: "Ermittelt die Elemente aus $R$, die mit ALLEN Elementen aus $S$ in Beziehung stehen (universelle Allquantifizierung).",
+        sql: "SELECT r.A FROM R r GROUP BY r.A HAVING COUNT(...) = (SELECT COUNT(*) FROM S);",
+        usecase: "Suchen nach 'hat alle Vorlesungen gehört' oder 'in allen Verlagen publiziert'."
+      }
+    ];
+
+    const PROMPT_DATA = [
+      {
+        phrase: "Minimaler und maximaler Produktpreis je Hersteller",
+        desc: "Gruppierung nach Hersteller mit Berechnung von MIN und MAX.",
+        latex: "{}_{\\text{Hersteller}}\\gamma_{\\text{MIN}(\\text{Preis}), \\text{MAX}(\\text{Preis})}(\\text{Produkt})",
+        join: "Aggregationsoperator $\\gamma$ (GROUP BY)",
+        warning: "Wichtig: In der Relationalen Algebra steht die Gruppierungsspalte als linker Index vor $\\gamma$."
+      },
+      {
+        phrase: "Dozenten mit Gesamtsumme der Semesterwochenstunden (SWS) über alle Vorlesungen",
+        desc: "Gruppierung der Vorlesungen nach Dozent (gelesenVon) mit SUM(SWS).",
+        latex: "{}_{\\text{gelesenVon}}\\gamma_{\\text{SUM}(\\text{SWS}), \\text{COUNT}(\\text{VorlNr})}(\\text{Vorlesung})",
+        join: "Aggregationsoperator $\\gamma$ (GROUP BY)",
+        warning: "Aggregation über Fremdschlüssel fasst alle Lehrveranstaltungen zusammen."
+      },
+      {
+        phrase: "Die Bestellnummern aller Bestellposten des Herstellers 'Nike'",
+        desc: "Reine Existenzfilterung von Bestellposten auf Vorhandensein von passenden Nike-Produkten.",
+        latex: "\\pi_{\\text{Bestellung}}(\\text{Bestellposten} \\ltimes_{\\text{Name}=\\text{Name}} \\sigma_{\\text{Hersteller}='Nike'}(\\text{Produkt}))",
+        join: "Linker Semi-Join ($\\ltimes$) oder Equi-Join mit Projektion $\\pi$",
+        warning: "Achtung: Left Outer Join ist hier FALSCH, weil er auch alle anderen Bestellungen behalten würde!"
+      },
+      {
+        phrase: "Alle Bücher von Autor 'Alfons Kemper'",
+        desc: "N:M-Beziehung über die Zwischentabelle BuchAutor mit Selektion auf Nachname.",
+        latex: "\\pi_{\\text{ISBN, Titel}}(\\sigma_{\\text{Nachname}='Kemper'}(\\text{Autor}) \\bowtie \\text{BuchAutor} \\bowtie \\text{Buch})",
+        join: "Inner Join / Equi-Join ($\\bowtie$)",
+        warning: "Klassische Schlüsselverknüpfung über ID und ISBN."
+      },
+      {
+        phrase: "Autoren, die in ALLEN Verlagen mindestens ein Buch haben",
+        desc: "Signalwort 'in ALLEN ...': Allquantifizierung über die relationale Division.",
+        latex: "\\pi_{\\text{AutorNr, Verlag}}(\\text{Verfasst} \\bowtie \\text{Buch}) \\div \\pi_{\\text{Verlag}}(\\text{Buch})",
+        join: "Relationale Division ($\\div$)",
+        warning: "Kandidatenpaare geteilt durch die Menge aller Verlage."
+      },
+      {
+        phrase: "Kunden, die bisher noch NIE eine Bestellung aufgegeben haben",
+        desc: "Suche nach fehlender Beziehung / Nicht-Existenz von Partnern.",
+        latex: "\\text{Kunde} \\triangleright_{\\text{Knr}=\\text{KundeNr}} \\text{Bestellung}",
+        join: "Anti-Semi-Join ($\\triangleright$) bzw. $R - (R \\ltimes S)$",
+        warning: "Findet inaktive Datensätze ohne Verknüpfung."
+      }
+    ];
+
+    const QUIZ_QUESTIONS = [
+      {
+        q: "Welche Aussage zur 'Single-Value Rule' bei Gruppierungen (GROUP BY / $\\gamma$) ist korrekt?",
+        options: [
+          "Jedes Attribut in der Projektion/SELECT-Klausel muss entweder in GROUP BY vorkommen oder innerhalb einer Aggregatfunktion (MIN, MAX, SUM etc.) stehen.",
+          "Man darf beliebige Spalten auswählen, SQL wählt automatisch einen Zufallswert.",
+          "GROUP BY ist nur auf Primärschlüsseln erlaubt.",
+          "Aggregatfunktionen dürfen nur ohne Gruppierung verwendet werden."
+        ],
+        correct: 0,
+        explain: "Da eine Gruppe viele Zeilen zu einer einzigen Ergebniszeile verdichtet, kann für nicht-gruppierte und nicht-aggregierte Spalten kein eindeutiger Einzelwert garantiert werden."
+      },
+      {
+        q: "Wie wird der SQL-Befehl 'HAVING COUNT(*) > 1' in der Relationalen Algebra formal ausgedrückt?",
+        options: [
+          "Als Selektion über dem Aggregationsergebnis: $\\sigma_{\\text{COUNT}(*) > 1}(\\gamma_{...}(R))$",
+          "Als vorgeschaltete Projektion $\\pi$",
+          "Durch einen Anti-Semi-Join ($\\triangleright$)",
+          "Das ist in der Relationalen Algebra nicht darstellbar."
+        ],
+        correct: 0,
+        explain: "In der Relationalen Algebra ist HAVING schlicht eine Selektion $\\sigma$, die auf das Ergebnis des Aggregationsoperators $\\gamma$ angewendet wird."
+      },
+      {
+        q: "In welcher Reihenfolge werden Ausdrücke der Relationalen Algebra prinzipiell ausgewertet?",
+        options: [
+          "Immer strikt von links nach rechts",
+          "Von innen nach außen (bzw. im Operatorbaum von den Blättern zur Wurzel)",
+          "Zuerst alle Projektionen, dann alle Selektionen",
+          "Alphabetisch nach Relationenname"
+        ],
+        correct: 1,
+        explain: "Da jeder relationale Operator Relationen konsumiert und eine neue erzeugt (Geschlossenheit), werden verschachtelte Ausdrücke von der innersten Klammer nach außen ausgewertet."
+      },
+      {
+        q: "Warum ist ein 'Left Outer Join' bei der Aufgabe 'Bestellnummern von Nike-Bestellposten' falsch?",
+        options: [
+          "Weil ein Left Outer Join keine Zeichenketten vergleichen kann.",
+          "Weil der Left Outer Join ALLE linken Zeilen behält und Fehlversuche mit NULL auffüllt, statt sie herauszufiltern.",
+          "Weil der Left Outer Join keine Spalten aus der linken Tabelle ausgeben darf.",
+          "Weil die relationale Algebra keinen Left Outer Join kennt."
+        ],
+        correct: 1,
+        explain: "Ein Left Outer Join filtert die linke Relation $R$ niemals. Bestellposten für andere Hersteller blieben mit NULL-Werten erhalten – die Projektion würde alle Bestellungen liefern!"
+      },
+      {
+        q: "Was besagt die Äquivalenzregel 12 (Join-Ersetzung)?",
+        options: [
+          "$\\sigma_c(R \\times S) \\equiv R \\bowtie_c S$",
+          "$\\pi_c(R \\cup S) \\equiv \\pi_c(R) \\cup \\pi_c(S)$",
+          "$(R \\bowtie S) \\bowtie T \\equiv R \\bowtie (S \\bowtie T)$",
+          "$\\neg(c_1 \\land c_2) \\equiv \\neg c_1 \\lor \\neg c_2$"
+        ],
+        correct: 0,
+        explain: "Regel 12 ersetzt die teure Kombination aus kartesischem Produkt und nachfolgender Gleichheitsselektion durch einen direkten Verbund (Theta-/Equi-Join $\\bowtie_c$)."
+      },
+      {
+        q: "Welcher Operator wird in Prüfungsaufgaben typischerweise für Formulierungen mit 'in ALLEN...' (Allquantifizierung) gesucht?",
+        options: [
+          "Anti-Semi-Join ($\\triangleright$)",
+          "Natürlicher Verbund ($\\bowtie$)",
+          "Relationale Division ($\\div$)",
+          "Kartesisches Produkt ($\\times$)"
+        ],
+        correct: 2,
+        explain: "Die Relationale Division $R \\div S$ ermittelt diejenigen Einheiten aus $R$, die in Beziehung zu ALLEN Elementen von $S$ stehen."
+      }
+    ];
+
+    function loadOptimizerPreset(presetKey) {
+      currentOptPresetKey = presetKey;
+      currentOptStep = 0;
+      renderOptimizerView();
+    }
+
+    function changeOptStep(delta) {
+      const p = OPTIMIZER_PRESETS[currentOptPresetKey];
+      if (!p) return;
+      const newStep = currentOptStep + delta;
+      if (newStep >= 0 && newStep < p.steps.length) {
+        currentOptStep = newStep;
+        renderOptimizerView();
+      }
+    }
+
+    function renderOptimizerView() {
+      const p = OPTIMIZER_PRESETS[currentOptPresetKey];
+      if (!p) return;
+
+      document.getElementById("opt-sql-display").textContent = p.sql;
+      const step = p.steps[currentOptStep];
+
+      document.getElementById("opt-step-badge").textContent = `Schritt ${currentOptStep} von ${p.steps.length - 1}`;
+      document.getElementById("opt-step-name").textContent = step.badge;
+      document.getElementById("opt-tree-container").innerHTML = step.treeHtml;
+      renderKaTeX("opt-latex-display", step.latex, true);
+      document.getElementById("opt-explanation").innerHTML = step.explanation;
+
+      const prevBtn = document.getElementById("btn-opt-prev");
+      const nextBtn = document.getElementById("btn-opt-next");
+      if (prevBtn) prevBtn.disabled = currentOptStep === 0;
+      if (nextBtn) nextBtn.disabled = currentOptStep === p.steps.length - 1;
+
+      if (prevBtn) prevBtn.classList.toggle("opacity-50", currentOptStep === 0);
+      if (nextBtn) nextBtn.classList.toggle("opacity-50", currentOptStep === p.steps.length - 1);
+      
+      renderAllMath();
+    }
+
+    function filterCatalog(category, btnEvent) {
+      const evt = btnEvent || window.event;
+      document.querySelectorAll('.cat-filter-btn').forEach(b => {
+        b.className = "cat-filter-btn px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+      });
+      if (evt && evt.target) {
+        evt.target.className = "cat-filter-btn px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium transition";
+      }
+
+      renderCatalog(category);
+    }
+
+    function renderCatalog(category = "all") {
+      const container = document.getElementById("catalog-cards-container");
+      if (!container) return;
+
+      const filtered = category === "all" ? CATALOG_DATA : CATALOG_DATA.filter(item => item.category === category);
+      let html = "";
+
+      filtered.forEach(item => {
+        const badgeColor = item.category === 'codd' ? 'bg-amber-500/20 text-amber-300' : item.category === 'agg' ? 'bg-purple-500/20 text-purple-300' : 'bg-indigo-500/20 text-indigo-300';
+        html += `
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 flex flex-col justify-between space-y-4 hover:border-indigo-500/50 transition shadow-lg">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2 py-0.5 rounded uppercase ${badgeColor}">${item.category}</span>
+                <span class="text-xs text-slate-500 font-mono">ID: ${item.id}</span>
+              </div>
+              <h3 class="text-base font-bold text-white">${item.name}</h3>
+              <div class="p-2.5 bg-[#070919] rounded-xl border border-indigo-950 text-center text-sm font-semibold text-indigo-200 overflow-x-auto custom-scrollbar">
+                ${renderKaTeXInline(item.symbol)}
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">${item.desc}</p>
+            </div>
+            
+            <div class="space-y-2 pt-3 border-t border-indigo-950 text-xs">
+              <div class="text-slate-400 font-mono bg-[#070919] p-2 rounded-lg border border-indigo-950 truncate">
+                <b class="text-amber-400">SQL:</b> ${item.sql}
+              </div>
+              <div class="text-[11px] text-slate-400">
+                <b class="text-indigo-400">Use-Case:</b> ${item.usecase}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      renderAllMath();
+    }
+
+    function filterPrompts(query) {
+      renderPrompts(query.toLowerCase());
+    }
+
+    function renderPrompts(filter = "") {
+      const container = document.getElementById("prompt-cards-container");
+      if (!container) return;
+
+      const filtered = PROMPT_DATA.filter(p => 
+        p.phrase.toLowerCase().includes(filter) || 
+        p.desc.toLowerCase().includes(filter) || 
+        p.join.toLowerCase().includes(filter)
+      );
+
+      let html = "";
+      if (filtered.length === 0) {
+        html = `<div class="p-8 text-center text-slate-500 italic bg-[#0b0e26] rounded-xl border border-indigo-950">Keine passenden Klausur-Muster gefunden.</div>`;
+      } else {
+        filtered.forEach(p => {
+          html += `
+            <div class="bg-[#0b0e26] border border-indigo-950 rounded-xl p-4 space-y-3 hover:border-indigo-900 transition">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div class="text-sm font-bold text-white">„${p.phrase}“</div>
+                <div class="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-500/30 whitespace-nowrap self-start sm:self-auto">${p.join}</div>
+              </div>
+              <p class="text-xs text-slate-400">${p.desc}</p>
+              <div class="p-3 bg-[#070919] rounded-lg border border-indigo-950 font-mono text-xs overflow-x-auto custom-scrollbar text-emerald-300">
+                ${renderKaTeXInline(p.latex)}
+              </div>
+              <div class="text-[11px] text-amber-300 font-medium bg-amber-950/20 p-2 rounded border border-amber-500/20">
+                ${p.warning}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      container.innerHTML = html;
+      renderAllMath();
+    }
+
+    function renderQuiz() {
+      const container = document.getElementById("quiz-questions-list");
+      if (!container) return;
+
+      let html = "";
+      QUIZ_QUESTIONS.forEach((qObj, qIdx) => {
+        const userAnswer = quizUserAnswers[qIdx];
+        const isAnswered = userAnswer !== undefined;
+
+        html += `
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4">
+            <div class="text-xs sm:text-sm font-bold text-white leading-snug">
+              <span class="text-indigo-400 mr-1.5 font-mono font-black">Frage ${qIdx + 1}:</span> ${qObj.q}
+            </div>
+            <div class="space-y-2">
+        `;
+
+        qObj.options.forEach((opt, optIdx) => {
+          let btnClass = "w-full text-left p-3 rounded-xl border text-xs font-medium transition ";
+          if (!isAnswered) {
+            btnClass += "bg-[#121633] hover:bg-[#1a2046] border-indigo-950 text-slate-300";
+          } else {
+            if (optIdx === qObj.correct) {
+              btnClass += "bg-emerald-600/30 border-emerald-500 text-emerald-200 font-bold ring-1 ring-emerald-500";
+            } else if (optIdx === userAnswer) {
+              btnClass += "bg-rose-600/30 border-rose-500 text-rose-200 font-bold ring-1 ring-rose-500";
+            } else {
+              btnClass += "bg-[#0b0e26] opacity-40 border-indigo-950 text-slate-500";
+            }
+          }
+
+          html += `
+            <button onclick="answerQuiz(${qIdx}, ${optIdx})" ${isAnswered ? 'disabled' : ''} class="${btnClass}">
+              ${opt}
+            </button>
+          `;
+        });
+
+        html += `</div>`;
+
+        if (isAnswered) {
+          const isCorrect = userAnswer === qObj.correct;
+          html += `
+            <div class="p-3 rounded-xl text-xs leading-relaxed ${isCorrect ? 'bg-emerald-950/40 text-emerald-300 border border-emerald-500/30' : 'bg-rose-950/40 text-rose-300 border border-rose-500/30'}">
+              <b>${isCorrect ? '✓ Richtig!' : '✗ Falsch!'}</b> ${qObj.explain}
+            </div>
+          `;
+        }
+
+        html += `</div>`;
+      });
+
+      container.innerHTML = html;
+      renderAllMath();
+
+      let score = 0;
+      Object.keys(quizUserAnswers).forEach(idx => {
+        if (quizUserAnswers[idx] === QUIZ_QUESTIONS[idx].correct) score++;
+      });
+      document.getElementById("quiz-score-badge").textContent = `${score} / ${QUIZ_QUESTIONS.length} Punkte`;
+    }
+
+    function answerQuiz(qIdx, optIdx) {
+      quizUserAnswers[qIdx] = optIdx;
+      renderQuiz();
+    }
+
+    function renderChart() {
+      const canvas = document.getElementById("tupleChart");
+      if (!canvas) return;
+
+      const tR = TABLES[selectedTableRKey];
+      const tS = TABLES[selectedTableSKey];
+      if (!tR || !tS) return;
+
+      const countR = tR.rows.length;
+      const countS = tS.rows.length;
+      const countTimes = countR * countS;
+
+      const semiCount = tR.rows.filter(r => tS.rows.some(s => s[selectedColS] !== null && r[selectedColR] !== null && String(r[selectedColR]) === String(s[selectedColS]))).length;
+      const antiCount = countR - semiCount;
+
+      const labels = ["Tabelle R", "Tabelle S", "Semi-Join (⋉)", "Anti-Join (▷)", "Equi-Join (⋈)", "Left Outer (⟕)", "Kreuzprodukt (×)"];
+      const dataValues = [countR, countS, semiCount, antiCount, semiCount, Math.max(countR, semiCount), countTimes];
+
+      if (tupleChartInstance) {
+        tupleChartInstance.destroy();
+      }
+
+      tupleChartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Tupelanzahl',
+            data: dataValues,
+            backgroundColor: [
+              'rgba(99, 102, 241, 0.7)',
+              'rgba(168, 85, 247, 0.7)',
+              'rgba(16, 185, 129, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(236, 72, 153, 0.7)',
+              'rgba(239, 68, 68, 0.7)'
+            ],
+            borderColor: [
+              'rgb(99, 102, 241)',
+              'rgb(168, 85, 247)',
+              'rgb(16, 185, 129)',
+              'rgb(245, 158, 11)',
+              'rgb(59, 130, 246)',
+              'rgb(236, 72, 153)',
+              'rgb(239, 68, 68)'
+            ],
+            borderWidth: 1.5,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255, 255, 255, 0.08)' },
+              ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8', font: { size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    function renderKaTeX(elemId, tex, displayMode = false) {
+      const el = document.getElementById(elemId);
+      if (!el) return;
+      if (window.katex) {
+        try {
+          katex.render(tex, el, { displayMode: displayMode, throwOnError: false });
+        } catch(e) {
+          el.textContent = tex;
+        }
+      } else {
+        el.textContent = tex;
+      }
+    }
+
+    function renderKaTeXInline(tex) {
+      if (window.katex) {
+        try {
+          return katex.renderToString(tex, { throwOnError: false });
+        } catch(e) {
+          return tex;
+        }
+      }
+      return tex;
+    }
+
+    function renderAllMath() {
+      if (window.renderMathInElement) {
+        try {
+          renderMathInElement(document.body, {
+            delimiters: [
+              { left: "$$", right: "$$", display: true },
+              { left: "$", right: "$", display: false }
+            ],
+            throwOnError: false
+          });
+        } catch(e) {
+          console.warn("KaTeX Auto-render:", e);
+        }
+      }
+    }
+
+    window.onload = function() {
+      initTableSelectors();
+      initAggTableSelectors();
+      renderOptimizerView();
+      resetWizard();
+      renderCatalog();
+      renderPrompts();
+      renderQuiz();
+      renderAllMath();
+    };
+  </script>
+</body>
+</html>
