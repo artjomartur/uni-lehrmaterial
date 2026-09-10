@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Studienplanung & Stundenplan</title>
+  <title>TUPlan — Studienplanung, Stundenplan & Notenspiegel | TU Darmstadt</title>
   
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
 
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -18,13 +18,21 @@
     .font-mono { font-family: 'JetBrains Mono', monospace; }
     
     .cs-card {
-      background: #0f131a;
+      background: #0d1117;
       border: 1px solid #1e2533;
     }
     
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2b3548; }
+
+    .grade-bar {
+      transition: height 0.4s ease, opacity 0.2s;
+    }
+    .grade-bar:hover {
+      filter: brightness(1.25);
+    }
   </style>
 </head>
 <body class="min-h-full flex flex-col custom-scrollbar selection:bg-blue-600 selection:text-white">
@@ -34,397 +42,1573 @@
   <script src="../components.js"></script>
   <script>renderHeader("../");</script>
 
-  <!-- Main Content -->
-  <main class="flex-1 max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-    
-    <!-- Hero / Title -->
-    <div class="space-y-4 hidden-print">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-900 to-indigo-900 border border-blue-500/30 flex items-center justify-center text-blue-400 font-mono font-bold text-lg shadow-[0_0_15px_rgba(59,130,246,0.2)]">
-          📅
-        </div>
-        <div>
-          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
-            Studienplanung &amp; VV Katalog
-          </h1>
-          <p class="text-sm text-slate-400 mt-1">
-            Gesamtkatalog aller Module, wöchentlicher Kalender und iCal Export.
-          </p>
-        </div>
-      </div>
+  <!-- TUPlan Sub-Navigation & Controls Bar -->
+  <div class="border-b border-[#1e2533] bg-[#0c1017]/90 sticky top-14 z-40 backdrop-blur hidden-print">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
       
-      <!-- TUCaN Disclaimer -->
-      <div class="p-4 bg-red-950/40 border border-red-500/50 rounded-lg flex gap-3 items-start">
-        <div class="text-red-400 mt-0.5">⚠️</div>
-        <div class="text-sm text-red-200">
-          <strong class="font-bold text-red-400">Wichtiger Hinweis zur TUCaN-Anmeldung:</strong><br>
-          Dieser Studienplaner dient ausschließlich der persönlichen Organisation und Übersicht. 
-          <strong class="text-white">Eine verbindliche Anmeldung zu Modulen, Lehrveranstaltungen und Prüfungen muss zwingend weiterhin über TUCaN erfolgen!</strong> 
-          Ohne Anmeldung auf TUCaN sind Sie nicht berechtigt, an Prüfungen teilzunehmen.
+      <!-- Brand & Semester Switcher -->
+      <div class="flex items-center gap-3 sm:gap-4">
+        <div class="flex items-center gap-1.5">
+          <span class="text-white font-extrabold text-lg tracking-tight font-heading">TU</span><span class="text-blue-500 font-extrabold text-lg tracking-tight font-heading">Plan</span>
+          <span class="text-[10px] font-mono uppercase bg-blue-950/60 border border-blue-600/40 text-blue-400 px-1.5 py-0.5 rounded font-bold">TU Darmstadt</span>
         </div>
+
+        <div class="h-4 w-px bg-[#1e2533] hidden sm:block"></div>
+
+        <select id="semester-select" onchange="onSemesterChange()" class="bg-[#151c28] border border-[#273248] rounded-lg px-2.5 py-1 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500">
+          <option value="all">Alle Semester</option>
+          <option value="WiSe" selected>Wintersemester (WiSe 2026/27)</option>
+          <option value="SoSe">Sommersemester (SoSe 2026)</option>
+        </select>
+      </div>
+
+      <!-- Navigation Tabs (Stundenplan, Kurse & Notenspiegel, Notenvergleich & Prüfungen) -->
+      <div class="flex items-center gap-1 bg-[#151c28] p-1 rounded-xl border border-[#273248] text-xs font-mono">
+        <button id="tab-btn-planner" onclick="switchTab('planner')" class="px-3 py-1.5 rounded-lg bg-blue-600 text-white font-bold transition flex items-center gap-1.5 shadow-sm">
+          <span>📅</span> <span class="hidden sm:inline">Stundenplan</span>
+        </button>
+        <button id="tab-btn-courses" onclick="switchTab('courses')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <span>📚</span> <span>Kurse &amp; Noten</span>
+        </button>
+        <button id="tab-btn-compare" onclick="switchTab('compare')" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5">
+          <span>⚖️</span> <span class="hidden sm:inline">Vergleich &amp; Klausuren</span><span class="sm:hidden">Klausuren</span>
+        </button>
+      </div>
+
+      <!-- Quick Stats & Actions -->
+      <div class="flex items-center gap-2 text-xs font-mono">
+        <div id="quick-stats-badge" class="px-2.5 py-1 rounded-lg bg-[#151c28] border border-[#273248] text-slate-300 flex items-center gap-2">
+          <span id="stat-cp-badge" class="text-blue-400 font-bold">0 CP</span>
+          <span class="text-slate-600">|</span>
+          <span id="stat-count-badge">0 Module</span>
+          <span id="stat-conflict-indicator" class="hidden text-rose-400 font-bold flex items-center gap-1">
+            <span>⚠️</span> <span id="conflict-count-num">0</span>
+          </span>
+        </div>
+
+        <button onclick="window.openTucanModal()" class="px-3 py-1 rounded-lg bg-blue-950/60 hover:bg-blue-900/60 border border-blue-500/50 text-blue-300 hover:text-white font-bold transition flex items-center gap-1">
+          <span>+</span> <span class="hidden md:inline">Modul</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Conflict Warning Banner (Appears when collisions exist) -->
+    <div id="conflict-alert-banner" class="hidden p-4 bg-rose-950/40 border border-rose-500/50 rounded-xl space-y-2 animate-in fade-in duration-200">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-rose-300 font-bold text-sm">
+          <span>⚠️</span> <span id="conflict-banner-title">2 Zeitkonflikte im aktuellen Stundenplan gefunden!</span>
+        </div>
+        <span class="text-xs font-mono text-rose-400 bg-rose-900/40 px-2 py-0.5 rounded border border-rose-600/40">Kollision</span>
+      </div>
+      <div id="conflict-banner-list" class="text-xs text-rose-200/90 font-mono space-y-1 pl-6">
+        <!-- Injected list of clashing modules -->
       </div>
     </div>
 
-    <!-- Interface -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- VIEW 1: STUNDENPLAN (PLANNER) -->
+    <div id="view-planner" class="space-y-6">
       
-      <!-- Left Column: Search & Add (Hidden in Print) -->
-      <div class="lg:col-span-1 space-y-4 hidden-print">
-        <div class="cs-card rounded-xl p-5 space-y-4 flex flex-col h-[700px]">
-          <div class="flex items-center justify-between">
-            <h2 class="font-heading font-bold text-white text-lg">Modul-Katalog</h2>
-            <span id="module-count" class="text-xs font-mono text-slate-500"></span>
-          </div>
+      <!-- Planner Grid & Sidebar -->
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        
+        <!-- Left Column: Selected Courses & Group Selector -->
+        <div class="lg:col-span-1 space-y-4">
           
-          <div class="space-y-2">
-            <input type="text" id="search-input" placeholder="Modul suchen..." class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition">
-            <select id="fb-filter" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition">
-            </select>
-          </div>
-          
-          <div id="search-results" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-
-        <div class="cs-card rounded-xl p-5 space-y-4">
-          <h2 class="font-heading font-bold text-white text-lg">Modul-Details</h2>
-          <div id="module-details" class="text-sm text-slate-400">
-            Klicke auf ein Modul im Katalog, um Rauminfos, Vorlesungsinhalte und alte Notenspiegel zu sehen.
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Column: Weekly Timetable -->
-      <div class="lg:col-span-3 space-y-4">
-        <div class="cs-card rounded-xl p-5 flex flex-col h-full min-h-[700px]">
-          <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
-            <div class="flex items-center gap-3">
-              <h2 class="font-heading font-bold text-white text-lg print:text-black">Wochen-Stundenplan</h2>
-              <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/40 text-emerald-400 hidden sm:inline-flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> TUCaN Live-Sync
-              </span>
+          <div class="cs-card rounded-xl p-4 space-y-4">
+            <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+              <h2 class="font-heading font-bold text-white text-base flex items-center gap-2">
+                <span>📑</span> Meine Belegung
+              </h2>
+              <span id="planner-selected-count" class="text-xs font-mono text-blue-400 font-bold">0 Module</span>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2 hidden-print">
-              <button onclick="window.openTucanModal()" class="px-3 py-1.5 text-xs font-mono font-bold text-blue-300 bg-blue-950/50 border border-blue-600/50 hover:bg-blue-900/50 rounded-lg transition flex items-center gap-1.5 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
-                <span>➕</span> Modul hinzufügen (TUCaN Katalog)
+            <!-- List of selected modules in plan -->
+            <div id="planner-selected-list" class="space-y-2.5 max-h-[420px] overflow-y-auto custom-scrollbar pr-1">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="planner-empty-state" class="text-center py-8 space-y-2">
+              <div class="text-3xl">🗓️</div>
+              <p class="text-xs text-slate-400 font-mono">Noch keine Module im Stundenplan.</p>
+              <button onclick="window.openTucanModal()" class="mt-2 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono font-bold transition">
+                + Aus TUCaN hinzufügen
               </button>
-              <button onclick="exportICS()" class="px-3 py-1.5 text-xs font-mono font-bold text-emerald-400 bg-emerald-950/30 border border-emerald-900/50 hover:bg-emerald-900/50 rounded-lg transition flex items-center gap-1.5">
-                <span>🗓️</span> als .ics Exportieren
+            </div>
+
+            <!-- Total CP & SWS Summary Widget -->
+            <div class="pt-3 border-t border-[#1e2533] space-y-2 text-xs font-mono">
+              <div class="flex items-center justify-between text-slate-400">
+                <span>Credit Points (CP):</span>
+                <span id="planner-total-cp" class="text-white font-bold text-sm">0 / 30 CP</span>
+              </div>
+              <div class="w-full bg-[#151c28] rounded-full h-1.5 overflow-hidden border border-[#273248]">
+                <div id="planner-cp-progressbar" class="bg-blue-500 h-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+              <div class="flex items-center justify-between text-slate-400 pt-1">
+                <span>Semesterwochenstunden (SWS):</span>
+                <span id="planner-total-sws" class="text-slate-200 font-bold">0 SWS</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Quick Actions Panel -->
+          <div class="cs-card rounded-xl p-4 space-y-3">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">Aktionen &amp; Export</h3>
+            <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+              <button onclick="exportPlanICS()" class="p-2 rounded-lg bg-[#151c28] hover:bg-emerald-950/40 border border-[#273248] hover:border-emerald-500/50 text-slate-300 hover:text-emerald-300 transition flex items-center justify-center gap-1.5">
+                <span>🗓️</span> .ics Export
               </button>
-              <button onclick="window.print()" class="px-3 py-1.5 text-xs font-mono font-bold text-slate-300 bg-[#151c28] border border-[#273248] hover:text-white rounded-lg transition flex items-center gap-1.5">
+              <button onclick="window.print()" class="p-2 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5">
                 <span>📄</span> PDF
               </button>
-              <button onclick="clearPlan()" class="px-3 py-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/30 border border-red-900/50 hover:bg-red-900/50 rounded-lg transition">
-                Plan leeren
+              <button onclick="copyPlanShareUrl()" class="p-2 rounded-lg bg-[#151c28] hover:bg-blue-950/40 border border-[#273248] hover:border-blue-500/50 text-slate-300 hover:text-blue-300 transition flex items-center justify-center gap-1.5">
+                <span>🔗</span> Link kopieren
+              </button>
+              <button onclick="clearFullPlan()" class="p-2 rounded-lg bg-[#151c28] hover:bg-rose-950/40 border border-[#273248] hover:border-rose-500/50 text-slate-300 hover:text-rose-400 transition flex items-center justify-center gap-1.5">
+                <span>🗑️</span> Leeren
               </button>
             </div>
           </div>
-          
-          <div class="flex-1 overflow-x-auto custom-scrollbar">
-            <div class="min-w-[700px] h-full flex border-t border-l border-[#1e2533] text-sm relative" id="weekly-calendar">
-              <!-- Calendar will be drawn by JS -->
+
+          <!-- Official TUCaN Disclaimer Box -->
+          <div class="p-3.5 bg-amber-950/30 border border-amber-500/40 rounded-xl space-y-1.5 text-xs text-amber-200">
+            <div class="flex items-center gap-1.5 font-bold text-amber-400 font-mono">
+              <span>⚠️</span> TUCaN Hinweis
             </div>
+            <p class="leading-relaxed text-[11px] text-slate-300">
+              Dieser Stundenplaner dient Ihrer persönlichen Planung. Eine verbindliche Prüfungs- und Lehrveranstaltungsanmeldung muss über <strong class="text-white">TUCaN</strong> erfolgen.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Interactive Weekly Calendar Grid -->
+        <div class="lg:col-span-3 space-y-4">
+          <div class="cs-card rounded-xl p-4 sm:p-5 flex flex-col h-full min-h-[750px]">
+            
+            <div class="flex flex-wrap items-center justify-between mb-4 gap-3 border-b border-[#1e2533] pb-3">
+              <div class="flex items-center gap-3">
+                <h2 class="font-heading font-bold text-white text-lg">Wochenplaner</h2>
+                <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Hörsäle verifiziert
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2 text-xs font-mono">
+                <span class="text-slate-500">Zeitraster: 08:00 – 20:00</span>
+              </div>
+            </div>
+
+            <!-- Calendar Canvas -->
+            <div class="flex-1 overflow-x-auto custom-scrollbar">
+              <div class="min-w-[680px] h-[680px] flex border border-[#1e2533] rounded-lg text-xs relative bg-[#0a0c10]" id="tuplan-weekly-grid">
+                <!-- Drawn by drawWeeklyGrid() -->
+              </div>
+            </div>
+
           </div>
         </div>
+
       </div>
+
+    </div>
+
+    <!-- VIEW 2: KURSE & NOTENSPIEGEL (COURSES & GRADE HISTOGRAMS) -->
+    <div id="view-courses" class="hidden space-y-6">
+      
+      <!-- Search & Filters Toolbar -->
+      <div class="cs-card rounded-xl p-4 space-y-3">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-3">
+          <div class="relative flex-1 w-full">
+            <input 
+              type="text" 
+              id="courses-search-input" 
+              placeholder="Kurs suchen (z.B. Informationsmanagement, AuD, MoSeS, Binnig, S1|01)..." 
+              class="w-full bg-[#151c28] border border-[#273248] rounded-xl px-4 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-blue-500 transition font-mono"
+            >
+            <span class="absolute right-3.5 top-3 text-xs text-slate-500">🔍</span>
+          </div>
+
+          <div class="flex items-center gap-2 w-full md:w-auto shrink-0 font-mono text-xs">
+            <span id="courses-count-label" class="text-slate-400 bg-[#151c28] border border-[#273248] px-3 py-2 rounded-xl">
+              0 Kurse
+            </span>
+          </div>
+        </div>
+
+        <!-- Filter Chips -->
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-xs font-mono">
+          <button onclick="filterCoursesTab('all')" class="courses-filter-chip active px-3 py-1 rounded-lg bg-blue-600 text-white font-bold transition shrink-0" data-f="all">Alle</button>
+          <button onclick="filterCoursesTab('pflicht')" class="courses-filter-chip px-3 py-1 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 transition shrink-0" data-f="pflicht">Pflicht</button>
+          <button onclick="filterCoursesTab('Praktisch')" class="courses-filter-chip px-3 py-1 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 transition shrink-0" data-f="Praktisch">Praktisch</button>
+          <button onclick="filterCoursesTab('Technisch')" class="courses-filter-chip px-3 py-1 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 transition shrink-0" data-f="Technisch">Technisch</button>
+          <button onclick="filterCoursesTab('Theoretisch')" class="courses-filter-chip px-3 py-1 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 transition shrink-0" data-f="Theoretisch">Theoretisch</button>
+          <button onclick="filterCoursesTab('Mathematik')" class="courses-filter-chip px-3 py-1 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 transition shrink-0" data-f="Mathematik">Mathematik</button>
+          <button onclick="filterCoursesTab('Soft Skills')" class="courses-filter-chip px-3 py-1 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 transition shrink-0" data-f="Soft Skills">Soft Skills</button>
+        </div>
+      </div>
+
+      <!-- Course Cards with Grade Histograms Grid -->
+      <div id="courses-catalog-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Dynamically populated with Grade Distribution Histograms -->
+      </div>
+
+    </div>
+
+    <!-- VIEW 3: NOTENVERGLEICH & PRÜFUNGSKALENDER (COMPARE & EXAMS) -->
+    <div id="view-compare" class="hidden space-y-6">
+      
+      <!-- Klausuren & Prüfungsstau Detektor -->
+      <div class="cs-card rounded-xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-[#1e2533] pb-3">
+          <div>
+            <h2 class="font-heading font-bold text-white text-lg flex items-center gap-2">
+              <span>📅</span> Klausurenkalender &amp; Prüfungsstau-Warnung
+            </h2>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">
+              Prüfungszeitraum WiSe 2026/27 (Februar – März 2027)
+            </p>
+          </div>
+          <span class="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-600/40 px-2.5 py-1 rounded-lg">
+            Kollisionsprüfer aktiv
+          </span>
+        </div>
+
+        <div id="exams-schedule-container" class="space-y-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Side-by-Side Grade Comparison Matrix -->
+      <div class="cs-card rounded-xl p-5 space-y-4">
+        <div class="border-b border-[#1e2533] pb-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="font-heading font-bold text-white text-lg flex items-center gap-2">
+              <span>📊</span> Notenspiegel-Vergleich aller Kernmodule
+            </h2>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">
+              Durchschnittsnoten, Durchfallquoten und Verteilungen im direkten Vergleich
+            </p>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs font-mono border-collapse">
+            <thead>
+              <tr class="border-b border-[#1e2533] text-slate-400 bg-[#131823]">
+                <th class="py-2.5 px-3">Modul</th>
+                <th class="py-2.5 px-3">Bereich</th>
+                <th class="py-2.5 px-3">CP</th>
+                <th class="py-2.5 px-3">Ø Schnitt</th>
+                <th class="py-2.5 px-3">Durchfallquote</th>
+                <th class="py-2.5 px-3">Notenverteilung (1.0 → 5.0)</th>
+                <th class="py-2.5 px-3 text-right">Aktion</th>
+              </tr>
+            </thead>
+            <tbody id="grade-comparison-tbody" class="divide-y divide-[#1e2533]">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
     </div>
 
   </main>
 
+  <!-- Module Detail Modal / Popover -->
+  <div id="course-detail-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" role="dialog" aria-modal="true">
+    <div class="bg-[#0f131a] border border-[#1e2533] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto custom-scrollbar p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
+      <div class="flex items-start justify-between border-b border-[#1e2533] pb-3">
+        <div id="modal-mod-header">
+          <!-- Injected title -->
+        </div>
+        <button onclick="closeCourseDetailModal()" class="text-slate-400 hover:text-white text-lg p-1">✕</button>
+      </div>
+
+      <div id="modal-mod-body" class="space-y-4 text-xs font-mono">
+        <!-- Injected details -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
   <div id="app-footer" class="hidden-print"></div>
   <script>renderFooter("../");</script>
 
+  <!-- TUPlan Core Script -->
   <script>
-    // =============================================================
-    // VOLLSTÄNDIGER TU DARMSTADT VV-KATALOG — alle Fachbereiche
-    // =============================================================
-    const MOCK_MODULES = [
-
-      // ── FB20: Informatik (Offizielle TUCaN Belegungen & Räume) ───
-      { id:"20-00-0015-iv", name:"Informationsmanagement",            fb:"FB20 – Informatik", type:"VL+Ü", day:2, startTime:"09:50", endTime:"11:30", room:"S1|01 A01 (Audimax)", contents:"SQL, Normalisierung, 2PL, relationale Algebra, B+ Bäume.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"20-00-0004-iv", name:"Algorithmen und Datenstrukturen (AuD)", fb:"FB20 – Informatik", type:"VL+Ü", day:2, startTime:"11:40", endTime:"13:20", room:"S1|01 A01 (Audimax)", contents:"Dijkstra, AVL-Bäume, Sortierverfahren, Hashing, Master-Theorem.", grades:"Ø 3.2 | Dfq: 42%", color:"bg-amber-900/50 border-amber-500/50 text-amber-300" },
-      { id:"20-00-0016-iv", name:"Rechnerorganisation (RO)",          fb:"FB20 – Informatik", type:"VL+Ü", day:1, startTime:"09:50", endTime:"11:30", room:"S2|02 C120 (Piloty)", contents:"RISC-V 5-Stufen Pipeline, Caches, IEEE-754, Amdahl's Law.", grades:"Ø 2.9 | Dfq: 25%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id:"20-00-0017-iv", name:"Modellierung, Spezifikation und Semantik (MoSeS)", fb:"FB20 – Informatik", type:"VL+Ü", day:2, startTime:"13:30", endTime:"15:10", room:"S2|02 C120 (Piloty)", contents:"Hoare-Kalkül, Weakest Precondition wp, Big-Step Semantik, LTL/CTL Model Checking.", grades:"Ø 3.4 | Dfq: 38%", color:"bg-purple-900/50 border-purple-500/50 text-purple-300" },
-      { id:"20-00-0001-iv", name:"Funktionale & OOP (FOP)",           fb:"FB20 – Informatik", type:"VL+Pr", day:4, startTime:"15:20", endTime:"17:00", room:"S1|01 A01 (Audimax)", contents:"Java, Objektorientierung, Rekursion, Lambdas, Streams, Generics.", grades:"Ø 2.5 | Dfq: 15%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"20-00-0002-iv", name:"Automaten, formale Sprachen & Entsch. (AFE)", fb:"FB20 – Informatik", type:"VL+Ü", day:1, startTime:"15:20", endTime:"17:00", room:"S1|01 A01 (Audimax)", contents:"DFA, NFA, Reguläre Ausdrücke, Kellerautomaten, Turing-Maschinen.", grades:"Ø 3.6 | Dfq: 50%", color:"bg-purple-900/50 border-purple-500/50 text-purple-300" },
-      { id:"20-00-0003-iv", name:"Aussagen- & Prädikatenlogik (APL)", fb:"FB20 – Informatik", type:"VL+Ü", day:4, startTime:"11:40", endTime:"13:20", room:"S1|01 A01 (Audimax)", contents:"PL1, Resolution, Unifikation, Herbrand-Theorie, Prolog.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-purple-900/50 border-purple-500/50 text-purple-300" },
-      { id:"20-00-0005-iv", name:"Digitaltechnik (DT)",               fb:"FB20 – Informatik", type:"VL+Ü", day:5, startTime:"08:00", endTime:"09:40", room:"S3|11 0012 (Hexagon)", contents:"Logikgatter, Boolesche Algebra, KV-Diagramme, synchrone Schaltwerke, VHDL.", grades:"Ø 2.8 | Dfq: 22%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id:"20-00-0018-iv", name:"Computersystemsicherheit (CSS)",     fb:"FB20 – Informatik", type:"VL+Ü", day:3, startTime:"11:40", endTime:"13:20", room:"S2|02 C120 (Piloty)", contents:"Kryptographie, AES, RSA, TLS, Buffer Overflows, Trusted Execution.", grades:"Ø 2.6 | Dfq: 18%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id:"20-00-0019-iv", name:"Computernetze & Verteilte Systeme", fb:"FB20 – Informatik", type:"VL+Ü", day:1, startTime:"11:40", endTime:"13:20", room:"S3|11 0012 (Hexagon)", contents:"OSI-Modell, TCP/IP, Routing (BGP, OSPF), DNS, HTTP/3, Congestion Control.", grades:"Ø 2.8 | Dfq: 20%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id:"20-00-0020-iv", name:"Software Engineering (SE)",         fb:"FB20 – Informatik", type:"VL+Pr", day:4, startTime:"09:50", endTime:"11:30", room:"S2|02 C120 (Piloty)", contents:"Design Patterns, UML, SCRUM, Refactoring, CI/CD, Test-Driven Development.", grades:"Ø 2.2 | Dfq: 5%",  color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"20-00-0021-iv", name:"Einführung in die KI",             fb:"FB20 – Informatik", type:"VL+Ü", day:1, startTime:"13:30", endTime:"15:10", room:"S1|01 A01 (Audimax)", contents:"A*, Minimax, Bayes'sche Netze, Neuronale Netze, Reinforcement Learning.", grades:"Ø 2.4 | Dfq: 12%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"20-00-0023-iv", name:"Parallele Programmierung",         fb:"FB20 – Informatik", type:"VL+Ü", day:4, startTime:"13:30", endTime:"15:10", room:"S2|02 C120 (Piloty)", contents:"Threads, Mutex, Semaphoren, OpenMP, MPI, GPU CUDA.", grades:"Ø 3.1 | Dfq: 30%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"20-00-0025-iv", name:"Informatik und Gesellschaft (IuG)", fb:"FB20 – Informatik", type:"VL", day:1, startTime:"09:50", endTime:"11:30", room:"S1|03 226", contents:"Ethik, DSGVO, KI & Recht, Urheberrecht, Barrierefreiheit.", grades:"Ø 1.8 | Dfq: 2%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-300" },
-      { id:"20-00-0026-iv", name:"Wissenschaftliches Arbeiten",       fb:"FB20 – Informatik", type:"Seminar", day:2, startTime:"15:20", endTime:"17:00", room:"S2|02 C120 (Piloty)", contents:"LaTeX, Zitationen, Literaturrecherche, Plagiatsvermeidung.", grades:"Ø 1.5 | Dfq: 1%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-300" },
-      { id:"04-00-0111-iv", name:"Mathematik I (Analysis)",           fb:"FB04 – Mathematik", type:"VL+Ü", day:1, startTime:"08:00", endTime:"09:40", room:"S1|01 A01 (Audimax)", contents:"Grenzwerte, Stetigkeit, Differential- und Integralrechnung, Taylor.", grades:"Ø 3.1 | Dfq: 35%", color:"bg-rose-900/50 border-rose-500/50 text-rose-300" },
-      { id:"04-00-0112-iv", name:"Mathematik II (Lin. Algebra)",      fb:"FB04 – Mathematik", type:"VL+Ü", day:2, startTime:"08:00", endTime:"09:40", room:"S1|01 A01 (Audimax)", contents:"Vektorräume, Matrizen, Eigenwerte, Gauss-Jordan, Singulärwertzerlegung.", grades:"Ø 3.3 | Dfq: 40%", color:"bg-rose-900/50 border-rose-500/50 text-rose-300" },
-      { id:"04-00-0113-iv", name:"Mathe III / Probabilistische Meth.",fb:"FB04 – Mathematik", type:"VL+Ü", day:3, startTime:"11:40", endTime:"13:20", room:"S1|01 A01 (Audimax)", contents:"Stochastik, Wahrscheinlichkeit, Bayes, Markov-Ketten, Grenzwertsätze.", grades:"Ø 3.5 | Dfq: 48%", color:"bg-rose-900/50 border-rose-500/50 text-rose-300" },
-
-      // ── FB02: Gesellschafts- und Geschichtswissenschaften ────────
-      { id:"fb02-powi",       name:"Einführung in die Politikwiss.",  fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:2, startTime:"08:00", endTime:"09:40", room:"S103/213", contents:"Politische Systeme, Demokratietheorie, Internationale Beziehungen.", grades:"Ø 2.1 | Dfq: 5%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
-      { id:"fb02-soziologie", name:"Einführung in die Soziologie",    fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:3, startTime:"09:50", endTime:"11:30", room:"S103/226", contents:"Soziale Strukturen, Ungleichheit, Institutionen.", grades:"Ø 2.0 | Dfq: 3%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
-      { id:"fb02-geschichte", name:"Geschichte der Technik",          fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:4, startTime:"11:40", endTime:"13:20", room:"S103/213", contents:"Industrialisierung, Digitalisierung, Technik und Gesellschaft.", grades:"Ø 1.8 | Dfq: 2%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
-      { id:"fb02-philosophie", name:"Wissenschaftstheorie und Ethik", fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:5, startTime:"13:30", endTime:"15:10", room:"S101/A1", contents:"Erkenntnistheorie, Wissenschaftsethik, angewandte Ethik.", grades:"Ø 1.9 | Dfq: 4%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
-
-      // ── FB03: Humanwissenschaften ────────────────────────────────
-      { id:"fb03-psych", name:"Einführung in die Psychologie", fb:"FB03 – Humanwissenschaften", type:"VL", day:1, startTime:"09:50", endTime:"11:30", room:"S101/A2",  contents:"Kognition, Wahrnehmung, Lernen, Sozialpsychologie.", grades:"Ø 2.2 | Dfq: 7%", color:"bg-violet-900/50 border-violet-400/50 text-violet-200" },
-      { id:"fb03-sport",  name:"Sportwissenschaft Grundlagen", fb:"FB03 – Humanwissenschaften", type:"VL", day:2, startTime:"11:40", endTime:"13:20", room:"Sporthalle", contents:"Trainingslehre, Bewegungswissenschaft.", grades:"Ø 1.7 | Dfq: 1%", color:"bg-violet-900/50 border-violet-400/50 text-violet-200" },
-      { id:"fb03-paed",  name:"Allgemeine Pädagogik",          fb:"FB03 – Humanwissenschaften", type:"VL", day:3, startTime:"13:30", endTime:"15:10", room:"S103/226",  contents:"Bildungstheorien, Didaktik, Unterrichtsgestaltung.", grades:"Ø 1.9 | Dfq: 3%", color:"bg-violet-900/50 border-violet-400/50 text-violet-200" },
-
-      // ── FB04: Mathematik ─────────────────────────────────────────
-      { id:"mathe1",        name:"Mathematik I (Analysis)",     fb:"FB04 – Mathematik", type:"VL+Ü", day:1, startTime:"08:00", endTime:"09:40", room:"S311/08", contents:"Grenzwerte, Stetigkeit, Differential- und Integralrechnung.", grades:"Ø 3.1 | Dfq: 35%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
-      { id:"mathe2",        name:"Mathematik II (Lin. Algebra)",fb:"FB04 – Mathematik", type:"VL+Ü", day:2, startTime:"09:50", endTime:"11:30", room:"S311/08", contents:"Vektorräume, Matrizen, Eigenwerte.", grades:"Ø 3.3 | Dfq: 40%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
-      { id:"mathe3",        name:"Probabilistische Methoden",   fb:"FB04 – Mathematik", type:"VL",   day:3, startTime:"11:40", endTime:"13:20", room:"S101/A1", contents:"Stochastik, Wahrscheinlichkeit, Bayes, Markov-Ketten.", grades:"Ø 3.5 | Dfq: 48%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
-      { id:"fb04-nummath",  name:"Numerische Mathematik",       fb:"FB04 – Mathematik", type:"VL+Ü", day:4, startTime:"09:50", endTime:"11:30", room:"S311/08", contents:"Numerische Integration, Differentialgleichungen, Fehleranalyse.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
-      { id:"fb04-diskret",  name:"Diskrete Mathematik",         fb:"FB04 – Mathematik", type:"VL+Ü", day:5, startTime:"08:00", endTime:"09:40", room:"S101/A1", contents:"Kombinatorik, Graphentheorie, Zahlentheorie.", grades:"Ø 3.2 | Dfq: 36%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
-      { id:"fb04-algebra",  name:"Algebra",                     fb:"FB04 – Mathematik", type:"VL",   day:1, startTime:"11:40", endTime:"13:20", room:"S311/08", contents:"Gruppen, Ringe, Körper, Galois-Theorie.", grades:"Ø 3.4 | Dfq: 42%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
-      { id:"fb04-stochastik", name:"Stochastik",                fb:"FB04 – Mathematik", type:"VL",   day:2, startTime:"13:30", endTime:"15:10", room:"S311/08", contents:"Maßtheoretische Wahrscheinlichkeit, Martingale, Brownsche Bewegung.", grades:"Ø 3.6 | Dfq: 50%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
-
-      // ── FB05: Physik ─────────────────────────────────────────────
-      { id:"fb05-exp1",       name:"Experimentalphysik I (Mech.)",   fb:"FB05 – Physik", type:"VL+Ü", day:1, startTime:"09:50", endTime:"11:30", room:"PhysikHS", contents:"Kinematik, Dynamik, Schwingungen, Wellen.", grades:"Ø 3.0 | Dfq: 30%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
-      { id:"fb05-exp2",       name:"Experimentalphysik II (E-Lehre)",fb:"FB05 – Physik", type:"VL+Ü", day:3, startTime:"09:50", endTime:"11:30", room:"PhysikHS", contents:"Elektrodynamik, Magnetismus, Maxwell-Gleichungen.", grades:"Ø 3.1 | Dfq: 33%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
-      { id:"fb05-theo1",      name:"Theoretische Physik I",          fb:"FB05 – Physik", type:"VL+Ü", day:2, startTime:"11:40", endTime:"13:20", room:"PhysikHS", contents:"Lagrange, Hamilton-Formalismus, Variationsrechnung.", grades:"Ø 3.4 | Dfq: 45%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
-      { id:"fb05-qm",         name:"Quantenmechanik",               fb:"FB05 – Physik", type:"VL+Ü", day:4, startTime:"09:50", endTime:"11:30", room:"PhysikHS", contents:"Schrödinger-Gleichung, Operatoren, Spin, Unschärferelation.", grades:"Ø 3.5 | Dfq: 47%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
-      { id:"fb05-festkoerper", name:"Festkörperphysik",             fb:"FB05 – Physik", type:"VL",   day:5, startTime:"11:40", endTime:"13:20", room:"PhysikHS", contents:"Kristallstrukturen, Bändermodell, Halbleiter.", grades:"Ø 3.2 | Dfq: 38%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
-
-      // ── FB07: Chemie ─────────────────────────────────────────────
-      { id:"fb07-ac",      name:"Allgemeine und Anorg. Chemie", fb:"FB07 – Chemie", type:"VL+Pr.", day:1, startTime:"13:30", endTime:"15:10", room:"ChemHS", contents:"Atombau, chem. Bindung, Reaktionen, Periodensystem.", grades:"Ø 2.9 | Dfq: 25%", color:"bg-lime-900/50 border-lime-500/50 text-lime-300" },
-      { id:"fb07-oc",      name:"Organische Chemie I",          fb:"FB07 – Chemie", type:"VL",    day:2, startTime:"13:30", endTime:"15:10", room:"ChemHS", contents:"Alkane, Alkene, Aromaten, Reaktionsmechanismen.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-lime-900/50 border-lime-500/50 text-lime-300" },
-      { id:"fb07-physchem", name:"Physikalische Chemie I",      fb:"FB07 – Chemie", type:"VL",    day:3, startTime:"15:20", endTime:"17:00", room:"ChemHS", contents:"Thermodynamik, kinetische Gastheorie, chem. Gleichgewicht.", grades:"Ø 3.2 | Dfq: 35%", color:"bg-lime-900/50 border-lime-500/50 text-lime-300" },
-      { id:"fb07-biochem",  name:"Biochemie I",                 fb:"FB07 – Chemie", type:"VL",    day:4, startTime:"15:20", endTime:"17:00", room:"ChemHS", contents:"Aminosäuren, Proteine, Enzyme, Kohlenhydrate.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-lime-900/50 border-lime-500/50 text-lime-300" },
-
-      // ── FB10: Biologie ───────────────────────────────────────────
-      { id:"fb10-bio1",    name:"Allgemeine Biologie I",  fb:"FB10 – Biologie", type:"VL",    day:1, startTime:"11:40", endTime:"13:20", room:"BioHS", contents:"Zellbiologie, Genetik, Evolution.", grades:"Ø 2.4 | Dfq: 10%", color:"bg-green-900/50 border-green-500/50 text-green-300" },
-      { id:"fb10-genetik", name:"Genetik",                fb:"FB10 – Biologie", type:"VL",    day:3, startTime:"08:00", endTime:"09:40", room:"BioHS", contents:"Mendel-Gesetze, Molekulargenetik, Genomik.", grades:"Ø 2.6 | Dfq: 15%", color:"bg-green-900/50 border-green-500/50 text-green-300" },
-      { id:"fb10-mikrobio", name:"Mikrobiologie",         fb:"FB10 – Biologie", type:"VL+Pr.", day:5, startTime:"09:50", endTime:"11:30", room:"BioHS", contents:"Bakterien, Viren, Pilze, Wachstum, Antibiotikaresistenz.", grades:"Ø 2.3 | Dfq: 8%",  color:"bg-green-900/50 border-green-500/50 text-green-300" },
-
-      // ── FB11: Geowissenschaften ──────────────────────────────────
-      { id:"fb11-geo1",         name:"Allgemeine Geologie",          fb:"FB11 – Geowissenschaften", type:"VL",    day:2, startTime:"08:00", endTime:"09:40", room:"GeoHS", contents:"Plattentektonik, Gesteinskunde, Mineralien.", grades:"Ø 2.2 | Dfq: 6%",  color:"bg-stone-700/60 border-stone-400/50 text-stone-200" },
-      { id:"fb11-geodaesie",    name:"Geodäsie Grundlagen",          fb:"FB11 – Geowissenschaften", type:"VL+Ü", day:4, startTime:"08:00", endTime:"09:40", room:"GeoHS", contents:"Vermessungstechnik, GPS, GIS, Kartographie.", grades:"Ø 2.5 | Dfq: 12%", color:"bg-stone-700/60 border-stone-400/50 text-stone-200" },
-      { id:"fb11-meteorologie", name:"Meteorologie und Klimatologie", fb:"FB11 – Geowissenschaften", type:"VL",   day:1, startTime:"15:20", endTime:"17:00", room:"GeoHS", contents:"Atmosphärenphysik, Klimamodelle, Wettervorhersage.", grades:"Ø 2.3 | Dfq: 9%",  color:"bg-stone-700/60 border-stone-400/50 text-stone-200" },
-
-      // ── FB13: Bauingenieurwesen ───────────────────────────────────
-      { id:"fb13-statik",    name:"Technische Mechanik I (Statik)", fb:"FB13 – Bauingenieurwesen", type:"VL+Ü", day:1, startTime:"13:30", endTime:"15:10", room:"L2|06 100", contents:"Kräftegleichgewicht, Schnittgrößen, Stabwerke.", grades:"Ø 3.2 | Dfq: 38%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-200" },
-      { id:"fb13-dynamik",   name:"Technische Mechanik III (Dyn.)", fb:"FB13 – Bauingenieurwesen", type:"VL+Ü", day:3, startTime:"13:30", endTime:"15:10", room:"L2|06 100", contents:"Kinetik, Schwingungen, Mehrkörpersysteme.", grades:"Ø 3.4 | Dfq: 42%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-200" },
-      { id:"fb13-werkstoff", name:"Werkstoffkunde I",               fb:"FB13 – Bauingenieurwesen", type:"VL",   day:2, startTime:"15:20", endTime:"17:00", room:"L2|06 100", contents:"Metalle, Polymere, Keramiken, Verbundwerkstoffe.", grades:"Ø 2.8 | Dfq: 22%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-200" },
-      { id:"fb13-hydro",     name:"Hydromechanik und Hydrologie",   fb:"FB13 – Bauingenieurwesen", type:"VL",   day:4, startTime:"13:30", endTime:"15:10", room:"L2|06 100", contents:"Strömungsmechanik, Wasserhaushalt, Hochwasserschutz.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-200" },
-
-      // ── FB15: Architektur ────────────────────────────────────────
-      { id:"fb15-entwerfen",    name:"Grundlagen des Entwerfens", fb:"FB15 – Architektur", type:"VL+Studio", day:1, startTime:"09:50", endTime:"13:20", room:"El-Lissitzky-Str.1", contents:"Architektonisches Entwerfen, Raum- und Formgestalten.", grades:"Ø 2.1 | Dfq: 5%",  color:"bg-sky-900/50 border-sky-500/50 text-sky-200" },
-      { id:"fb15-baugeschichte", name:"Architekturgeschichte I",  fb:"FB15 – Architektur", type:"VL",       day:3, startTime:"08:00", endTime:"09:40", room:"El-Lissitzky-Str.1", contents:"Antike bis Renaissance, Bautypen, Stilentwicklung.", grades:"Ø 1.9 | Dfq: 3%",  color:"bg-sky-900/50 border-sky-500/50 text-sky-200" },
-      { id:"fb15-tragwerk",     name:"Tragwerkslehre I",          fb:"FB15 – Architektur", type:"VL+Ü",     day:5, startTime:"11:40", endTime:"13:20", room:"El-Lissitzky-Str.1", contents:"Statik für Architekten, Baustoffe, Lastabtragung.", grades:"Ø 2.8 | Dfq: 20%", color:"bg-sky-900/50 border-sky-500/50 text-sky-200" },
-
-      // ── FB16: Maschinenbau ───────────────────────────────────────
-      { id:"fb16-thermo",           name:"Technische Thermodynamik I", fb:"FB16 – Maschinenbau", type:"VL+Ü",  day:1, startTime:"11:40", endTime:"13:20", room:"L2|06 200", contents:"Hauptsätze, Zustandsgrößen, Kreisprozesse.", grades:"Ø 3.3 | Dfq: 40%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id:"fb16-stroemung",        name:"Strömungslehre I",           fb:"FB16 – Maschinenbau", type:"VL+Ü",  day:3, startTime:"11:40", endTime:"13:20", room:"L2|06 200", contents:"Euler-/Navier-Stokes-Gleichungen, Grenzschicht, Turbulenz.", grades:"Ø 3.4 | Dfq: 44%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id:"fb16-maschinenelemente", name:"Maschinenelemente I",       fb:"FB16 – Maschinenbau", type:"VL+Ü",  day:2, startTime:"09:50", endTime:"11:30", room:"L2|06 200", contents:"Schrauben, Federn, Wälzlager, Getriebe.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id:"fb16-fertig",           name:"Fertigungslehre",             fb:"FB16 – Maschinenbau", type:"VL",    day:4, startTime:"11:40", endTime:"13:20", room:"L2|06 200", contents:"Urformen, Umformen, Trennen, Fügen, CNC.", grades:"Ø 2.9 | Dfq: 24%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id:"fb16-cad",              name:"CAD / Konstruktionslehre",    fb:"FB16 – Maschinenbau", type:"VL+Pr.", day:5, startTime:"09:50", endTime:"11:30", room:"L2|06 200", contents:"SolidWorks, parametrisches Konstruieren, Baugruppenmodellierung.", grades:"Ø 2.2 | Dfq: 7%",  color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-
-      // ── FB18: Elektro- und Informationstechnik ────────────────────
-      { id:"fb18-get",        name:"Grundlagen der Elektrotechnik I",  fb:"FB18 – Elektro- & Informationstechnik", type:"VL+Ü", day:1, startTime:"09:50", endTime:"11:30", room:"S311/08", contents:"Gleichstromnetzwerke, Kirchhoff, Kondensatoren.", grades:"Ø 3.1 | Dfq: 33%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"fb18-get2",       name:"Grundlagen der Elektrotechnik II", fb:"FB18 – Elektro- & Informationstechnik", type:"VL+Ü", day:3, startTime:"09:50", endTime:"11:30", room:"S311/08", contents:"Wechselstrom, Frequenzgang, Fourier.", grades:"Ø 3.2 | Dfq: 36%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"fb18-signale",    name:"Signale und Systeme",              fb:"FB18 – Elektro- & Informationstechnik", type:"VL+Ü", day:2, startTime:"13:30", endTime:"15:10", room:"S311/08", contents:"LTI-Systeme, Laplace, Z-Transformation, Filter.", grades:"Ø 3.3 | Dfq: 38%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"fb18-halbleiter", name:"Halbleiterbauelemente",            fb:"FB18 – Elektro- & Informationstechnik", type:"VL",   day:4, startTime:"15:20", endTime:"17:00", room:"S311/08", contents:"Dioden, Transistoren (BJT, MOSFET), Schaltkreisdesign.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"fb18-nachrich",   name:"Nachrichtentechnik",               fb:"FB18 – Elektro- & Informationstechnik", type:"VL",   day:5, startTime:"13:30", endTime:"15:10", room:"S311/08", contents:"Modulation, Kanalkapazität, Informationstheorie.", grades:"Ø 3.1 | Dfq: 32%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id:"fb18-regelung",   name:"Regelungstechnik I",               fb:"FB18 – Elektro- & Informationstechnik", type:"VL+Ü", day:1, startTime:"15:20", endTime:"17:00", room:"S311/08", contents:"PID-Regler, Stabilitätsanalyse, Bode-Diagramm.", grades:"Ø 3.2 | Dfq: 36%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
-
-      // ── FB20: Informatik ──────────────────────────────────────────
-      { id:"fop",           name:"Funktionale & OOP (FOP)",           fb:"FB20 – Informatik", type:"VL",    day:4, startTime:"13:30", endTime:"15:10", room:"S101/A1",  contents:"Java, Objektorientierung, Rekursion, Lambdas, Streams.", grades:"Ø 2.5 | Dfq: 15%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"aud",           name:"Algorithmen & Datenstrukturen",     fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"11:40", endTime:"13:20", room:"S101/A1",  contents:"Graphen, Sortierverfahren, Hashing, Laufzeitanalyse.", grades:"Ø 3.2 | Dfq: 42%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"infoman",       name:"Informationsmanagement",            fb:"FB20 – Informatik", type:"VL",    day:3, startTime:"09:50", endTime:"11:30", room:"S311/08",  contents:"SQL, Normalisierung, 2PL, relationale Algebra.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"ro",            name:"Rechnerorganisation",               fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"13:30", endTime:"15:10", room:"S311/08",  contents:"RISC-V, Caches, Pipeline, IEEE-754.", grades:"Ø 2.9 | Dfq: 25%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"dt",            name:"Digitaltechnik",                    fb:"FB20 – Informatik", type:"VL",    day:5, startTime:"08:00", endTime:"09:40", room:"S311/08",  contents:"Logikgatter, Boolesche Algebra, Automaten, KV-Diagramm.", grades:"Ø 2.8 | Dfq: 22%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"apl",           name:"Aussagen- & Prädikatenlogik",       fb:"FB20 – Informatik", type:"VL",    day:3, startTime:"15:20", endTime:"17:00", room:"S103/226", contents:"PL1, Resolution, Unifikation, Prolog.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"se",            name:"Software Engineering",              fb:"FB20 – Informatik", type:"VL",    day:4, startTime:"09:50", endTime:"11:30", room:"S101/A1",  contents:"Design Patterns, UML, SCRUM, Agile.", grades:"Ø 2.2 | Dfq: 5%",  color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"sec",           name:"Computersystemsicherheit",          fb:"FB20 – Informatik", type:"VL",    day:5, startTime:"11:40", endTime:"13:20", room:"S311/08",  contents:"Kryptographie, RSA, TLS, Buffer Overflow, SQL-Injection.", grades:"Ø 2.6 | Dfq: 18%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"ki",            name:"Einführung in die KI",              fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"15:20", endTime:"17:00", room:"S101/A1",  contents:"A*, Minimax, Neuronale Netze, Maschinelles Lernen.", grades:"Ø 2.4 | Dfq: 12%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"moses",         name:"Modellierung & Semantik (MoSeS)",   fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"08:00", endTime:"09:40", room:"S103/226", contents:"Hoare-Kalkül, LTL, Kripke-Strukturen.", grades:"Ø 3.4 | Dfq: 38%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"netz",          name:"Computernetze",                     fb:"FB20 – Informatik", type:"VL",    day:4, startTime:"11:40", endTime:"13:20", room:"S101/A1",  contents:"OSI-Modell, TCP/IP, Routing, DNS.", grades:"Ø 2.8 | Dfq: 20%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"parallel",      name:"Parallele Programmierung",          fb:"FB20 – Informatik", type:"VL",    day:5, startTime:"13:30", endTime:"15:10", room:"S311/08",  contents:"Threads, Deadlocks, Mutex, Semaphoren, OpenMP.", grades:"Ø 3.1 | Dfq: 30%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"iug",           name:"Informatik und Gesellschaft",       fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"09:50", endTime:"11:30", room:"S103/226", contents:"Ethik, DSGVO, KI & Recht, Urheberrecht.", grades:"Ø 1.8 | Dfq: 2%",  color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"wiss",          name:"Wissenschaftliches Arbeiten",       fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"15:20", endTime:"17:00", room:"S103/226", contents:"LaTeX, Zitationen, Literaturrecherche, Plagiat.", grades:"Ø 1.5 | Dfq: 1%",  color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"afe",           name:"Automaten, form. Sprachen & Entsch.",fb:"FB20 – Informatik", type:"VL",   day:3, startTime:"13:30", endTime:"15:10", room:"S311/08",  contents:"DFA, NFA, Reguläre Ausdrücke, Kellerautomaten, Turing.", grades:"Ø 3.6 | Dfq: 50%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-os",       name:"Betriebssysteme",                   fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"13:30", endTime:"15:10", room:"S101/A1",  contents:"Prozesse, Speicherverwaltung, Dateisysteme, Scheduling.", grades:"Ø 2.8 | Dfq: 22%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-compiler", name:"Übersetzerbau (Compilerbau)",       fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"11:40", endTime:"13:20", room:"S103/226", contents:"Lexer, Parser, Codegenerierung, Optimierung.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-ml",       name:"Maschinelles Lernen",               fb:"FB20 – Informatik", type:"VL",    day:4, startTime:"15:20", endTime:"17:00", room:"S101/A1",  contents:"Regression, SVM, Deep Learning, Reinforcement Learning.", grades:"Ø 2.6 | Dfq: 16%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-crypto",   name:"Kryptographie",                     fb:"FB20 – Informatik", type:"VL",    day:5, startTime:"15:20", endTime:"17:00", room:"S311/08",  contents:"Symmetrische Verfahren, Public-Key, Protokolle, Zero-Knowledge.", grades:"Ø 2.9 | Dfq: 24%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-dbs",      name:"Datenbanksysteme",                  fb:"FB20 – Informatik", type:"VL",    day:3, startTime:"08:00", endTime:"09:40", room:"S311/08",  contents:"Relationale Algebra, SQL, Transaktionen, NoSQL.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-cv",       name:"Computer Vision",                   fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"13:30", endTime:"15:10", room:"S103/226", contents:"Bildverarbeitung, Segmentierung, CNNs, 3D-Rekonstruktion.", grades:"Ø 2.5 | Dfq: 13%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-nlp",      name:"Natural Language Processing",       fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"09:50", endTime:"11:30", room:"S101/A1",  contents:"Tokenisierung, Sprachmodelle, Transformers, BERT, GPT.", grades:"Ø 2.4 | Dfq: 10%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-hci",      name:"Mensch-Computer-Interaktion",       fb:"FB20 – Informatik", type:"VL+Pr.",day:4, startTime:"08:00", endTime:"09:40", room:"S103/226", contents:"Usability, User Research, Prototyping, Accessibility.", grades:"Ø 1.9 | Dfq: 3%",  color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-verteilt", name:"Verteilte Systeme",                 fb:"FB20 – Informatik", type:"VL",    day:3, startTime:"15:20", endTime:"17:00", room:"S101/A1",  contents:"RPC, Konsistenz, Replikation, Blockchain, Microservices.", grades:"Ø 2.8 | Dfq: 20%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-embedded", name:"Eingebettete Systeme",              fb:"FB20 – Informatik", type:"VL+Pr.",day:5, startTime:"08:00", endTime:"09:40", room:"S311/08",  contents:"RTOS, Hardware-Schnittstellen, ARM, Echtzeitsysteme.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-graphik",  name:"Computergraphik",                   fb:"FB20 – Informatik", type:"VL+Pr.",day:1, startTime:"08:00", endTime:"09:40", room:"S103/226", contents:"OpenGL, Rasterisierung, Ray Tracing, Shader.", grades:"Ø 2.6 | Dfq: 15%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id:"fb20-formal",   name:"Formale Methoden",                  fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"15:20", endTime:"17:00", room:"S103/213", contents:"Modellprüfung, SAT/SMT-Solver, Theorembeweiser (Coq, Isabelle).", grades:"Ø 3.3 | Dfq: 40%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-
-      // ── Sprachenzentrum ───────────────────────────────────────────
-      { id:"spz-en-b2",    name:"English for Academic Purposes B2", fb:"Sprachenzentrum", type:"Ü", day:1, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Wissenschaftliche Texte, Präsentationen, akademische Kommunikation.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
-      { id:"spz-en-c1",    name:"English for Academic Purposes C1", fb:"Sprachenzentrum", type:"Ü", day:3, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Akademisches Schreiben, Debatte, Scientific Writing.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
-      { id:"spz-french",   name:"Französisch A1",                   fb:"Sprachenzentrum", type:"Ü", day:2, startTime:"15:20", endTime:"17:00", room:"S103/213", contents:"Grundlagen Französisch, Alltag, Kommunikation.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
-      { id:"spz-spanisch", name:"Spanisch A1",                      fb:"Sprachenzentrum", type:"Ü", day:4, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Grundlagen Spanisch, Alltag, Kommunikation.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
-      { id:"spz-chinesisch", name:"Chinesisch A1 (Mandarin)",       fb:"Sprachenzentrum", type:"Ü", day:5, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Pinyin, Grundvokabular, Begrüßung, Zahlen.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
-      { id:"spz-russisch",  name:"Russisch A1",                     fb:"Sprachenzentrum", type:"Ü", day:2, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Kyrillisches Alphabet, Grundwortschatz, Grußformeln.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
+    // =========================================================================
+    // TUPlan Dataset & Grade Statistics (FB20 Informatik & FB04 Mathe)
+    // =========================================================================
+    const TUPLAN_COURSES = [
+      {
+        id: "20-00-0015-iv",
+        slug: "informationsmanagement",
+        name: "Informationsmanagement",
+        category: "Praktisch",
+        level: "Pflicht",
+        semester: "WiSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Carsten Binnig, Prof. Dr. Karsten Weihe",
+        color: "border-blue-500/60 bg-blue-950/80 text-blue-200",
+        examDate: "2027-02-18",
+        examTime: "09:00 - 10:30",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 2.7,
+        failRate: 18,
+        studentsCount: 420,
+        // Histogram buckets: [1.0, 1.3, 1.7, 2.0, 2.3, 2.7, 3.0, 3.3, 3.7, 4.0, 5.0]
+        gradesDist: [12, 18, 25, 30, 28, 24, 19, 14, 10, 8, 22],
+        times: [
+          { type: "VL", day: "Di", dayNum: 2, start: "09:50", end: "11:30", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Do", dayNum: 4, start: "13:30", end: "15:10", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "ÜB", day: "Mo", dayNum: 1, start: "11:40", end: "13:20", room: "S2|02 C120 (Piloty)", group: "Gruppe 1" },
+          { type: "ÜB", day: "Mi", dayNum: 3, start: "15:20", end: "17:00", room: "S1|03 226", group: "Gruppe 2 (Alt)" }
+        ],
+        desc: "Relationales Modell, Relationale Algebra, SQL-Optimierung, B+-Bäume, Transaktionsverwaltung (ACID, 2PL) und Normalformen (1NF–BCNF)."
+      },
+      {
+        id: "20-00-0004-iv",
+        slug: "algorithmen-datenstrukturen",
+        name: "Algorithmen & Datenstrukturen (AuD)",
+        category: "Praktisch",
+        level: "Pflicht",
+        semester: "SoSe",
+        cp: 8,
+        sws: 6,
+        prof: "Prof. Dr. Karsten Weihe, Prof. Dr. Iryna Gurevych",
+        color: "border-amber-500/60 bg-amber-950/80 text-amber-200",
+        examDate: "2027-02-22",
+        examTime: "14:00 - 16:00",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 3.2,
+        failRate: 42,
+        studentsCount: 680,
+        gradesDist: [5, 9, 14, 18, 22, 26, 32, 28, 20, 15, 68],
+        times: [
+          { type: "VL", day: "Di", dayNum: 2, start: "11:40", end: "13:20", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Do", dayNum: 4, start: "13:30", end: "15:10", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Fr", dayNum: 5, start: "09:50", end: "11:30", room: "S2|02 C120 (Piloty)", group: "Gruppe 1" },
+          { type: "ÜB", day: "Mi", dayNum: 3, start: "09:50", end: "11:30", room: "S1|05 122", group: "Gruppe 2 (Alt)" }
+        ],
+        desc: "Graphen-Algorithmen (Dijkstra, A*, Kruskal), Bäume (AVL, Rot-Schwarz), Hashing, Sortieren und Komplexitätsanalyse mit Master-Theorem."
+      },
+      {
+        id: "20-00-0016-iv",
+        slug: "rechnerorganisation",
+        name: "Rechnerorganisation (RO)",
+        category: "Technisch",
+        level: "Pflicht",
+        semester: "SoSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Christian Hochberger, Prof. Dr. Andreas Koch",
+        color: "border-emerald-500/60 bg-emerald-950/80 text-emerald-200",
+        examDate: "2027-02-26",
+        examTime: "10:00 - 11:30",
+        examRoom: "S2|02 C120 (Piloty)",
+        gradeAvg: 2.9,
+        failRate: 25,
+        studentsCount: 390,
+        gradesDist: [10, 15, 20, 26, 30, 25, 22, 18, 12, 9, 32],
+        times: [
+          { type: "VL", day: "Mo", dayNum: 1, start: "09:50", end: "11:30", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "VL", day: "Mi", dayNum: 3, start: "13:30", end: "15:10", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "ÜB", day: "Do", dayNum: 4, start: "15:20", end: "17:00", room: "S1|03 226", group: "Gruppe 1" }
+        ],
+        desc: "RISC-V 5-Stufen Pipeline, Hazard-Detection & Forwarding, Caches (Direct-Mapped, Set-Associative) und Gleitkommazahlen (IEEE-754)."
+      },
+      {
+        id: "20-00-0017-iv",
+        slug: "moses",
+        name: "Modellierung, Spezifikation & Semantik (MoSeS)",
+        category: "Theoretisch",
+        level: "Pflicht",
+        semester: "WiSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Heiko Mantel",
+        color: "border-purple-500/60 bg-purple-950/80 text-purple-200",
+        examDate: "2027-03-02",
+        examTime: "08:30 - 10:00",
+        examRoom: "S2|02 C120 (Piloty)",
+        gradeAvg: 3.4,
+        failRate: 38,
+        studentsCount: 350,
+        gradesDist: [4, 8, 12, 16, 20, 24, 28, 25, 18, 12, 52],
+        times: [
+          { type: "VL", day: "Di", dayNum: 2, start: "13:30", end: "15:10", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "VL", day: "Fr", dayNum: 5, start: "09:50", end: "11:30", room: "S1|05 122", group: "Alle" },
+          { type: "ÜB", day: "Mi", dayNum: 3, start: "11:40", end: "13:20", room: "S2|02 C120 (Piloty)", group: "Gruppe 1" }
+        ],
+        desc: "Hoare-Kalkül {P} c {Q}, Weakest Precondition wp, Big-Step Semantik (Downarrow), Temporallogik (LTL/CTL) und Model Checking."
+      },
+      {
+        id: "20-00-0001-iv",
+        slug: "fop",
+        name: "Funktionale & OOP (FOP)",
+        category: "Praktisch",
+        level: "Pflicht",
+        semester: "WiSe",
+        cp: 8,
+        sws: 6,
+        prof: "Prof. Dr. Mira Mezini, Prof. Dr. Guido Salvaneschi",
+        color: "border-indigo-500/60 bg-indigo-950/80 text-indigo-200",
+        examDate: "2027-02-15",
+        examTime: "14:00 - 15:30",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 2.5,
+        failRate: 15,
+        studentsCount: 720,
+        gradesDist: [22, 35, 45, 52, 48, 38, 30, 22, 15, 10, 42],
+        times: [
+          { type: "VL", day: "Di", dayNum: 2, start: "09:50", end: "11:30", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Do", dayNum: 4, start: "15:20", end: "17:00", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Mi", dayNum: 3, start: "13:30", end: "15:10", room: "S2|02 C120 (Piloty)", group: "Gruppe 1" }
+        ],
+        desc: "Moderne Java-Entwicklung: OOP, Polymorphie, Rekursion, Generics, Lambdas, Streams und funktionale Datenstrukturen."
+      },
+      {
+        id: "20-00-0002-iv",
+        slug: "afe",
+        name: "Automaten, formale Sprachen & Entsch. (AFE)",
+        category: "Theoretisch",
+        level: "Pflicht",
+        semester: "WiSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Martin Otto",
+        color: "border-purple-500/60 bg-purple-950/80 text-purple-200",
+        examDate: "2027-03-05",
+        examTime: "11:00 - 12:30",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 3.6,
+        failRate: 50,
+        studentsCount: 450,
+        gradesDist: [3, 6, 9, 14, 18, 22, 26, 28, 22, 16, 85],
+        times: [
+          { type: "VL", day: "Mo", dayNum: 1, start: "15:20", end: "17:00", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Mi", dayNum: 3, start: "09:50", end: "11:30", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Do", dayNum: 4, start: "11:40", end: "13:20", room: "S2|02 C120 (Piloty)", group: "Gruppe 1" }
+        ],
+        desc: "Chomsky-Hierarchie, DFA/NFA, Reguläre Ausdrücke, Pumping-Lemma, Kellerautomaten, Turingmaschinen und Unentscheidbarkeit."
+      },
+      {
+        id: "20-00-0003-iv",
+        slug: "apl",
+        name: "Aussagen- & Prädikatenlogik (APL)",
+        category: "Theoretisch",
+        level: "Pflicht",
+        semester: "SoSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Thomas Schneider",
+        color: "border-purple-500/60 bg-purple-950/80 text-purple-200",
+        examDate: "2027-02-20",
+        examTime: "13:30 - 15:00",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 3.0,
+        failRate: 28,
+        studentsCount: 410,
+        gradesDist: [8, 14, 20, 25, 28, 24, 20, 16, 12, 9, 36],
+        times: [
+          { type: "VL", day: "Di", dayNum: 2, start: "09:50", end: "11:30", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Do", dayNum: 4, start: "11:40", end: "13:20", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Fr", dayNum: 5, start: "13:30", end: "15:10", room: "S1|03 226", group: "Gruppe 1" }
+        ],
+        desc: "Aussagenlogik, Prädikatenlogik 1. Stufe, Klauselnormalform (KNF), Robinson-Resolution, Unifikation und Prolog."
+      },
+      {
+        id: "20-00-0005-iv",
+        slug: "digitaltechnik",
+        name: "Digitaltechnik (DT)",
+        category: "Technisch",
+        level: "Pflicht",
+        semester: "WiSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Andreas Koch",
+        color: "border-emerald-500/60 bg-emerald-950/80 text-emerald-200",
+        examDate: "2027-02-12",
+        examTime: "08:30 - 10:00",
+        examRoom: "S3|11 0012 (Hexagon)",
+        gradeAvg: 2.8,
+        failRate: 22,
+        studentsCount: 380,
+        gradesDist: [12, 18, 24, 29, 27, 22, 18, 14, 10, 7, 28],
+        times: [
+          { type: "VL", day: "Fr", dayNum: 5, start: "08:00", end: "09:40", room: "S3|11 0012 (Hexagon)", group: "Alle" },
+          { type: "VL", day: "Mo", dayNum: 1, start: "13:30", end: "15:10", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Di", dayNum: 2, start: "15:20", end: "17:00", room: "S2|02 C120 (Piloty)", group: "Gruppe 1" }
+        ],
+        desc: "Boolesche Algebra, KV-Diagramme, synchrone Automaten (Mealy/Moore), VHDL-Synthese und FPGA-Hardware."
+      },
+      {
+        id: "20-00-0018-iv",
+        slug: "computersystemsicherheit",
+        name: "Computersystemsicherheit (CSS)",
+        category: "Technisch",
+        level: "Pflicht",
+        semester: "WiSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Ahmad-Reza Sadeghi",
+        color: "border-emerald-500/60 bg-emerald-950/80 text-emerald-200",
+        examDate: "2027-03-08",
+        examTime: "10:00 - 11:30",
+        examRoom: "S2|02 C120 (Piloty)",
+        gradeAvg: 2.6,
+        failRate: 18,
+        studentsCount: 290,
+        gradesDist: [14, 22, 26, 30, 25, 20, 16, 11, 7, 5, 18],
+        times: [
+          { type: "VL", day: "Mi", dayNum: 3, start: "11:40", end: "13:20", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "VL", day: "Fr", dayNum: 5, start: "13:30", end: "15:10", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "ÜB", day: "Mo", dayNum: 1, start: "09:50", end: "11:30", room: "S2|02 C120 (Piloty)", group: "Gruppe 1" }
+        ],
+        desc: "Kryptographie (AES, RSA, TLS), Buffer Overflows, ROP Exploits, Web Security, Sandboxing und Trusted Execution (TEE)."
+      },
+      {
+        id: "20-00-0019-iv",
+        slug: "computernetze",
+        name: "Computernetze & Verteilte Systeme (CNVS)",
+        category: "Technisch",
+        level: "Pflicht",
+        semester: "SoSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Ralf Steinmetz, Prof. Dr. Boris Koldehofe",
+        color: "border-emerald-500/60 bg-emerald-950/80 text-emerald-200",
+        examDate: "2027-02-24",
+        examTime: "14:00 - 15:30",
+        examRoom: "S3|11 0012 (Hexagon)",
+        gradeAvg: 2.8,
+        failRate: 20,
+        studentsCount: 310,
+        gradesDist: [11, 19, 23, 28, 26, 22, 17, 12, 8, 6, 24],
+        times: [
+          { type: "VL", day: "Mo", dayNum: 1, start: "11:40", end: "13:20", room: "S3|11 0012 (Hexagon)", group: "Alle" },
+          { type: "VL", day: "Mi", dayNum: 3, start: "09:50", end: "11:30", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "ÜB", day: "Do", dayNum: 4, start: "13:30", end: "15:10", room: "S1|01 A01 (Audimax)", group: "Gruppe 1" }
+        ],
+        desc: "OSI/TCP-IP Schichten, Routing-Protokolle (BGP, OSPF), TCP Staukontrolle, DNS, HTTP/3 und Peer-to-Peer Systeme."
+      },
+      {
+        id: "20-00-0020-iv",
+        slug: "software-engineering",
+        name: "Software Engineering (SE)",
+        category: "Praktisch",
+        level: "Pflicht",
+        semester: "SoSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Guido Salvaneschi, Prof. Dr. Mira Mezini",
+        color: "border-blue-500/60 bg-blue-950/80 text-blue-200",
+        examDate: "2027-03-11",
+        examTime: "09:00 - 10:30",
+        examRoom: "S2|02 C120 (Piloty)",
+        gradeAvg: 2.2,
+        failRate: 5,
+        studentsCount: 330,
+        gradesDist: [25, 38, 42, 35, 28, 18, 12, 8, 4, 2, 6],
+        times: [
+          { type: "VL", day: "Di", dayNum: 2, start: "15:20", end: "17:00", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "VL", day: "Do", dayNum: 4, start: "09:50", end: "11:30", room: "S2|02 C120 (Piloty)", group: "Alle" },
+          { type: "ÜB", day: "Fr", dayNum: 5, start: "11:40", end: "13:20", room: "S1|03 226", group: "Gruppe 1" }
+        ],
+        desc: "Architekturmuster, GoF Entwurfsmuster, UML, SCRUM, Refactoring, CI/CD und Test-Driven Development."
+      },
+      {
+        id: "20-00-0021-iv",
+        slug: "ki",
+        name: "Einführung in die KI (Künstliche Intelligenz)",
+        category: "Praktisch",
+        level: "Wahlpflicht",
+        semester: "WiSe",
+        cp: 6,
+        sws: 4,
+        prof: "Prof. Dr. Kristian Kersting",
+        color: "border-blue-500/60 bg-blue-950/80 text-blue-200",
+        examDate: "2027-02-16",
+        examTime: "11:00 - 12:30",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 2.4,
+        failRate: 12,
+        studentsCount: 450,
+        gradesDist: [20, 32, 38, 34, 26, 18, 14, 9, 5, 3, 16],
+        times: [
+          { type: "VL", day: "Mo", dayNum: 1, start: "13:30", end: "15:10", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Do", dayNum: 4, start: "15:20", end: "17:00", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Mi", dayNum: 3, start: "15:20", end: "17:00", room: "S2|02 C120 (Piloty)", group: "Gruppe 1" }
+        ],
+        desc: "A*-Suche, Minimax mit Alpha-Beta Pruning, Bayes-Netze, Neuronale Netze und Reinforcement Learning."
+      },
+      {
+        id: "04-00-0111-iv",
+        slug: "mathe-1",
+        name: "Mathematik I für Informatik (Analysis)",
+        category: "Mathematik",
+        level: "Pflicht",
+        semester: "WiSe",
+        cp: 8,
+        sws: 6,
+        prof: "Dozenten des FB 04 Mathematik",
+        color: "border-rose-500/60 bg-rose-950/80 text-rose-200",
+        examDate: "2027-02-10",
+        examTime: "09:00 - 11:00",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 3.1,
+        failRate: 35,
+        studentsCount: 650,
+        gradesDist: [6, 11, 17, 21, 25, 28, 30, 24, 18, 12, 60],
+        times: [
+          { type: "VL", day: "Mo", dayNum: 1, start: "08:00", end: "09:40", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Mi", dayNum: 3, start: "08:00", end: "09:40", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Fr", dayNum: 5, start: "08:00", end: "09:40", room: "S3|11 0012 (Hexagon)", group: "Gruppe 1" }
+        ],
+        desc: "Grenzwerte, Stetigkeit, Differenzierbarkeit, Integralrechnung, Taylorreihen und Fourier-Reihen."
+      },
+      {
+        id: "04-00-0112-iv",
+        slug: "mathe-2",
+        name: "Mathematik II für Informatik (Lin. Algebra)",
+        category: "Mathematik",
+        level: "Pflicht",
+        semester: "SoSe",
+        cp: 8,
+        sws: 6,
+        prof: "Dozenten des FB 04 Mathematik",
+        color: "border-rose-500/60 bg-rose-950/80 text-rose-200",
+        examDate: "2027-03-01",
+        examTime: "09:00 - 11:00",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 3.3,
+        failRate: 40,
+        studentsCount: 580,
+        gradesDist: [5, 9, 13, 18, 22, 26, 28, 24, 18, 12, 65],
+        times: [
+          { type: "VL", day: "Di", dayNum: 2, start: "08:00", end: "09:40", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Do", dayNum: 4, start: "08:00", end: "09:40", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Mi", dayNum: 3, start: "13:30", end: "15:10", room: "S3|11 0012 (Hexagon)", group: "Gruppe 1" }
+        ],
+        desc: "Vektorräume, Matrizen, Determinanten, lineare Gleichungssysteme, Eigenwerte und Singulärwertzerlegung (SVD)."
+      },
+      {
+        id: "04-00-0113-iv",
+        slug: "mathe-3",
+        name: "Mathe III & Probabilistische Methoden (ProMi)",
+        category: "Mathematik",
+        level: "Pflicht",
+        semester: "WiSe",
+        cp: 6,
+        sws: 4,
+        prof: "Dozenten FB 04 / FB 20",
+        color: "border-rose-500/60 bg-rose-950/80 text-rose-200",
+        examDate: "2027-03-04",
+        examTime: "14:00 - 15:30",
+        examRoom: "S1|01 A01 (Audimax)",
+        gradeAvg: 3.5,
+        failRate: 48,
+        studentsCount: 420,
+        gradesDist: [4, 7, 10, 15, 18, 22, 25, 24, 18, 14, 72],
+        times: [
+          { type: "VL", day: "Mi", dayNum: 3, start: "11:40", end: "13:20", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "VL", day: "Fr", dayNum: 5, start: "09:50", end: "11:30", room: "S1|01 A01 (Audimax)", group: "Alle" },
+          { type: "ÜB", day: "Do", dayNum: 4, start: "09:50", end: "11:30", room: "S1|05 122", group: "Gruppe 1" }
+        ],
+        desc: "Diskrete & stetige Wahrscheinlichkeitsräume, Gesetz der großen Zahlen, Hypothesentests und Markov-Ketten."
+      },
+      {
+        id: "20-00-0025-iv",
+        slug: "informatik-gesellschaft",
+        name: "Informatik und Gesellschaft (IuG)",
+        category: "Soft Skills",
+        level: "Pflicht",
+        semester: "WiSe/SoSe",
+        cp: 3,
+        sws: 2,
+        prof: "Prof. Dr. Christian Reuter",
+        color: "border-yellow-500/60 bg-yellow-950/80 text-yellow-200",
+        examDate: "2027-02-05",
+        examTime: "Abgabe Portfolio",
+        examRoom: "Online / Moodle",
+        gradeAvg: 1.8,
+        failRate: 2,
+        studentsCount: 360,
+        gradesDist: [45, 55, 48, 30, 18, 10, 5, 2, 1, 0, 4],
+        times: [
+          { type: "VL", day: "Mo", dayNum: 1, start: "09:50", end: "11:30", room: "S1|03 226", group: "Alle" }
+        ],
+        desc: "DSGVO, KI-Ethik, Urheberrecht, Barrierefreiheit, Technikfolgenabschätzung und gesellschaftliche Verantwortung."
+      },
+      {
+        id: "20-00-0026-iv",
+        slug: "wissenschaftliches-arbeiten",
+        name: "Wissenschaftliches Arbeiten in der Informatik",
+        category: "Soft Skills",
+        level: "Pflicht",
+        semester: "WiSe/SoSe",
+        cp: 3,
+        sws: 2,
+        prof: "Dozenten des FB 20 Informatik",
+        color: "border-yellow-500/60 bg-yellow-950/80 text-yellow-200",
+        examDate: "2027-02-08",
+        examTime: "Bericht & Vortrag",
+        examRoom: "S2|02 C120 (Piloty)",
+        gradeAvg: 1.5,
+        failRate: 1,
+        studentsCount: 320,
+        gradesDist: [58, 62, 35, 18, 8, 4, 2, 1, 0, 0, 2],
+        times: [
+          { type: "Seminar", day: "Di", dayNum: 2, start: "15:20", end: "17:00", room: "S2|02 C120 (Piloty)", group: "Alle" }
+        ],
+        desc: "Literaturrecherche (ACM, IEEE, DBLP), LaTeX, Zitationsstandards, Gute wissenschaftliche Praxis und Vortragstechniken."
+      }
     ];
 
-    const allFachbereiche = ["Alle Fachbereiche", ...new Set(MOCK_MODULES.map(m => m.fb))];
-    let myPlan = JSON.parse(localStorage.getItem('unisuite_stundenplan_v2')) || [];
+    // Grade buckets labels
+    const GRADE_LABELS = ["1.0", "1.3", "1.7", "2.0", "2.3", "2.7", "3.0", "3.3", "3.7", "4.0", "5.0"];
 
-    function timeToPercent(timeStr) {
-      const [h, m] = timeStr.split(':').map(Number);
-      const totalMinutes = (18 - 8) * 60;
-      const currentMinutes = (h - 8) * 60 + m;
-      return (currentMinutes / totalMinutes) * 100;
+    // App State
+    let currentTab = 'planner';
+    let currentSemesterFilter = 'WiSe';
+    let currentCoursesCategoryFilter = 'all';
+    let currentCoursesSearch = '';
+    
+    // User Plan: array of module IDs selected
+    let myPlannedModuleIds = getStoredPlan();
+
+    function getStoredPlan() {
+      try {
+        const raw = localStorage.getItem('unisuite_stundenplan_v2') || localStorage.getItem('unisuite_my_plan');
+        if (!raw) return ["20-00-0015-iv", "20-00-0004-iv", "20-00-0017-iv", "04-00-0111-iv"]; // sensible default
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          return parsed.map(item => typeof item === 'string' ? item : item.id).filter(Boolean);
+        }
+        return ["20-00-0015-iv", "20-00-0004-iv"];
+      } catch {
+        return ["20-00-0015-iv", "20-00-0004-iv"];
+      }
     }
 
-    function renderTimetable() {
-      const cal = document.getElementById('weekly-calendar');
-      cal.innerHTML = '';
-      const days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+    function savePlan() {
+      try {
+        const structured = myPlannedModuleIds.map(id => {
+          const mod = TUPLAN_COURSES.find(m => m.id === id);
+          return { id, day: (mod && mod.times[0]) ? mod.times[0].dayNum : 1 };
+        });
+        localStorage.setItem('unisuite_stundenplan_v2', JSON.stringify(structured));
+        localStorage.setItem('unisuite_my_plan', JSON.stringify(myPlannedModuleIds));
+      } catch (e) {
+        console.error(e);
+      }
+      updateGlobalBadges();
+    }
 
+    // =========================================================================
+    // TAB SWITCHING
+    // =========================================================================
+    function switchTab(tabId) {
+      currentTab = tabId;
+      
+      const vPlanner = document.getElementById('view-planner');
+      const vCourses = document.getElementById('view-courses');
+      const vCompare = document.getElementById('view-compare');
+
+      const btnPlanner = document.getElementById('tab-btn-planner');
+      const btnCourses = document.getElementById('tab-btn-courses');
+      const btnCompare = document.getElementById('tab-btn-compare');
+
+      // Reset all buttons
+      [btnPlanner, btnCourses, btnCompare].forEach(b => {
+        b.className = "px-3 py-1.5 rounded-lg text-slate-400 hover:text-white transition flex items-center gap-1.5";
+      });
+
+      // Hide all views
+      vPlanner.classList.add('hidden');
+      vCourses.classList.add('hidden');
+      vCompare.classList.add('hidden');
+
+      if (tabId === 'planner') {
+        vPlanner.classList.remove('hidden');
+        btnPlanner.className = "px-3 py-1.5 rounded-lg bg-blue-600 text-white font-bold transition flex items-center gap-1.5 shadow-sm";
+        renderPlanner();
+      } else if (tabId === 'courses') {
+        vCourses.classList.remove('hidden');
+        btnCourses.className = "px-3 py-1.5 rounded-lg bg-blue-600 text-white font-bold transition flex items-center gap-1.5 shadow-sm";
+        renderCoursesTab();
+      } else if (tabId === 'compare') {
+        vCompare.classList.remove('hidden');
+        btnCompare.className = "px-3 py-1.5 rounded-lg bg-blue-600 text-white font-bold transition flex items-center gap-1.5 shadow-sm";
+        renderCompareTab();
+      }
+    }
+
+    function onSemesterChange() {
+      currentSemesterFilter = document.getElementById('semester-select').value;
+      renderPlanner();
+      renderCoursesTab();
+      renderCompareTab();
+    }
+
+    // =========================================================================
+    // CONFLICT DETECTOR ENGINE
+    // =========================================================================
+    function parseMinutes(timeStr) {
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    function detectTimeConflicts() {
+      const activeModules = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id));
+      const sessions = [];
+
+      activeModules.forEach(mod => {
+        mod.times.forEach(t => {
+          sessions.push({
+            modId: mod.id,
+            modName: mod.name,
+            dayNum: t.dayNum,
+            dayName: t.day,
+            startMin: parseMinutes(t.start),
+            endMin: parseMinutes(t.end),
+            startStr: t.start,
+            endStr: t.end,
+            type: t.type,
+            room: t.room,
+            color: mod.color
+          });
+        });
+      });
+
+      const conflicts = [];
+
+      for (let i = 0; i < sessions.length; i++) {
+        for (let j = i + 1; j < sessions.length; j++) {
+          const s1 = sessions[i];
+          const s2 = sessions[j];
+
+          if (s1.modId !== s2.modId && s1.dayNum === s2.dayNum) {
+            // Check overlap: startA < endB && startB < endA
+            if (s1.startMin < s2.endMin && s2.startMin < s1.endMin) {
+              const overlapMin = Math.min(s1.endMin, s2.endMin) - Math.max(s1.startMin, s2.startMin);
+              conflicts.push({
+                sessionA: s1,
+                sessionB: s2,
+                overlapMinutes: overlapMin,
+                dayName: s1.dayName
+              });
+            }
+          }
+        }
+      }
+
+      return conflicts;
+    }
+
+    // =========================================================================
+    // VIEW 1: STUNDENPLAN RENDERING
+    // =========================================================================
+    function timeToTopPercent(timeStr) {
+      const totalMinutes = 12 * 60; // 08:00 to 20:00 = 720 minutes
+      const cur = parseMinutes(timeStr) - (8 * 60);
+      return (cur / totalMinutes) * 100;
+    }
+
+    function renderPlanner() {
+      drawWeeklyGrid();
+      renderSelectedCoursesList();
+      updateGlobalBadges();
+      renderConflictBanner();
+    }
+
+    function drawWeeklyGrid() {
+      const container = document.getElementById('tuplan-weekly-grid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
+      const conflicts = detectTimeConflicts();
+
+      // Background Hour Grid Lines
       let gridHTML = '<div class="absolute inset-0 flex flex-col pointer-events-none z-0">';
-      for(let i = 0; i < 10; i++) {
-        gridHTML += `<div class="flex-1 border-b border-[#1e2533] relative"><span class="absolute -top-3 -left-10 text-[10px] text-slate-500 font-mono hidden md:block">${8+i}:00</span></div>`;
+      for (let i = 0; i < 12; i++) {
+        const hour = 8 + i;
+        gridHTML += `
+          <div class="flex-1 border-b border-[#1e2533]/70 relative">
+            <span class="absolute -top-2.5 left-1 text-[10px] text-slate-500 font-mono select-none hidden md:inline">
+              ${hour < 10 ? '0' + hour : hour}:00
+            </span>
+          </div>
+        `;
       }
       gridHTML += '</div>';
-      cal.innerHTML += gridHTML;
+      container.innerHTML = gridHTML;
 
+      // Render Day Columns
       days.forEach((dayName, index) => {
         const dayNum = index + 1;
-        let col = document.createElement('div');
-        col.className = "flex-1 border-r border-[#1e2533] relative flex flex-col z-10";
-        let header = document.createElement('div');
-        header.className = "text-center py-2 border-b border-[#1e2533] font-bold text-slate-400 text-xs uppercase tracking-wider bg-[#0d1117] print:bg-white print:text-black sticky top-0 z-20";
-        header.textContent = dayName;
-        col.appendChild(header);
-        let eventContainer = document.createElement('div');
-        eventContainer.className = "relative flex-1";
+        const col = document.createElement('div');
+        col.className = "flex-1 border-r border-[#1e2533] relative flex flex-col z-10 min-w-[120px]";
 
-        myPlan.filter(p => p.day === dayNum).forEach(ev => {
-          const mod = MOCK_MODULES.find(m => m.id === ev.id);
-          if(!mod) return;
-          const topPct = timeToPercent(mod.startTime);
-          const heightPct = timeToPercent(mod.endTime) - topPct;
-          let block = document.createElement('div');
-          block.className = `absolute left-1 right-1 rounded border ${mod.color} p-2 overflow-hidden shadow-lg hover:brightness-125 transition-all cursor-pointer`;
-          block.style.top = topPct + '%';
-          block.style.height = heightPct + '%';
-          block.onclick = () => showDetails(mod.id);
-          block.innerHTML = `<div class="font-bold text-[11px] leading-tight text-white">${mod.name}</div><div class="text-[9px] font-mono mt-1 opacity-80">${mod.startTime}-${mod.endTime}</div><div class="text-[9px] font-mono opacity-80">${mod.room}</div>`;
-          eventContainer.appendChild(block);
+        // Column Header
+        const hdr = document.createElement('div');
+        hdr.className = "text-center py-2.5 border-b border-[#1e2533] font-bold text-slate-300 text-xs uppercase tracking-wider bg-[#0d1117] sticky top-0 z-20 select-none";
+        hdr.textContent = dayName;
+        col.appendChild(hdr);
+
+        // Events Canvas
+        const eventCanvas = document.createElement('div');
+        eventCanvas.className = "relative flex-1";
+
+        // Gather all sessions for this day
+        const daySessions = [];
+        TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id)).forEach(mod => {
+          mod.times.filter(t => t.dayNum === dayNum).forEach(t => {
+            daySessions.push({ mod, time: t });
+          });
         });
 
-        col.appendChild(eventContainer);
-        cal.appendChild(col);
+        // Draw each session
+        daySessions.forEach(({ mod, time }) => {
+          const topPct = timeToTopPercent(time.start);
+          const heightPct = timeToTopPercent(time.end) - topPct;
+
+          // Check if this session is in conflict
+          const isConflicted = conflicts.some(c => 
+            (c.sessionA.modId === mod.id && c.sessionA.startStr === time.start && c.sessionA.dayNum === dayNum) ||
+            (c.sessionB.modId === mod.id && c.sessionB.startStr === time.start && c.sessionB.dayNum === dayNum)
+          );
+
+          const block = document.createElement('div');
+          block.className = `absolute left-1 right-1 rounded-lg border ${isConflicted ? 'border-rose-500 bg-rose-950/85 text-rose-100 ring-1 ring-rose-500 animate-pulse' : mod.color} p-2 overflow-hidden shadow-lg hover:brightness-125 transition-all cursor-pointer select-none group`;
+          block.style.top = `${topPct}%`;
+          block.style.height = `${heightPct}%`;
+          block.onclick = () => openCourseDetailModal(mod.id);
+
+          block.innerHTML = `
+            <div class="flex items-center justify-between gap-1 leading-tight mb-1">
+              <span class="font-bold text-[11px] truncate text-white">${mod.name}</span>
+              <span class="text-[9px] font-mono px-1 py-0.2 rounded bg-black/40 border border-white/20 uppercase font-bold shrink-0">${time.type}</span>
+            </div>
+            <div class="text-[10px] font-mono opacity-90 truncate">${time.start} – ${time.end}</div>
+            <div class="text-[9px] font-mono opacity-75 truncate mt-0.5">📍 ${time.room}</div>
+            ${isConflicted ? '<div class="text-[9px] font-bold text-rose-300 mt-1 flex items-center gap-1"><span>⚠️</span> <span>Kollision!</span></div>' : ''}
+          `;
+
+          eventCanvas.appendChild(block);
+        });
+
+        col.appendChild(eventCanvas);
+        container.appendChild(col);
       });
-      localStorage.setItem('unisuite_stundenplan_v2', JSON.stringify(myPlan));
     }
 
-    function renderSearchResults(query = "", fbFilter = "Alle Fachbereiche") {
-      const resDiv = document.getElementById('search-results');
-      resDiv.innerHTML = '';
-      const q = query.toLowerCase();
-      const filtered = MOCK_MODULES.filter(m => {
-        const matchQuery = !q || m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q) || m.fb.toLowerCase().includes(q) || m.contents.toLowerCase().includes(q);
-        const matchFB = fbFilter === "Alle Fachbereiche" || m.fb === fbFilter;
-        return matchQuery && matchFB;
-      });
-      document.getElementById('module-count').textContent = `${filtered.length} / ${MOCK_MODULES.length}`;
-      if(!filtered.length) {
-        resDiv.innerHTML = '<div class="text-slate-500 text-xs text-center py-4">Keine Module gefunden.</div>';
+    function renderSelectedCoursesList() {
+      const list = document.getElementById('planner-selected-list');
+      const empty = document.getElementById('planner-empty-state');
+      if (!list) return;
+
+      const activeMods = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id));
+
+      if (activeMods.length === 0) {
+        list.innerHTML = '';
+        if (empty) empty.classList.remove('hidden');
         return;
       }
-      const grouped = {};
-      filtered.forEach(mod => { if(!grouped[mod.fb]) grouped[mod.fb] = []; grouped[mod.fb].push(mod); });
-      Object.entries(grouped).forEach(([fb, mods]) => {
-        const hdr = document.createElement('div');
-        hdr.className = "text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider px-1 pt-3 pb-1 border-b border-[#1e2533]";
-        hdr.textContent = fb;
-        resDiv.appendChild(hdr);
-        mods.forEach(mod => {
-          const isAdded = myPlan.some(p => p.id === mod.id);
-          const daysArr = ["","Mo","Di","Mi","Do","Fr"];
-          const div = document.createElement('div');
-          div.className = "p-2.5 bg-[#151c28] border border-[#273248] rounded-lg flex items-center gap-2";
-          div.innerHTML = `<div class="min-w-0 flex-1"><div class="text-xs font-bold text-white cursor-pointer hover:text-blue-400 transition truncate" title="${mod.name}" onclick="showDetails('${mod.id}')">${mod.name}</div><div class="text-[10px] font-mono text-slate-500">${daysArr[mod.day]||'?'} ${mod.startTime}–${mod.endTime}</div></div><button onclick="toggleModul('${mod.id}')" class="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold font-mono transition ${isAdded ? 'bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white' : 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500 hover:text-white'}">${isAdded ? '✕' : '+'}</button>`;
-          resDiv.appendChild(div);
+
+      if (empty) empty.classList.add('hidden');
+
+      list.innerHTML = activeMods.map(mod => {
+        return `
+          <div class="p-2.5 bg-[#151c28] border border-[#273248] hover:border-blue-500/50 rounded-lg flex items-center justify-between gap-2 group transition">
+            <div class="min-w-0 flex-1 cursor-pointer" onclick="openCourseDetailModal('${mod.id}')">
+              <div class="text-xs font-bold text-white group-hover:text-blue-400 transition truncate" title="${mod.name}">
+                ${mod.name}
+              </div>
+              <div class="text-[10px] font-mono text-slate-400 flex items-center gap-2 mt-0.5">
+                <span class="text-blue-400 font-bold">${mod.cp} CP</span>
+                <span>•</span>
+                <span>${mod.category}</span>
+                <span>•</span>
+                <span>${mod.semester}</span>
+              </div>
+            </div>
+
+            <button 
+              onclick="togglePlanModule('${mod.id}')" 
+              class="w-6 h-6 rounded bg-[#1f293d] hover:bg-rose-950/60 border border-[#2e3b52] hover:border-rose-500/50 text-slate-400 hover:text-rose-300 flex items-center justify-center text-xs font-bold transition shrink-0"
+              title="Aus Stundenplan entfernen"
+            >
+              ✕
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderConflictBanner() {
+      const banner = document.getElementById('conflict-alert-banner');
+      const list = document.getElementById('conflict-banner-list');
+      const title = document.getElementById('conflict-banner-title');
+      if (!banner || !list) return;
+
+      const conflicts = detectTimeConflicts();
+
+      if (conflicts.length === 0) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      banner.classList.remove('hidden');
+      title.textContent = `${conflicts.length} Zeitkonflikt${conflicts.length > 1 ? 'e' : ''} im Stundenplan entdeckt!`;
+
+      list.innerHTML = conflicts.map(c => `
+        <div class="flex items-center gap-2">
+          <span>•</span>
+          <span class="font-bold text-white">${c.dayName} (${c.sessionA.startStr}–${c.sessionA.endStr}):</span>
+          <span class="text-rose-300 font-bold">${c.sessionA.modName}</span>
+          <span>überschneidet sich mit</span>
+          <span class="text-rose-300 font-bold">${c.sessionB.modName}</span>
+          <span class="text-rose-400">(${c.overlapMinutes} Min. Überschneidung)</span>
+        </div>
+      `).join('');
+    }
+
+    function updateGlobalBadges() {
+      const activeMods = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id));
+      const totalCp = activeMods.reduce((sum, m) => sum + m.cp, 0);
+      const totalSws = activeMods.reduce((sum, m) => sum + m.sws, 0);
+      const conflicts = detectTimeConflicts();
+
+      // Top navbar badges
+      const statCp = document.getElementById('stat-cp-badge');
+      const statCount = document.getElementById('stat-count-badge');
+      const statConflict = document.getElementById('stat-conflict-indicator');
+      const conflictNum = document.getElementById('conflict-count-num');
+
+      if (statCp) statCp.textContent = `${totalCp} CP`;
+      if (statCount) statCount.textContent = `${activeMods.length} Modul${activeMods.length !== 1 ? 'e' : ''}`;
+      
+      if (statConflict && conflictNum) {
+        if (conflicts.length > 0) {
+          statConflict.classList.remove('hidden');
+          conflictNum.textContent = `${conflicts.length} Konflikt${conflicts.length > 1 ? 'e' : ''}`;
+        } else {
+          statConflict.classList.add('hidden');
+        }
+      }
+
+      // Planner Left Sidebar Stats
+      const selCount = document.getElementById('planner-selected-count');
+      const planTotalCp = document.getElementById('planner-total-cp');
+      const planTotalSws = document.getElementById('planner-total-sws');
+      const planProgress = document.getElementById('planner-cp-progressbar');
+
+      if (selCount) selCount.textContent = `${activeMods.length} Modul${activeMods.length !== 1 ? 'e' : ''}`;
+      if (planTotalCp) planTotalCp.textContent = `${totalCp} / 30 CP`;
+      if (planTotalSws) planTotalSws.textContent = `${totalSws} SWS`;
+      if (planProgress) planProgress.style.width = `${Math.min(100, (totalCp / 30) * 100)}%`;
+    }
+
+    function togglePlanModule(id) {
+      if (myPlannedModuleIds.includes(id)) {
+        myPlannedModuleIds = myPlannedModuleIds.filter(x => x !== id);
+      } else {
+        myPlannedModuleIds.push(id);
+      }
+      savePlan();
+      renderPlanner();
+      renderCoursesTab();
+      renderCompareTab();
+    }
+
+    function clearFullPlan() {
+      if (!confirm('Möchtest du wirklich den gesamten Stundenplan leeren?')) return;
+      myPlannedModuleIds = [];
+      savePlan();
+      renderPlanner();
+      renderCoursesTab();
+      renderCompareTab();
+    }
+
+    function copyPlanShareUrl() {
+      const url = window.location.href.split('?')[0] + '?plan=' + encodeURIComponent(myPlannedModuleIds.join(','));
+      navigator.clipboard.writeText(url).then(() => {
+        alert('Stundenplan-Link in die Zwischenablage kopiert:\n' + url);
+      }).catch(() => {
+        prompt('Stundenplan-Link kopieren:', url);
+      });
+    }
+
+    function exportPlanICS() {
+      if (myPlannedModuleIds.length === 0) {
+        alert('Der Stundenplan ist leer. Bitte zuerst Module hinzufügen.');
+        return;
+      }
+      const activeMods = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id));
+      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//UniSuite//TUPlan//DE\nCALSCALE:GREGORIAN\n";
+      
+      const offsets = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
+      const baseMonday = new Date('2026-10-12T00:00:00Z');
+
+      activeMods.forEach(mod => {
+        mod.times.forEach(t => {
+          let d = new Date(baseMonday);
+          d.setDate(d.getDate() + offsets[t.dayNum]);
+          const ds = d.toISOString().split('T')[0].replace(/-/g, '');
+          const sTime = t.start.replace(':', '') + '00';
+          const eTime = t.end.replace(':', '') + '00';
+
+          ics += "BEGIN:VEVENT\n";
+          ics += `DTSTART;TZID=Europe/Berlin:${ds}T${sTime}\n`;
+          ics += `DTEND;TZID=Europe/Berlin:${ds}T${eTime}\n`;
+          ics += `RRULE:FREQ=WEEKLY;UNTIL=20270215T000000Z\n`;
+          ics += `SUMMARY:[${t.type}] ${mod.name}\n`;
+          ics += `LOCATION:${t.room}\n`;
+          ics += `DESCRIPTION:${mod.desc} (${mod.prof})\n`;
+          ics += "END:VEVENT\n";
         });
       });
-    }
 
-    function toggleModul(id) {
-      const idx = myPlan.findIndex(p => p.id === id);
-      if(idx >= 0) myPlan.splice(idx, 1);
-      else { const mod = MOCK_MODULES.find(m => m.id === id); myPlan.push({ id: mod.id, day: mod.day }); }
-      renderSearchResults(document.getElementById('search-input').value, document.getElementById('fb-filter').value);
-      renderTimetable();
-    }
-
-    function showDetails(id) {
-      const mod = MOCK_MODULES.find(m => m.id === id);
-      const isAdded = myPlan.some(p => p.id === id);
-      document.getElementById('module-details').innerHTML = `
-        <div class="space-y-3">
-          <div class="text-base font-bold text-white font-heading">${mod.name}</div>
-          <div class="text-[10px] font-mono text-slate-500 leading-tight">${mod.fb}</div>
-          <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded"><span class="text-slate-500 block mb-0.5">Typ:</span><span class="text-slate-300">${mod.type}</span></div>
-            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded"><span class="text-slate-500 block mb-0.5">Zeit:</span><span class="text-slate-300">${mod.startTime}–${mod.endTime}</span></div>
-            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded col-span-2"><span class="text-slate-500 block mb-0.5">Raum:</span><span class="text-slate-300">${mod.room}</span></div>
-          </div>
-          <div class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded text-xs text-slate-300"><span class="font-bold text-white block mb-1">Inhalte:</span>${mod.contents}</div>
-          <div class="p-3 bg-indigo-950/20 border border-indigo-900/50 rounded text-xs text-indigo-200"><span class="font-bold text-indigo-400 block mb-1">📊 Notenspiegel:</span>${mod.grades}</div>
-          <button onclick="toggleModul('${mod.id}')" class="w-full py-1.5 rounded text-xs font-bold transition ${isAdded ? 'bg-red-900/50 text-red-400 border border-red-500/50' : 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50'}">
-            ${isAdded ? '✕ Aus Stundenplan entfernen' : '+ In Stundenplan eintragen'}
-          </button>
-        </div>`;
-    }
-
-    function clearPlan() {
-      myPlan = [];
-      renderSearchResults(document.getElementById('search-input').value, document.getElementById('fb-filter').value);
-      renderTimetable();
-    }
-
-    function exportICS() {
-      if(!myPlan.length) { alert("Der Stundenplan ist leer."); return; }
-      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//UniSuite//Stundenplaner//DE\n";
-      const offsets = {1:0,2:1,3:2,4:3,5:4};
-      const base = new Date('2026-10-12T00:00:00Z');
-      myPlan.forEach(ev => {
-        const mod = MOCK_MODULES.find(m => m.id === ev.id);
-        if(!mod) return;
-        let d = new Date(base);
-        d.setDate(d.getDate() + offsets[mod.day]);
-        const ds = d.toISOString().split('T')[0].replace(/-/g,'');
-        ics += `BEGIN:VEVENT\nDTSTART;TZID=Europe/Berlin:${ds}T${mod.startTime.replace(':','')}00\nDTEND;TZID=Europe/Berlin:${ds}T${mod.endTime.replace(':','')}00\nRRULE:FREQ=WEEKLY;UNTIL=20270215T000000Z\nSUMMARY:${mod.name}\nLOCATION:${mod.room}\nDESCRIPTION:${mod.contents} [${mod.fb}]\nEND:VEVENT\n`;
-      });
       ics += "END:VCALENDAR";
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
       const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([ics], {type:'text/calendar;charset=utf-8'}));
-      a.download = "stundenplan.ics";
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      a.href = URL.createObjectURL(blob);
+      a.download = "tuplan_stundenplan.ics";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
 
-    function buildFBFilter() {
-      const sel = document.getElementById('fb-filter');
-      allFachbereiche.forEach(fb => {
-        const opt = document.createElement('option');
-        opt.value = fb; opt.textContent = fb;
-        sel.appendChild(opt);
+    // =========================================================================
+    // VIEW 2: KURSE & NOTENSPIEGEL HISTOGRAMS
+    // =========================================================================
+    function filterCoursesTab(category) {
+      currentCoursesCategoryFilter = category;
+      const chips = document.querySelectorAll('.courses-filter-chip');
+      chips.forEach(c => {
+        if (c.getAttribute('data-f') === category) {
+          c.className = "courses-filter-chip active px-3 py-1 rounded-lg bg-blue-600 text-white font-bold transition shrink-0";
+        } else {
+          c.className = "courses-filter-chip px-3 py-1 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 transition shrink-0";
+        }
       });
-      sel.addEventListener('change', () => renderSearchResults(document.getElementById('search-input').value, sel.value));
+      renderCoursesTab();
     }
 
-    document.getElementById('search-input').addEventListener('input', e => {
-      renderSearchResults(e.target.value, document.getElementById('fb-filter').value);
+    function renderCoursesTab() {
+      const grid = document.getElementById('courses-catalog-grid');
+      const countLabel = document.getElementById('courses-count-label');
+      if (!grid) return;
+
+      const q = currentCoursesSearch.trim().toLowerCase();
+
+      const filtered = TUPLAN_COURSES.filter(mod => {
+        // Search filter
+        const matchSearch = !q ||
+          mod.name.toLowerCase().includes(q) ||
+          mod.id.toLowerCase().includes(q) ||
+          mod.prof.toLowerCase().includes(q) ||
+          mod.desc.toLowerCase().includes(q) ||
+          mod.times.some(t => t.room.toLowerCase().includes(q));
+
+        if (!matchSearch) return false;
+
+        // Semester filter
+        if (currentSemesterFilter !== 'all' && !mod.semester.includes(currentSemesterFilter)) return false;
+
+        // Category filter
+        if (currentCoursesCategoryFilter === 'all') return true;
+        if (currentCoursesCategoryFilter === 'pflicht') return mod.level === 'Pflicht';
+        return mod.category === currentCoursesCategoryFilter;
+      });
+
+      if (countLabel) countLabel.textContent = `${filtered.length} von ${TUPLAN_COURSES.length} Kursen`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-16 space-y-3">
+            <div class="text-3xl">🔍</div>
+            <div class="text-base font-bold text-white font-heading">Keine Kurse gefunden</div>
+            <p class="text-xs text-slate-400 font-mono">Kein Modul entspricht deinen Suchkriterien.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(mod => {
+        const isAdded = myPlannedModuleIds.includes(mod.id);
+        const maxBarVal = Math.max(...mod.gradesDist);
+
+        // Build Grade Histogram Bars
+        const barsHTML = mod.gradesDist.map((count, i) => {
+          const heightPct = Math.round((count / maxBarVal) * 100);
+          const gradeLabel = GRADE_LABELS[i];
+          
+          let barColor = 'bg-blue-500';
+          if (i <= 2) barColor = 'bg-emerald-500';      // 1.0 - 1.7
+          else if (i <= 5) barColor = 'bg-cyan-500';    // 2.0 - 2.7
+          else if (i <= 8) barColor = 'bg-amber-500';   // 3.0 - 3.7
+          else if (i === 9) barColor = 'bg-orange-500'; // 4.0
+          else barColor = 'bg-rose-600';                // 5.0
+
+          return `
+            <div class="flex-1 flex flex-col items-center gap-1 group/bar relative">
+              <!-- Tooltip on hover -->
+              <div class="opacity-0 group-hover/bar:opacity-100 pointer-events-none absolute -top-8 bg-[#090d14] border border-[#273248] text-white text-[10px] font-mono px-1.5 py-0.5 rounded shadow-xl transition z-30 whitespace-nowrap">
+                Note ${gradeLabel}: ${count} Studierende
+              </div>
+              <!-- Bar -->
+              <div class="w-full bg-[#151c28] rounded-t flex items-end h-16 p-0.5">
+                <div class="w-full ${barColor} rounded-t grade-bar" style="height: ${heightPct}%"></div>
+              </div>
+              <!-- Label -->
+              <span class="text-[9px] font-mono text-slate-400">${gradeLabel}</span>
+            </div>
+          `;
+        }).join('');
+
+        const scheduleList = mod.times.map(t => `
+          <div class="flex items-center justify-between text-[11px] font-mono py-1 border-b border-[#1e2533]/50 last:border-0 text-slate-300">
+            <div class="flex items-center gap-1.5">
+              <span class="px-1.5 py-0.2 rounded bg-blue-950/60 border border-blue-600/40 text-blue-300 font-bold text-[9px]">${t.type}</span>
+              <span class="font-bold text-white">${t.day}</span>
+              <span>${t.start}–${t.end}</span>
+            </div>
+            <span class="text-slate-400 truncate max-w-[140px]" title="${t.room}">📍 ${t.room}</span>
+          </div>
+        `).join('');
+
+        return `
+          <div class="cs-card rounded-xl p-5 flex flex-col justify-between space-y-4 border ${isAdded ? 'border-blue-500/70 shadow-[0_0_15px_rgba(59,130,246,0.12)]' : 'border-[#1e2533]'} transition">
+            
+            <div class="space-y-3">
+              <!-- Top Row -->
+              <div class="flex items-center justify-between gap-2 border-b border-[#1e2533] pb-2 text-[11px] font-mono">
+                <div class="flex items-center gap-2">
+                  <span class="text-blue-400 font-bold">${mod.id}</span>
+                  <span class="px-1.5 py-0.5 rounded border border-[#273248] bg-[#151c28] text-slate-300 text-[10px]">
+                    ${mod.category}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248] text-slate-300 font-bold text-[10px]">
+                    ${mod.semester}
+                  </span>
+                  <span class="px-1.5 py-0.5 rounded bg-blue-950/60 border border-blue-600/40 text-blue-300 font-bold text-[10px]">
+                    ${mod.cp} CP
+                  </span>
+                </div>
+              </div>
+
+              <!-- Title & Prof -->
+              <div>
+                <h3 class="text-base font-bold text-white hover:text-blue-400 transition font-heading cursor-pointer" onclick="openCourseDetailModal('${mod.id}')">
+                  ${mod.name}
+                </h3>
+                <div class="text-xs text-slate-400 font-mono mt-1 flex items-center gap-1">
+                  <span>👤</span> <span>${mod.prof}</span>
+                </div>
+              </div>
+
+              <!-- Grade Histogram Visualizer -->
+              <div class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded-xl space-y-2">
+                <div class="flex items-center justify-between text-xs font-mono">
+                  <div class="flex items-center gap-3">
+                    <span class="text-white font-bold">📊 Notenspiegel</span>
+                    <span class="text-slate-400">Ø <strong class="text-white">${mod.gradeAvg.toFixed(1)}</strong></span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-slate-400 text-[11px]">Dfq:</span>
+                    <span class="font-bold ${mod.failRate > 35 ? 'text-rose-400' : 'text-emerald-400'}">${mod.failRate}%</span>
+                  </div>
+                </div>
+
+                <!-- Bars Container -->
+                <div class="flex items-end gap-1 pt-1 pb-1">
+                  ${barsHTML}
+                </div>
+              </div>
+
+              <!-- Schedule Times & Locations -->
+              <div class="p-2.5 bg-[#0a0c10] border border-[#1e2533] rounded-xl space-y-1">
+                <div class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider mb-1">
+                  Termine &amp; Hörsäle (TUCaN)
+                </div>
+                ${scheduleList}
+              </div>
+
+              <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">
+                ${mod.desc}
+              </p>
+            </div>
+
+            <!-- Action Button -->
+            <div class="pt-3 border-t border-[#1e2533] flex items-center gap-2">
+              <button 
+                onclick="togglePlanModule('${mod.id}')" 
+                class="flex-1 py-2 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 ${isAdded ? 'bg-rose-950/50 hover:bg-rose-900 border border-rose-600/50 text-rose-300' : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg'}"
+              >
+                <span>${isAdded ? '✕ Aus Stundenplan entfernen' : '+ In Stundenplan aufnehmen'}</span>
+              </button>
+
+              <button 
+                onclick="openCourseDetailModal('${mod.id}')"
+                class="py-2 px-3 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 hover:text-white text-xs font-mono transition"
+                title="Details & Prüfungsinfo"
+              >
+                🔍 Details
+              </button>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // VIEW 3: NOTENVERGLEICH & PRÜFUNGSKALENDER
+    // =========================================================================
+    function renderCompareTab() {
+      renderExamsSchedule();
+      renderGradeComparisonTable();
+    }
+
+    function renderExamsSchedule() {
+      const container = document.getElementById('exams-schedule-container');
+      if (!container) return;
+
+      const activeMods = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id))
+        .sort((a, b) => new Date(a.examDate) - new Date(b.examDate));
+
+      if (activeMods.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-xs text-slate-500 font-mono">
+            Keine Module ausgewählt. Wähle im Stundenplan Module aus, um den Klausurenkalender zu sehen.
+          </div>
+        `;
+        return;
+      }
+
+      // Check for exam pile-up (exams within 48h of each other)
+      const warnings = [];
+      for (let i = 0; i < activeMods.length - 1; i++) {
+        const d1 = new Date(activeMods[i].examDate);
+        const d2 = new Date(activeMods[i + 1].examDate);
+        const diffDays = Math.abs((d2 - d1) / (1000 * 60 * 60 * 24));
+        if (diffDays <= 2) {
+          warnings.push({
+            modA: activeMods[i].name,
+            modB: activeMods[i + 1].name,
+            days: diffDays
+          });
+        }
+      }
+
+      let warningHTML = '';
+      if (warnings.length > 0) {
+        warningHTML = `
+          <div class="p-3 bg-amber-950/40 border border-amber-500/50 rounded-xl text-xs font-mono text-amber-200 space-y-1">
+            <div class="font-bold text-amber-400 flex items-center gap-1.5">
+              <span>⚠️</span> Prüfungsstau-Warnung (Klausuren &le; 48h Abstand):
+            </div>
+            ${warnings.map(w => `<div>• <strong>${w.modA}</strong> und <strong>${w.modB}</strong> liegen nur ${w.days === 0 ? 'am selben Tag' : w.days + ' Tag(e) auseinander'}!</div>`).join('')}
+          </div>
+        `;
+      }
+
+      const rowsHTML = activeMods.map(mod => {
+        const dateObj = new Date(mod.examDate);
+        const formattedDate = dateObj.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+
+        return `
+          <div class="p-3 bg-[#151c28] border border-[#273248] rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+            <div class="flex items-center gap-3">
+              <div class="px-2.5 py-1.5 rounded-lg bg-[#0d1117] border border-[#273248] text-center min-w-[90px]">
+                <div class="font-bold text-white">${formattedDate}</div>
+                <div class="text-[10px] text-blue-400">${mod.examTime}</div>
+              </div>
+              <div>
+                <div class="font-bold text-white text-sm">${mod.name}</div>
+                <div class="text-[11px] text-slate-400 mt-0.5">📍 ${mod.examRoom}</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <span class="px-2 py-1 rounded bg-blue-950/60 border border-blue-600/40 text-blue-300 font-bold">${mod.cp} CP</span>
+              <span class="text-slate-400">${mod.category}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = warningHTML + rowsHTML;
+    }
+
+    function renderGradeComparisonTable() {
+      const tbody = document.getElementById('grade-comparison-tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = TUPLAN_COURSES.map(mod => {
+        const isAdded = myPlannedModuleIds.includes(mod.id);
+        const maxVal = Math.max(...mod.gradesDist);
+
+        const miniBars = mod.gradesDist.map((c, idx) => {
+          const h = Math.round((c / maxVal) * 100);
+          const bg = idx <= 2 ? 'bg-emerald-500' : idx <= 5 ? 'bg-cyan-500' : idx <= 8 ? 'bg-amber-500' : idx === 9 ? 'bg-orange-500' : 'bg-rose-600';
+          return `<div class="w-1.5 ${bg} rounded-t" style="height: ${h}%"></div>`;
+        }).join('');
+
+        return `
+          <tr class="hover:bg-[#131823] transition">
+            <td class="py-2.5 px-3">
+              <div class="font-bold text-white">${mod.name}</div>
+              <div class="text-[10px] text-slate-500">${mod.id}</div>
+            </td>
+            <td class="py-2.5 px-3 text-slate-300">${mod.category}</td>
+            <td class="py-2.5 px-3 font-bold text-blue-400">${mod.cp} CP</td>
+            <td class="py-2.5 px-3 font-bold text-white">Ø ${mod.gradeAvg.toFixed(1)}</td>
+            <td class="py-2.5 px-3 font-bold ${mod.failRate > 35 ? 'text-rose-400' : 'text-emerald-400'}">${mod.failRate}%</td>
+            <td class="py-2.5 px-3">
+              <div class="flex items-end gap-0.5 h-6 bg-[#0a0c10] p-1 rounded border border-[#1e2533] w-28">
+                ${miniBars}
+              </div>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <button 
+                onclick="togglePlanModule('${mod.id}')"
+                class="px-2.5 py-1 rounded text-[11px] font-bold transition ${isAdded ? 'bg-rose-950/60 text-rose-300 border border-rose-600/40' : 'bg-blue-600 text-white'}"
+              >
+                ${isAdded ? 'Entfernen' : '+ Plan'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // MODAL DIALOGS
+    // =========================================================================
+    function openCourseDetailModal(modId) {
+      const mod = TUPLAN_COURSES.find(m => m.id === modId);
+      if (!mod) return;
+
+      const modal = document.getElementById('course-detail-modal');
+      const header = document.getElementById('modal-mod-header');
+      const body = document.getElementById('modal-mod-body');
+      if (!modal || !header || !body) return;
+
+      const isAdded = myPlannedModuleIds.includes(mod.id);
+
+      header.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-mono text-blue-400 font-bold">${mod.id}</span>
+          <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-950/60 border border-blue-600/40 text-blue-300">${mod.level}</span>
+        </div>
+        <h3 class="text-xl font-bold text-white font-heading mt-1">${mod.name}</h3>
+        <div class="text-xs text-slate-400 mt-0.5">👤 ${mod.prof}</div>
+      `;
+
+      const scheduleRows = mod.times.map(t => `
+        <div class="flex items-center justify-between p-2 bg-[#151c28] border border-[#273248] rounded-lg">
+          <div class="flex items-center gap-2">
+            <span class="px-1.5 py-0.5 rounded bg-blue-900/40 border border-blue-600/40 text-blue-300 font-bold">${t.type}</span>
+            <span class="text-white font-bold">${t.day}</span>
+            <span class="text-slate-300">${t.start} – ${t.end}</span>
+          </div>
+          <div class="text-slate-400">📍 ${t.room}</div>
+        </div>
+      `).join('');
+
+      body.innerHTML = `
+        <div class="space-y-3">
+          <div class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded-xl">
+            <div class="font-bold text-slate-300 mb-1">Beschreibung &amp; Lernziele:</div>
+            <p class="text-slate-400 leading-relaxed">${mod.desc}</p>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="font-bold text-slate-300">Wöchentliche Termine:</div>
+            ${scheduleRows}
+          </div>
+
+          <div class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded-xl flex items-center justify-between">
+            <div>
+              <div class="font-bold text-slate-300">Prüfungsinformation:</div>
+              <div class="text-slate-400 mt-0.5">${mod.examDate} (${mod.examTime}) • ${mod.examRoom}</div>
+            </div>
+            <div class="text-right">
+              <span class="text-blue-400 font-bold text-sm">${mod.cp} CP</span>
+              <div class="text-slate-500 text-[10px]">${mod.sws} SWS</div>
+            </div>
+          </div>
+
+          <div class="pt-2 flex items-center gap-2">
+            <button 
+              onclick="togglePlanModule('${mod.id}'); closeCourseDetailModal();"
+              class="flex-1 py-2.5 rounded-xl font-bold text-xs transition ${isAdded ? 'bg-rose-950/60 hover:bg-rose-900 border border-rose-600/50 text-rose-300' : 'bg-blue-600 hover:bg-blue-500 text-white'}"
+            >
+              ${isAdded ? '✕ Aus Stundenplan entfernen' : '+ In Stundenplan aufnehmen'}
+            </button>
+            <a 
+              href="../${mod.slug}/" 
+              class="py-2.5 px-4 rounded-xl bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-200 hover:text-white font-bold text-xs text-center transition"
+            >
+              🔬 UniSuite Labor
+            </a>
+          </div>
+        </div>
+      `;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCourseDetailModal() {
+      const modal = document.getElementById('course-detail-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // Modal background click
+    document.addEventListener('click', e => {
+      const modal = document.getElementById('course-detail-modal');
+      if (e.target === modal) closeCourseDetailModal();
     });
 
-    buildFBFilter();
-    renderSearchResults();
-    renderTimetable();
+    // Search input listener for Tab 2
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('courses-search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', e => {
+          currentCoursesSearch = e.target.value;
+          renderCoursesTab();
+        });
+      }
+
+      // Check URL parameters for shared plan (?plan=20-00-0015-iv,20-00-0004-iv)
+      const urlParams = new URLSearchParams(window.location.search);
+      const sharedPlan = urlParams.get('plan');
+      if (sharedPlan) {
+        myPlannedModuleIds = sharedPlan.split(',').filter(Boolean);
+        savePlan();
+      }
+
+      renderPlanner();
+      renderCoursesTab();
+      renderCompareTab();
+    });
   </script>
 </body>
 </html>
