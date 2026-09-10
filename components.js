@@ -13,7 +13,7 @@ const TUCAN_CATALOG = [
       { type: "Vorlesung", day: "Do", dayNum: 4, time: "13:30–15:10", room: "S2|02 C120 (Piloty)" },
       { type: "Übung", day: "Mo", dayNum: 1, time: "11:40–13:20", room: "S2|02 C120 (Piloty)" }
     ],
-    desc: "Relationales Datenmodell, deklarative Algebra, SQL Optimierungs-Pipelines, B+ Baum Indexstrukturen, Normalisierung (1NF-BCNF) und Transaktionsverwaltung (2PL, ACID).",
+    desc: "Relationales Datenmodell, deklarative Algebra, SQL Optimierungs-Pipelines, B+ Baum Indexstrukturen, Normalisierung (1NF-BCNF), Transaktionsverwaltung (2PL, ACID) sowie NLP / UTF-8 Bitfolgen- und Zeichensatz-Validierung.",
     exam: "Schriftliche Klausur (90 Min.)",
     unisuiteUrl: "informationsmanagement/",
     tucanUrl: "https://www.tucan.tu-darmstadt.de/"

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UTF-8 Checker &amp; Bitfolgen-Validator | Informationsmanagement</title>
+  <meta name="description" content="Interaktiver UTF-8 Bitfolgen-Validator, Overlong-Encoding-Prüfer, Codepoint-Rechner und Klausur-Trainer für Informationsmanagement und NLP.">
+  
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg">
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    
+    .cs-card {
+      background: #0d1117;
+      border: 1px solid #1e2533;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #2b3548; }
+
+    .bit-ctrl {
+      color: #94a3b8;
+      background: rgba(30, 41, 59, 0.7);
+    }
+    .bit-payload {
+      color: #60a5fa;
+      background: rgba(37, 99, 235, 0.2);
+      font-weight: bold;
+    }
+    .bit-error {
+      color: #f87171;
+      background: rgba(225, 29, 72, 0.25);
+      border-color: #f43f5e;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col custom-scrollbar selection:bg-blue-600 selection:text-white">
+
+  <!-- Header -->
+  <div id="app-header" class="hidden-print"></div>
+  <script src="../components.js"></script>
+  <script>renderHeader("../");</script>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Hero Header -->
+    <div class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 sm:p-8 space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+        <div class="flex items-center gap-2">
+          <span class="text-blue-400 font-bold">$</span>
+          <span>check_utf8 --validate --extract-payload</span>
+        </div>
+        <div class="text-[11px] text-slate-500">
+          Informationsmanagement • NLP &amp; Zeichensätze • UTF-8 Engine
+        </div>
+      </div>
+
+      <div class="space-y-2 pt-1">
+        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white font-heading">
+          UTF-8 Bitfolgen-Checker &amp; Validierungs-Labor
+        </h1>
+        <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
+          Schritt-für-Schritt Prüfung von Bitfolgen auf UTF-8 Konformität: Header-Analyse (1–4 Bytes), Folge-Byte Validierung (`10...`), Nutzbit-Extraktion, Erkennung von Overlong Encodings, Surrogates und Klausur-Trainer.
+        </p>
+      </div>
+    </div>
+
+    <!-- Interactive Workspace Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left Column: Input & Presets -->
+      <div class="lg:col-span-1 space-y-4">
+        
+        <!-- Input Card -->
+        <div class="cs-card rounded-xl p-5 space-y-4">
+          <div class="border-b border-[#1e2533] pb-3">
+            <h2 class="font-heading font-bold text-white text-base flex items-center gap-2">
+              <span>⌨️</span> Bitfolge eingeben
+            </h2>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">Binär (0 &amp; 1), Hexadezimal oder Zeichen</p>
+          </div>
+
+          <!-- Input Format Tabs -->
+          <div class="flex rounded-lg bg-[#151c28] p-1 border border-[#273248] text-xs font-mono">
+            <button id="in-mode-bin" onclick="setInputMode('bin')" class="flex-1 py-1.5 rounded-md bg-blue-600 text-white font-bold transition">Binär</button>
+            <button id="in-mode-hex" onclick="setInputMode('hex')" class="flex-1 py-1.5 rounded-md text-slate-400 hover:text-white transition">Hex (0x)</button>
+            <button id="in-mode-char" onclick="setInputMode('char')" class="flex-1 py-1.5 rounded-md text-slate-400 hover:text-white transition">Zeichen</button>
+          </div>
+
+          <!-- Main Input Field -->
+          <div class="space-y-1.5">
+            <label for="bit-input-field" class="block text-[11px] text-slate-400 font-mono font-bold uppercase tracking-wider" id="input-label">Binäre Bitfolge (8er Blöcke)</label>
+            <textarea 
+              id="bit-input-field" 
+              rows="3" 
+              placeholder="z.B. 11000011 10100100"
+              class="w-full bg-[#0a0c10] border border-[#273248] focus:border-blue-500 rounded-xl p-3 text-sm text-white font-mono focus:outline-none transition leading-relaxed"
+            >11000011 10100100</textarea>
+            <div class="flex items-center justify-between text-[11px] font-mono text-slate-500">
+              <span id="input-stats">16 Bits (2 Bytes)</span>
+              <button onclick="clearInputField()" class="text-slate-400 hover:text-white">Leeren</button>
+            </div>
+          </div>
+
+          <button onclick="runValidation()" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs transition shadow-lg flex items-center justify-center gap-2">
+            <span>⚡</span> <span>Schrittweise prüfen</span>
+          </button>
+        </div>
+
+        <!-- Klausur-Presets Card -->
+        <div class="cs-card rounded-xl p-5 space-y-3">
+          <div class="border-b border-[#1e2533] pb-2">
+            <h3 class="font-heading font-bold text-white text-sm">Klausur-Presets &amp; Testfälle</h3>
+          </div>
+
+          <div class="space-y-1.5 font-mono text-xs">
+            <div class="text-[10px] text-slate-500 uppercase font-bold pt-1">Gültige UTF-8 Sequenzen:</div>
+            
+            <button onclick="loadPreset('11000011 10100100')" class="w-full p-2 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-left text-slate-200 flex items-center justify-between transition">
+              <span>Umlaut 'ä' (2 Bytes)</span>
+              <span class="text-emerald-400 font-bold">U+00E4</span>
+            </button>
+
+            <button onclick="loadPreset('01000001')" class="w-full p-2 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-left text-slate-200 flex items-center justify-between transition">
+              <span>ASCII 'A' (1 Byte)</span>
+              <span class="text-emerald-400 font-bold">U+0041</span>
+            </button>
+
+            <button onclick="loadPreset('11100010 10000010 10101100')" class="w-full p-2 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-left text-slate-200 flex items-center justify-between transition">
+              <span>Euro-Symbol '€' (3 Bytes)</span>
+              <span class="text-emerald-400 font-bold">U+20AC</span>
+            </button>
+
+            <button onclick="loadPreset('11110000 10011111 10011000 10000000')" class="w-full p-2 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-left text-slate-200 flex items-center justify-between transition">
+              <span>Raketen-Emoji '🚀' (4 Bytes)</span>
+              <span class="text-emerald-400 font-bold">U+1F680</span>
+            </button>
+
+            <div class="text-[10px] text-rose-400 uppercase font-bold pt-2">Typische Klausurfallen:</div>
+
+            <button onclick="loadPreset('11000000 10100001')" class="w-full p-2 rounded-lg bg-rose-950/30 hover:bg-rose-950/50 border border-rose-900/50 text-left text-rose-200 flex items-center justify-between transition">
+              <span>Overlong Encoding ('!')</span>
+              <span class="text-rose-400 font-bold">Falle: Überlang</span>
+            </button>
+
+            <button onclick="loadPreset('10100000 10100001')" class="w-full p-2 rounded-lg bg-rose-950/30 hover:bg-rose-950/50 border border-rose-900/50 text-left text-rose-200 flex items-center justify-between transition">
+              <span>Ungültiges Start-Byte (10...)</span>
+              <span class="text-rose-400 font-bold">Falle: Folge-Header</span>
+            </button>
+
+            <button onclick="loadPreset('11100010 00000001 10000000')" class="w-full p-2 rounded-lg bg-rose-950/30 hover:bg-rose-950/50 border border-rose-900/50 text-left text-rose-200 flex items-center justify-between transition">
+              <span>Falsches Folge-Byte (0...)</span>
+              <span class="text-rose-400 font-bold">Falle: Kein 10...</span>
+            </button>
+
+            <button onclick="loadPreset('11101101 10100000 10000000')" class="w-full p-2 rounded-lg bg-rose-950/30 hover:bg-rose-950/50 border border-rose-900/50 text-left text-rose-200 flex items-center justify-between transition">
+              <span>Surrogate Code Point (U+D800)</span>
+              <span class="text-rose-400 font-bold">Falle: Surrogate</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Columns: Step-by-Step Validation & Result -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Overall Result Box -->
+        <div id="validation-result-card" class="cs-card rounded-xl p-5 border border-emerald-500/50 bg-gradient-to-r from-emerald-950/30 via-[#0d121c] to-[#0a0c10] space-y-3">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- 5-Step Pipeline Inspector -->
+        <div class="cs-card rounded-xl p-5 space-y-5">
+          <div class="border-b border-[#1e2533] pb-3 flex items-center justify-between">
+            <div>
+              <h2 class="font-heading font-bold text-white text-base flex items-center gap-2">
+                <span>🔍</span> Schritt-für-Schritt Analyse
+              </h2>
+              <p class="text-xs text-slate-400 font-mono mt-0.5">Exakte Prüfung nach Informationsmanagement-Schema</p>
+            </div>
+            <span id="pipeline-status-badge" class="px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 font-mono text-xs font-bold">
+              Gültig
+            </span>
+          </div>
+
+          <!-- Step 1: Byte Breakdown -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 font-mono text-xs font-bold text-slate-300">
+              <span class="w-5 h-5 rounded bg-blue-900/60 border border-blue-500/40 text-blue-300 flex items-center justify-center text-[10px]">1</span>
+              <span>Schritt 1: Aufteilung in 8-Bit Blöcke (Bytes)</span>
+            </div>
+            <div id="step-1-display" class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded-xl font-mono text-xs overflow-x-auto custom-scrollbar">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Step 2: Header & Sequence Length -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 font-mono text-xs font-bold text-slate-300">
+              <span class="w-5 h-5 rounded bg-blue-900/60 border border-blue-500/40 text-blue-300 flex items-center justify-center text-[10px]">2</span>
+              <span>Schritt 2: Start-Byte &amp; Erwartete Sequenzlänge</span>
+            </div>
+            <div id="step-2-display" class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded-xl font-mono text-xs space-y-1">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Step 3: Continuation Bytes Check -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 font-mono text-xs font-bold text-slate-300">
+              <span class="w-5 h-5 rounded bg-blue-900/60 border border-blue-500/40 text-blue-300 flex items-center justify-center text-[10px]">3</span>
+              <span>Schritt 3: Folge-Bytes Präfix-Prüfung (`10...`)</span>
+            </div>
+            <div id="step-3-display" class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded-xl font-mono text-xs space-y-1">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Step 4: Payload Assembly & Codepoint Extraction -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 font-mono text-xs font-bold text-slate-300">
+              <span class="w-5 h-5 rounded bg-blue-900/60 border border-blue-500/40 text-blue-300 flex items-center justify-center text-[10px]">4</span>
+              <span>Schritt 4: Nutzbits extrahieren &amp; Codepoint berechnen</span>
+            </div>
+            <div id="step-4-display" class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded-xl font-mono text-xs space-y-2">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Step 5: Overlong & Unicode Range Verification -->
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 font-mono text-xs font-bold text-slate-300">
+              <span class="w-5 h-5 rounded bg-blue-900/60 border border-blue-500/40 text-blue-300 flex items-center justify-center text-[10px]">5</span>
+              <span>Schritt 5: Overlong-Encoding &amp; Bereichsprüfung</span>
+            </div>
+            <div id="step-5-display" class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded-xl font-mono text-xs space-y-1">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- UTF-8 Rules Quick Reference Card -->
+        <div class="cs-card rounded-xl p-5 space-y-3">
+          <h3 class="font-heading font-bold text-white text-sm">UTF-8 Spezifikationstabelle (Spickzettel)</h3>
+          
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left text-xs font-mono border border-[#1e2533] rounded-lg">
+              <thead class="bg-[#151c28] text-slate-300">
+                <tr class="border-b border-[#1e2533]">
+                  <th class="p-2">Länge</th>
+                  <th class="p-2">Byte 1 (Start)</th>
+                  <th class="p-2">Byte 2</th>
+                  <th class="p-2">Byte 3</th>
+                  <th class="p-2">Byte 4</th>
+                  <th class="p-2">Codepoint-Bereich</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#1e2533] text-slate-400">
+                <tr>
+                  <td class="p-2 font-bold text-white">1 Byte</td>
+                  <td class="p-2 text-blue-400 font-bold">0xxxxxxx</td>
+                  <td class="p-2 text-slate-600">-</td>
+                  <td class="p-2 text-slate-600">-</td>
+                  <td class="p-2 text-slate-600">-</td>
+                  <td class="p-2 text-emerald-400">U+0000 – U+007F (0–127)</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-bold text-white">2 Bytes</td>
+                  <td class="p-2 text-blue-400 font-bold">110xxxxx</td>
+                  <td class="p-2 text-blue-400 font-bold">10xxxxxx</td>
+                  <td class="p-2 text-slate-600">-</td>
+                  <td class="p-2 text-slate-600">-</td>
+                  <td class="p-2 text-emerald-400">U+0080 – U+07FF</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-bold text-white">3 Bytes</td>
+                  <td class="p-2 text-blue-400 font-bold">1110xxxx</td>
+                  <td class="p-2 text-blue-400 font-bold">10xxxxxx</td>
+                  <td class="p-2 text-blue-400 font-bold">10xxxxxx</td>
+                  <td class="p-2 text-slate-600">-</td>
+                  <td class="p-2 text-emerald-400">U+0800 – U+FFFF</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-bold text-white">4 Bytes</td>
+                  <td class="p-2 text-blue-400 font-bold">11110xxx</td>
+                  <td class="p-2 text-blue-400 font-bold">10xxxxxx</td>
+                  <td class="p-2 text-blue-400 font-bold">10xxxxxx</td>
+                  <td class="p-2 text-blue-400 font-bold">10xxxxxx</td>
+                  <td class="p-2 text-emerald-400">U+10000 – U+10FFFF</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <div id="app-footer" class="hidden-print"></div>
+  <script>renderFooter("../");</script>
+
+  <!-- UTF-8 Engine Script -->
+  <script>
+    let currentInputMode = 'bin';
+
+    function setInputMode(mode) {
+      currentInputMode = mode;
+      const btnBin = document.getElementById('in-mode-bin');
+      const btnHex = document.getElementById('in-mode-hex');
+      const btnChar = document.getElementById('in-mode-char');
+      const label = document.getElementById('input-label');
+      const input = document.getElementById('bit-input-field');
+
+      [btnBin, btnHex, btnChar].forEach(b => b.className = "flex-1 py-1.5 rounded-md text-slate-400 hover:text-white transition");
+
+      if (mode === 'bin') {
+        btnBin.className = "flex-1 py-1.5 rounded-md bg-blue-600 text-white font-bold transition";
+        label.textContent = "Binäre Bitfolge (8er Blöcke)";
+        input.placeholder = "z.B. 11000011 10100100";
+      } else if (mode === 'hex') {
+        btnHex.className = "flex-1 py-1.5 rounded-md bg-blue-600 text-white font-bold transition";
+        label.textContent = "Hexadezimale Bytes (0x..)";
+        input.placeholder = "z.B. 0xC3 0xA4 oder C3 A4";
+      } else {
+        btnChar.className = "flex-1 py-1.5 rounded-md bg-blue-600 text-white font-bold transition";
+        label.textContent = "Unicode Zeichen oder Text";
+        input.placeholder = "z.B. ä oder € oder 🚀";
+      }
+
+      runValidation();
+    }
+
+    function loadPreset(binString) {
+      currentInputMode = 'bin';
+      setInputMode('bin');
+      const input = document.getElementById('bit-input-field');
+      if (input) input.value = binString;
+      runValidation();
+    }
+
+    function clearInputField() {
+      const input = document.getElementById('bit-input-field');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      runValidation();
+    }
+
+    function getCleanedBytes() {
+      const input = document.getElementById('bit-input-field');
+      if (!input) return [];
+      const raw = input.value.trim();
+      if (!raw) return [];
+
+      if (currentInputMode === 'char') {
+        // Encode character to UTF-8 bytes
+        const encoder = new TextEncoder();
+        const u8 = encoder.encode(raw);
+        return Array.from(u8).map(b => b.toString(2).padStart(8, '0'));
+      }
+
+      if (currentInputMode === 'hex') {
+        const hexTokens = raw.replace(/0x/gi, '').split(/[\s,;-]+/).filter(Boolean);
+        const bytes = [];
+        hexTokens.forEach(t => {
+          // If token has multiple hex pairs (e.g. C3A4)
+          if (t.length % 2 === 0 && t.length > 2) {
+            for (let i = 0; i < t.length; i += 2) {
+              const val = parseInt(t.substring(i, i+2), 16);
+              if (!isNaN(val)) bytes.push(val.toString(2).padStart(8, '0'));
+            }
+          } else {
+            const val = parseInt(t, 16);
+            if (!isNaN(val)) bytes.push(val.toString(2).padStart(8, '0'));
+          }
+        });
+        return bytes;
+      }
+
+      // Default Binary Mode
+      const cleaned = raw.replace(/[^01]/g, '');
+      const bytes = [];
+      for (let i = 0; i < cleaned.length; i += 8) {
+        const chunk = cleaned.substring(i, i + 8);
+        bytes.push(chunk);
+      }
+      return bytes;
+    }
+
+    function runValidation() {
+      const bytes = getCleanedBytes();
+      const statsEl = document.getElementById('input-stats');
+      const totalBits = bytes.reduce((sum, b) => sum + b.length, 0);
+
+      if (statsEl) {
+        statsEl.textContent = `${totalBits} Bits (${bytes.length} Byte${bytes.length !== 1 ? 's' : ''})`;
+      }
+
+      if (bytes.length === 0) {
+        renderEmptyState();
+        return;
+      }
+
+      // Check 1: Incomplete byte check
+      const incomplete = bytes.some(b => b.length !== 8);
+      if (incomplete) {
+        renderError({
+          title: "Ungültige Bitfolge: Unvollständiges Byte",
+          desc: "Die Bitfolge muss ein Vielfaches von 8 Bits sein. Mindestens ein Byte hat weniger als 8 Bits.",
+          step: 1
+        }, bytes);
+        return;
+      }
+
+      const byte1 = bytes[0];
+      let expectedLength = 0;
+      let headerPattern = "";
+      let payloadBits = "";
+      const stepDetails = {};
+
+      // Check 2: Start Byte Inspection
+      if (byte1.startsWith('0')) {
+        expectedLength = 1;
+        headerPattern = "0xxxxxxx (1 Byte)";
+        payloadBits = byte1.substring(1);
+      } else if (byte1.startsWith('110')) {
+        expectedLength = 2;
+        headerPattern = "110xxxxx (2 Bytes)";
+        payloadBits = byte1.substring(3);
+      } else if (byte1.startsWith('1110')) {
+        expectedLength = 3;
+        headerPattern = "1110xxxx (3 Bytes)";
+        payloadBits = byte1.substring(4);
+      } else if (byte1.startsWith('11110')) {
+        expectedLength = 4;
+        headerPattern = "11110xxx (4 Bytes)";
+        payloadBits = byte1.substring(5);
+      } else if (byte1.startsWith('10')) {
+        renderError({
+          title: "Ungültiges Start-Byte (Continuation-Byte als Header)",
+          desc: `Das 1. Byte '${byte1}' beginnt mit '10...'. Dies ist ein Folge-Byte und darf niemals am Anfang einer Sequenz stehen!`,
+          step: 2
+        }, bytes);
+        return;
+      } else {
+        renderError({
+          title: "Ungültiges Start-Byte (Zu viele führende 1-Bits)",
+          desc: `Das 1. Byte '${byte1}' beginnt mit 5 oder mehr führenden 1-Bits ('11111...'). UTF-8 unterstützt maximal 4 Bytes!`,
+          step: 2
+        }, bytes);
+        return;
+      }
+
+      // Check 3: Truncated sequence check
+      if (bytes.length < expectedLength) {
+        renderError({
+          title: "Abgeschnittene Bitfolge (Zu wenige Bytes)",
+          desc: `Das Start-Byte '${byte1}' verlangt genau ${expectedLength} Bytes, es wurden aber nur ${bytes.length} Byte(s) übergeben.`,
+          step: 2
+        }, bytes);
+        return;
+      }
+
+      // Check 4: Continuation Bytes Prefix check
+      const followingBytes = bytes.slice(1, expectedLength);
+      for (let i = 0; i < followingBytes.length; i++) {
+        const fb = followingBytes[i];
+        if (!fb.startsWith('10')) {
+          renderError({
+            title: `Ungültiges Folge-Byte #${i + 2}`,
+            desc: `Das Folge-Byte '${fb}' an Position ${i + 2} beginnt nicht mit '10...'. Jedes Folge-Byte in UTF-8 muss zwingend mit '10' beginnen!`,
+            step: 3
+          }, bytes);
+          return;
+        }
+        payloadBits += fb.substring(2);
+      }
+
+      // Check 5: Codepoint calculation
+      const codepointInt = parseInt(payloadBits, 2);
+      const hexStr = codepointInt.toString(16).toUpperCase().padStart(4, '0');
+      const unicodeFormatted = `U+${hexStr}`;
+      let charRepresentation = "";
+      try {
+        charRepresentation = String.fromCodePoint(codepointInt);
+      } catch {
+        charRepresentation = "";
+      }
+
+      // Check 6: Overlong Encoding Verification
+      let isOverlong = false;
+      let minAllowed = 0;
+      if (expectedLength === 1) minAllowed = 0x0000;
+      else if (expectedLength === 2) minAllowed = 0x0080;
+      else if (expectedLength === 3) minAllowed = 0x0800;
+      else if (expectedLength === 4) minAllowed = 0x10000;
+
+      if (codepointInt < minAllowed) {
+        renderError({
+          title: "Overlong Encoding (Überlange Kodierung)",
+          desc: `Der Codepoint ${unicodeFormatted} (Dezimal: ${codepointInt}) wurde mit ${expectedLength} Bytes kodiert, hätte jedoch in weniger Bytes gepasst! In UTF-8 ist die kürzeste Repräsentation zwingend vorgeschrieben (Sicherheitsregel).`,
+          step: 5,
+          codepoint: unicodeFormatted
+        }, bytes);
+        return;
+      }
+
+      // Check 7: UTF-16 Surrogate Range (0xD800 to 0xDFFF)
+      if (codepointInt >= 0xD800 && codepointInt <= 0xDFFF) {
+        renderError({
+          title: "Ungültiger Unicode-Bereich (UTF-16 Surrogate)",
+          desc: `Der Codepoint ${unicodeFormatted} liegt im Bereich U+D800–U+DFFF. Diese Codepoints sind ausschließlich für UTF-16 Surrogates reserviert und in UTF-8 ungültig!`,
+          step: 5,
+          codepoint: unicodeFormatted
+        }, bytes);
+        return;
+      }
+
+      // Check 8: Max Unicode Codepoint (0x10FFFF)
+      if (codepointInt > 0x10FFFF) {
+        renderError({
+          title: "Codepoint außerhalb des gültigen Unicode-Bereichs",
+          desc: `Der berechnete Wert ${unicodeFormatted} überschreitet das Maximum von U+10FFFF.`,
+          step: 5,
+          codepoint: unicodeFormatted
+        }, bytes);
+        return;
+      }
+
+      // SUCCESS: Valid UTF-8 Sequence
+      renderSuccess({
+        bytes,
+        expectedLength,
+        headerPattern,
+        payloadBits,
+        codepointInt,
+        unicodeFormatted,
+        charRepresentation
+      });
+    }
+
+    function renderSuccess(data) {
+      const card = document.getElementById('validation-result-card');
+      const badge = document.getElementById('pipeline-status-badge');
+
+      if (badge) {
+        badge.className = "px-2.5 py-1 rounded-lg bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 font-mono text-xs font-bold";
+        badge.textContent = "✓ Gültig (Valid UTF-8)";
+      }
+
+      if (card) {
+        card.className = "cs-card rounded-xl p-5 border border-emerald-500/50 bg-gradient-to-r from-emerald-950/30 via-[#0d121c] to-[#0a0c10] space-y-3";
+        card.innerHTML = `
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-xl bg-emerald-950 border border-emerald-500/50 text-emerald-300 font-mono font-extrabold text-2xl flex items-center justify-center shadow-lg">
+                ${data.charRepresentation || '✓'}
+              </div>
+              <div>
+                <div class="text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <span>✓</span> Gültige UTF-8 Bitfolge
+                </div>
+                <h3 class="text-xl font-bold text-white font-heading">${data.unicodeFormatted} <span class="text-slate-400 text-sm font-normal font-mono">('${data.charRepresentation}')</span></h3>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 font-mono text-xs">
+              <span class="px-2.5 py-1 rounded bg-[#151c28] border border-[#273248] text-slate-300 font-bold">${data.expectedLength} Byte${data.expectedLength > 1 ? 's' : ''}</span>
+              <span class="px-2.5 py-1 rounded bg-blue-950/60 border border-blue-600/40 text-blue-300 font-bold">${data.payloadBits.length} Nutzbits</span>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-[#1e2533] grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
+              <span class="text-slate-500 block text-[10px]">Unicode Codepoint:</span>
+              <span class="text-white font-bold">${data.unicodeFormatted}</span>
+            </div>
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
+              <span class="text-slate-500 block text-[10px]">Dezimalwert:</span>
+              <span class="text-white font-bold">${data.codepointInt}</span>
+            </div>
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
+              <span class="text-slate-500 block text-[10px]">Hex-Bytes:</span>
+              <span class="text-blue-400 font-bold">${data.bytes.map(b => '0x' + parseInt(b,2).toString(16).toUpperCase().padStart(2,'0')).join(' ')}</span>
+            </div>
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
+              <span class="text-slate-500 block text-[10px]">Overlong Check:</span>
+              <span class="text-emerald-400 font-bold">Kürzeste Form OK</span>
+            </div>
+          </div>
+        `;
+      }
+
+      // Step 1 Display
+      document.getElementById('step-1-display').innerHTML = `
+        <div class="flex flex-wrap gap-2 items-center">
+          ${data.bytes.map((b, i) => `
+            <div class="px-2.5 py-1.5 rounded-lg bg-[#151c28] border border-[#273248] text-center">
+              <div class="text-[10px] text-slate-500">Byte ${i+1}</div>
+              <div class="font-bold text-slate-200">${b}</div>
+            </div>
+          `).join('')}
+          <div class="text-xs text-emerald-400 font-bold ml-2">✓ Genau ${data.bytes.length} Byte(s) (je 8 Bits)</div>
+        </div>
+      `;
+
+      // Step 2 Display
+      const b1 = data.bytes[0];
+      const ctrlLen = data.expectedLength === 1 ? 1 : data.expectedLength + 1;
+      const b1Ctrl = b1.substring(0, ctrlLen);
+      const b1Pay = b1.substring(ctrlLen);
+      document.getElementById('step-2-display').innerHTML = `
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-2">
+            <span>Start-Byte:</span>
+            <span class="px-2 py-0.5 rounded bg-[#151c28] border border-[#273248]">
+              <span class="text-blue-400 font-bold">${b1Ctrl}</span><span class="text-slate-300">${b1Pay}</span>
+            </span>
+            <span class="text-slate-400">&rarr; Präfix <code>${b1Ctrl}</code> signalisiert <b>${data.expectedLength} Byte(s)</b></span>
+          </div>
+          <div class="text-slate-400 text-[11px]">Muster: <code>${data.headerPattern}</code></div>
+        </div>
+      `;
+
+      // Step 3 Display
+      if (data.expectedLength === 1) {
+        document.getElementById('step-3-display').innerHTML = `<div class="text-slate-400">1-Byte ASCII Zeichen benötigt keine Folge-Bytes.</div>`;
+      } else {
+        const rows = data.bytes.slice(1, data.expectedLength).map((b, i) => `
+          <div class="flex items-center gap-2">
+            <span>Byte ${i+2}:</span>
+            <span class="px-2 py-0.5 rounded bg-[#151c28] border border-[#273248]">
+              <span class="text-emerald-400 font-bold">10</span><span class="text-slate-300">${b.substring(2)}</span>
+            </span>
+            <span class="text-emerald-400 font-bold">✓ Beginnt mit '10'</span>
+          </div>
+        `).join('');
+        document.getElementById('step-3-display').innerHTML = `<div class="space-y-1.5">${rows}</div>`;
+      }
+
+      // Step 4 Display
+      let payloadBreakdown = "";
+      if (data.expectedLength === 1) {
+        payloadBreakdown = `<span class="text-blue-400 font-bold">${data.bytes[0].substring(1)}</span> (7 Bits)`;
+      } else if (data.expectedLength === 2) {
+        payloadBreakdown = `<span class="text-blue-400 font-bold">${data.bytes[0].substring(3)}</span> + <span class="text-blue-400 font-bold">${data.bytes[1].substring(2)}</span> = ${data.payloadBits} (11 Bits)`;
+      } else if (data.expectedLength === 3) {
+        payloadBreakdown = `<span class="text-blue-400 font-bold">${data.bytes[0].substring(4)}</span> + <span class="text-blue-400 font-bold">${data.bytes[1].substring(2)}</span> + <span class="text-blue-400 font-bold">${data.bytes[2].substring(2)}</span> = ${data.payloadBits} (16 Bits)`;
+      } else {
+        payloadBreakdown = `<span class="text-blue-400 font-bold">${data.bytes[0].substring(5)}</span> + ${data.bytes.slice(1).map(b => `<span class="text-blue-400 font-bold">${b.substring(2)}</span>`).join(' + ')} = ${data.payloadBits} (21 Bits)`;
+      }
+
+      document.getElementById('step-4-display').innerHTML = `
+        <div class="space-y-1.5">
+          <div><b>Zusammengefügte Nutzbits:</b> ${payloadBreakdown}</div>
+          <div class="text-slate-300">Binär: <code>${data.payloadBits}</code> &rarr; Hex: <code>0x${data.codepointInt.toString(16).toUpperCase()}</code> &rarr; <b>${data.unicodeFormatted}</b></div>
+        </div>
+      `;
+
+      // Step 5 Display
+      document.getElementById('step-5-display').innerHTML = `
+        <div class="space-y-1 text-slate-300">
+          <div>• Overlong-Prüfung: Erlaubter Minimalwert für ${data.expectedLength} Bytes ist <b>U+${data.expectedLength === 1 ? '0000' : (data.expectedLength === 2 ? '0080' : (data.expectedLength === 3 ? '0800' : '10000'))}</b> &rarr; ${data.unicodeFormatted} ist gültig.</div>
+          <div>• Surrogate-Prüfung: Liegt nicht in U+D800–U+DFFF &rarr; OK.</div>
+          <div>• Maximum-Prüfung: Liegt innerhalb U+0000 bis U+10FFFF &rarr; OK.</div>
+        </div>
+      `;
+    }
+
+    function renderError(err, bytes) {
+      const card = document.getElementById('validation-result-card');
+      const badge = document.getElementById('pipeline-status-badge');
+
+      if (badge) {
+        badge.className = "px-2.5 py-1 rounded-lg bg-rose-950/60 border border-rose-600/40 text-rose-400 font-mono text-xs font-bold";
+        badge.textContent = "✗ Ungültig (Invalid UTF-8)";
+      }
+
+      if (card) {
+        card.className = "cs-card rounded-xl p-5 border border-rose-500/50 bg-gradient-to-r from-rose-950/30 via-[#0d121c] to-[#0a0c10] space-y-3";
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl bg-rose-950 border border-rose-500/50 text-rose-300 font-mono font-extrabold text-2xl flex items-center justify-center shadow-lg">
+              ✕
+            </div>
+            <div>
+              <div class="text-xs font-mono text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <span>✗</span> Validierungsfehler
+              </div>
+              <h3 class="text-lg font-bold text-white font-heading">${err.title}</h3>
+            </div>
+          </div>
+          <p class="text-xs font-mono text-rose-200/90 leading-relaxed bg-[#0a0c10] p-3 rounded-lg border border-rose-900/50">
+            ${err.desc}
+          </p>
+        `;
+      }
+
+      // Step 1
+      document.getElementById('step-1-display').innerHTML = `
+        <div class="flex flex-wrap gap-2 items-center">
+          ${bytes.map((b, i) => `
+            <div class="px-2.5 py-1.5 rounded-lg ${b.length !== 8 ? 'bg-rose-950/60 border border-rose-500 text-rose-200' : 'bg-[#151c28] border border-[#273248] text-slate-200'} text-center">
+              <div class="text-[10px] text-slate-500">Byte ${i+1} (${b.length} Bits)</div>
+              <div class="font-bold">${b}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+
+      // Clear steps after failure
+      document.getElementById('step-2-display').innerHTML = err.step === 2 ? `<div class="text-rose-400 font-bold">${err.desc}</div>` : `<div class="text-slate-500">Prüfung abgebrochen bei Schritt ${err.step}.</div>`;
+      document.getElementById('step-3-display').innerHTML = err.step === 3 ? `<div class="text-rose-400 font-bold">${err.desc}</div>` : `<div class="text-slate-500">Prüfung nicht erreicht.</div>`;
+      document.getElementById('step-4-display').innerHTML = `<div class="text-slate-500">Keine Nutzbit-Zusammenführung möglich.</div>`;
+      document.getElementById('step-5-display').innerHTML = err.step === 5 ? `<div class="text-rose-400 font-bold">${err.desc}</div>` : `<div class="text-slate-500">Prüfung nicht erreicht.</div>`;
+    }
+
+    function renderEmptyState() {
+      const card = document.getElementById('validation-result-card');
+      if (card) {
+        card.className = "cs-card rounded-xl p-5 border border-[#1e2533] space-y-2 text-center py-8";
+        card.innerHTML = `
+          <div class="text-3xl">⌨️</div>
+          <div class="text-sm font-bold text-white font-heading">Keine Bitfolge eingegeben</div>
+          <p class="text-xs text-slate-400 font-mono">Wähle ein Preset aus oder tippe eine Bitfolge ein, um die UTF-8 Analyse zu starten.</p>
+        </div>`;
+      }
+      document.getElementById('step-1-display').innerHTML = '<span class="text-slate-500">Warte auf Eingabe...</span>';
+      document.getElementById('step-2-display').innerHTML = '<span class="text-slate-500">Warte auf Eingabe...</span>';
+      document.getElementById('step-3-display').innerHTML = '<span class="text-slate-500">Warte auf Eingabe...</span>';
+      document.getElementById('step-4-display').innerHTML = '<span class="text-slate-500">Warte auf Eingabe...</span>';
+      document.getElementById('step-5-display').innerHTML = '<span class="text-slate-500">Warte auf Eingabe...</span>';
+    }
+
+    // Auto-run on load
+    document.addEventListener('DOMContentLoaded', () => {
+      runValidation();
+      const input = document.getElementById('bit-input-field');
+      if (input) {
+        input.addEventListener('input', runValidation);
+      }
+    });
+  </script>
+</body>
+</html>
