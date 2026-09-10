@@ -37,7 +37,9 @@ function checkPage(filePath) {
     errors.push(`header/footer relative path mismatch (${headerMatch[1]} vs ${footerMatch[1]})`)
   }
 
-  if (!content.includes('tailwindcss.com')) errors.push('missing Tailwind CDN include')
+  if (!content.match(/<script\s+src="https:\/\/cdn\.tailwindcss\.com"/i)) {
+    errors.push('missing Tailwind CDN include')
+  }
   if (!content.match(/<meta\s+name="viewport"/i)) errors.push('missing viewport meta tag')
   if (!content.match(/<title>.+<\/title>/i)) errors.push('missing title tag')
 
