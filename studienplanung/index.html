@@ -70,11 +70,16 @@
       
       <!-- Left Column: Search & Add (Hidden in Print) -->
       <div class="lg:col-span-1 space-y-4 hidden-print">
-        <div class="cs-card rounded-xl p-5 space-y-4 flex flex-col h-[600px]">
-          <h2 class="font-heading font-bold text-white text-lg">Modul-Katalog</h2>
+        <div class="cs-card rounded-xl p-5 space-y-4 flex flex-col h-[700px]">
+          <div class="flex items-center justify-between">
+            <h2 class="font-heading font-bold text-white text-lg">Modul-Katalog</h2>
+            <span id="module-count" class="text-xs font-mono text-slate-500"></span>
+          </div>
           
-          <div class="relative">
+          <div class="space-y-2">
             <input type="text" id="search-input" placeholder="Modul suchen..." class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-500 transition">
+            <select id="fb-filter" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition">
+            </select>
           </div>
           
           <div id="search-results" class="space-y-2 overflow-y-auto custom-scrollbar flex-1 pr-1">

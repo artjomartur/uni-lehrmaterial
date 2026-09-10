@@ -20,6 +20,14 @@
     .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .tab-btn.active { 
+      background-color: #151c28; 
+      border-color: #3b82f6; 
+      color: #3b82f6; 
+    }
   </style>
 </head>
 <body class="min-h-full flex flex-col custom-scrollbar selection:bg-blue-600 selection:text-white">
@@ -31,31 +39,158 @@
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     <div class="space-y-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-[#151c28] border border-[#273248] flex items-center justify-center font-mono font-bold text-lg">
-          🌐
-        </div>
+        <div class="w-10 h-10 rounded-xl bg-[#151c28] border border-[#273248] flex items-center justify-center font-mono font-bold text-lg">🌐</div>
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
-            Computernetze und verteilte Systeme
-          </h1>
-          <p class="text-sm text-slate-400 mt-1">
-            Plattform-Modul für interaktive Lerntools.
-          </p>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">Computernetze und verteilte Systeme</h1>
+          <p class="text-sm text-slate-400 mt-1">Plattform-Modul für interaktive Lerntools, Übungsaufgaben und Klausurvorbereitung.</p>
         </div>
       </div>
     </div>
 
-    <!-- Placeholder Tool -->
-    <div class="cs-card rounded-xl p-6 flex flex-col items-center justify-center min-h-[300px] text-center space-y-4">
-      <div class="text-4xl opacity-50">🌐</div>
-      <h2 class="text-xl font-bold text-white font-heading">OSI-Schichten Modell / Ping Tracer</h2>
-      <p class="text-sm text-slate-400 max-w-md">
-        Dieses Modul befindet sich aktuell im Aufbau. Ein interaktiver Simulator oder Visualisierer für diesen Fachbereich wird in Kürze von einem Subagenten generiert.
-      </p>
+    <div class="flex space-x-2 border-b border-[#1e2533] pb-2 overflow-x-auto">
+      <button onclick="switchTab('tool')" id="btn-tool" class="tab-btn active px-4 py-2 rounded-lg border border-transparent font-medium text-sm text-slate-400 hover:text-white transition whitespace-nowrap">Lern-Tool (OSI-Modell)</button>
+      <button onclick="switchTab('aufgaben')" id="btn-aufgaben" class="tab-btn px-4 py-2 rounded-lg border border-transparent font-medium text-sm text-slate-400 hover:text-white transition whitespace-nowrap">Übungsaufgaben</button>
+      <button onclick="switchTab('klausur')" id="btn-klausur" class="tab-btn px-4 py-2 rounded-lg border border-transparent font-medium text-sm text-slate-400 hover:text-white transition whitespace-nowrap">Übungsklausur</button>
+    </div>
+
+    <div id="tab-tool" class="tab-content active space-y-6">
+      <h2 class="text-xl font-bold text-white font-heading">Interaktives OSI-Modell</h2>
+      <p class="text-sm text-slate-400">Klicke auf die Schichten, um Details, Protokolle und Beispiele zu sehen.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex flex-col-reverse gap-2" id="osi-layers"></div>
+        <div class="cs-card rounded-xl p-6" id="osi-details">
+          <div class="text-slate-400 text-center mt-10">Wähle links eine Schicht aus.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-aufgaben" class="tab-content space-y-6">
+      <h2 class="text-xl font-bold text-white font-heading">Übungsaufgaben</h2>
+      <div class="grid grid-cols-1 gap-6">
+        <div class="cs-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-white mb-2">1. Routing-Tabelle</h3>
+          <p class="text-sm text-slate-300 mb-4">Welcher Eintrag in einer Standard-Routing-Tabelle wird gewählt, wenn ein Paket an <code>192.168.1.55</code> gesendet wird?</p>
+          <ul class="text-sm text-slate-400 space-y-2 mb-4">
+            <li>A: 192.168.1.0 / 25</li>
+            <li>B: 192.168.1.0 / 26</li>
+            <li>C: 0.0.0.0 / 0</li>
+          </ul>
+          <button onclick="toggleAnswer('ans1')" class="px-3 py-1.5 bg-[#151c28] border border-[#273248] rounded text-sm hover:border-blue-500 transition">Lösung anzeigen</button>
+          <div id="ans1" class="hidden mt-4 p-4 bg-[#151c28] border border-blue-900/50 rounded text-sm text-blue-200">
+            <strong>B (192.168.1.0 / 26)</strong>. Nach dem Longest Prefix Match wird die spezifischste Route gewählt. /26 schließt Adressen von .0 bis .63 ein.
+          </div>
+        </div>
+        <div class="cs-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-white mb-2">2. TCP vs UDP</h3>
+          <p class="text-sm text-slate-300 mb-4">Welche drei Hauptunterschiede gibt es zwischen TCP und UDP?</p>
+          <button onclick="toggleAnswer('ans2')" class="px-3 py-1.5 bg-[#151c28] border border-[#273248] rounded text-sm hover:border-blue-500 transition">Lösung anzeigen</button>
+          <div id="ans2" class="hidden mt-4 p-4 bg-[#151c28] border border-blue-900/50 rounded text-sm text-blue-200">
+            1. TCP ist verbindungsorientiert (3-Way-Handshake), UDP ist verbindungslos.<br>
+            2. TCP bietet zuverlässige Übertragung (ACKs, Retransmission), UDP nicht.<br>
+            3. TCP garantiert Reihenfolge und führt Fluss-/Staukontrolle durch, UDP ist schneller mit weniger Overhead.
+          </div>
+        </div>
+        <div class="cs-card rounded-xl p-6">
+          <h3 class="text-lg font-bold text-white mb-2">3. Standard-Ports</h3>
+          <p class="text-sm text-slate-300 mb-4">Ordne die folgenden Ports ihren Protokollen zu: 22, 53, 80, 443.</p>
+          <button onclick="toggleAnswer('ans3')" class="px-3 py-1.5 bg-[#151c28] border border-[#273248] rounded text-sm hover:border-blue-500 transition">Lösung anzeigen</button>
+          <div id="ans3" class="hidden mt-4 p-4 bg-[#151c28] border border-blue-900/50 rounded text-sm text-blue-200">
+            22: SSH &nbsp;|&nbsp; 53: DNS &nbsp;|&nbsp; 80: HTTP &nbsp;|&nbsp; 443: HTTPS
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-klausur" class="tab-content space-y-6">
+      <h2 class="text-xl font-bold text-white font-heading">Klausur-Quiz</h2>
+      <div class="cs-card rounded-xl p-6 space-y-6" id="quiz-container"></div>
+      <button onclick="submitQuiz()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition">Quiz auswerten</button>
+      <div id="quiz-result" class="hidden mt-4 p-4 bg-[#151c28] border border-emerald-900/50 rounded text-emerald-400 font-bold"></div>
     </div>
   </main>
 
   <div id="app-footer"></div>
   <script>renderFooter("../");</script>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      document.getElementById('btn-' + tabId).classList.add('active');
+    }
+
+    function toggleAnswer(id) {
+      document.getElementById(id).classList.toggle('hidden');
+    }
+
+    const osiLayers = [
+      { num: 1, name: "Physical Layer (Bitübertragung)", desc: "Übertragung von unstrukturierten Bitströmen über das physikalische Medium.", protocols: "Ethernet (Phy), USB, Bluetooth, DSL", unit: "Bits" },
+      { num: 2, name: "Data Link Layer (Sicherung)", desc: "Zuverlässige Übertragung von Frames zwischen zwei physisch verbundenen Knoten. MAC-Adressierung.", protocols: "Ethernet (MAC), Wi-Fi 802.11, PPP, ARP", unit: "Frames" },
+      { num: 3, name: "Network Layer (Vermittlung)", desc: "Routing von Paketen über verschiedene Netzwerke hinweg. IP-Adressierung.", protocols: "IPv4, IPv6, ICMP, IPsec, OSPF", unit: "Packets" },
+      { num: 4, name: "Transport Layer (Transport)", desc: "End-to-End-Verbindungen und Zuverlässigkeit. Multiplexing durch Ports.", protocols: "TCP, UDP", unit: "Segments / Datagrams" },
+      { num: 5, name: "Session Layer (Sitzung)", desc: "Steuerung von logischen Verbindungen (Sitzungen) zwischen Anwendungen.", protocols: "NetBIOS, PPTP, RPC", unit: "Data" },
+      { num: 6, name: "Presentation Layer (Darstellung)", desc: "Datenformatierung, Verschlüsselung und Komprimierung.", protocols: "SSL/TLS, JPEG, ASCII", unit: "Data" },
+      { num: 7, name: "Application Layer (Anwendung)", desc: "Schnittstelle für Netzwerkanwendungen zum Endnutzer.", protocols: "HTTP, FTP, SMTP, DNS, SSH", unit: "Data" }
+    ];
+
+    function renderOsi() {
+      const container = document.getElementById('osi-layers');
+      osiLayers.forEach(layer => {
+        const div = document.createElement('div');
+        div.className = "p-3 border border-[#1e2533] rounded cursor-pointer hover:bg-[#151c28] hover:border-blue-500 transition text-center font-bold text-slate-300";
+        div.innerHTML = `Schicht ${layer.num}: ${layer.name}`;
+        div.onclick = () => {
+          document.getElementById('osi-details').innerHTML = `
+            <h3 class="text-xl font-bold text-white mb-4">Schicht ${layer.num}: ${layer.name}</h3>
+            <p class="text-sm text-slate-300 mb-4">${layer.desc}</p>
+            <div class="space-y-2 text-sm text-slate-400">
+              <p><strong class="text-white">Protokolle:</strong> <span class="text-blue-300 font-mono">${layer.protocols}</span></p>
+              <p><strong class="text-white">PDU:</strong> <span class="text-blue-300 font-mono">${layer.unit}</span></p>
+            </div>
+          `;
+        };
+        container.appendChild(div);
+      });
+    }
+
+    const quizQuestions = [
+      { q: "Auf welcher OSI-Schicht arbeitet ein Router typischerweise?", options: ["Schicht 2", "Schicht 3", "Schicht 4", "Schicht 7"], ans: 1 },
+      { q: "Was ist der Zweck des ARP-Protokolls?", options: ["Routing von IP-Paketen", "Auflösung von IP-Adressen in MAC-Adressen", "Verschlüsselung von Daten", "Namensauflösung in IP-Adressen"], ans: 1 },
+      { q: "Wie viele Bit lang ist eine IPv6-Adresse?", options: ["32 Bit", "64 Bit", "128 Bit", "256 Bit"], ans: 2 }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      quizQuestions.forEach((q, i) => {
+        let optionsHtml = q.options.map((opt, j) => `
+          <label class="flex items-center space-x-2 text-sm text-slate-300 cursor-pointer p-2 rounded hover:bg-[#151c28]">
+            <input type="radio" name="q${i}" value="${j}" class="accent-blue-500">
+            <span>${opt}</span>
+          </label>
+        `).join('');
+        container.innerHTML += `
+          <div class="mb-4">
+            <p class="font-bold text-white mb-2">${i+1}. ${q.q}</p>
+            <div class="space-y-1">${optionsHtml}</div>
+          </div>
+        `;
+      });
+    }
+
+    function submitQuiz() {
+      let score = 0;
+      quizQuestions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected && parseInt(selected.value) === q.ans) score++;
+      });
+      const res = document.getElementById('quiz-result');
+      res.innerText = `Ergebnis: ${score} von ${quizQuestions.length} richtig!`;
+      res.classList.remove('hidden');
+    }
+
+    renderOsi();
+    renderQuiz();
+  </script>
 </body>
 </html>

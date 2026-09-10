@@ -15,11 +15,14 @@
   <style>
     body { font-family: 'Inter', sans-serif; }
     h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
     .cs-card { background: #0f131a; border: 1px solid #1e2533; }
-    .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .cs-tab { padding: 0.5rem 1rem; border-radius: 0.5rem; transition: all 0.2s; cursor: pointer; }
+    .cs-tab.active { background: #1e2533; color: white; font-weight: 600; }
+    .cs-tab:not(.active):hover { background: #151c28; color: #cbd5e1; }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: #0a0c10; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e2533; border-radius: 4px; }
+    .hidden-content { display: none; }
   </style>
 </head>
 <body class="min-h-full flex flex-col custom-scrollbar selection:bg-blue-600 selection:text-white">
@@ -29,33 +32,138 @@
   <script>renderHeader("../");</script>
 
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-    <div class="space-y-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-[#151c28] border border-[#273248] flex items-center justify-center font-mono font-bold text-lg">
-          ⚖️
-        </div>
-        <div>
-          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">
-            Informatik und Gesellschaft
-          </h1>
-          <p class="text-sm text-slate-400 mt-1">
-            Plattform-Modul für interaktive Lerntools.
-          </p>
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-[#151c28] border border-[#273248] flex items-center justify-center text-lg">⚖️</div>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white font-heading">Informatik und Gesellschaft</h1>
+        <p class="text-sm text-slate-400 mt-1">Plattform-Modul für Ethik, Datenschutz und Gesellschaftsfragen.</p>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mb-6">
+      <button class="cs-tab active" onclick="switchTab('tool', this)">Lern-Tool</button>
+      <button class="cs-tab" onclick="switchTab('aufgaben', this)">Übungsaufgaben</button>
+      <button class="cs-tab" onclick="switchTab('klausur', this)">Übungsklausur</button>
+    </div>
+
+    <!-- Lern-Tool -->
+    <div id="tab-tool" class="space-y-6">
+      <div class="cs-card rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white font-heading mb-4">Interaktives DSGVO/Ethik-Fallbeispiel</h2>
+        <p class="text-slate-400 mb-6 text-sm">Entscheide über den Umgang mit Daten und Algorithmen in einem fiktiven Projekt.</p>
+        <div id="scenario-text" class="text-lg font-medium text-white mb-6"></div>
+        <div id="scenario-options" class="flex flex-col gap-3"></div>
+        <div class="mt-8 pt-6 border-t border-[#1e2533]">
+          <button onclick="startScenario()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm">Neu starten</button>
         </div>
       </div>
     </div>
 
-    <!-- Placeholder Tool -->
-    <div class="cs-card rounded-xl p-6 flex flex-col items-center justify-center min-h-[300px] text-center space-y-4">
-      <div class="text-4xl opacity-50">⚖️</div>
-      <h2 class="text-xl font-bold text-white font-heading">Ethik-Checklist / Datenschutz</h2>
-      <p class="text-sm text-slate-400 max-w-md">
-        Dieses Modul befindet sich aktuell im Aufbau. Ein interaktiver Simulator oder Visualisierer für diesen Fachbereich wird in Kürze von einem Subagenten generiert.
-      </p>
+    <!-- Übungsaufgaben -->
+    <div id="tab-aufgaben" class="space-y-6 hidden-content">
+      <div class="cs-card rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white font-heading mb-4">Diskussionsfälle</h2>
+        <div class="space-y-4">
+          <div class="p-4 bg-[#151c28] rounded-lg border border-[#1e2533]">
+            <h3 class="font-bold text-white mb-2">Fall 1: KI-generierte Kunst & Urheberrecht</h3>
+            <p class="text-slate-300 text-sm">Ein Unternehmen nutzt ein generatives KI-Modell, das mit urheberrechtlich geschützten Bildern trainiert wurde, um kommerzielle Assets zu erstellen. Darf das Unternehmen die Bilder als eigenes Werk verkaufen?</p>
+            <div class="mt-3 text-sm text-slate-500">Themen: Urheberrecht, Fair Use, Generative KI</div>
+          </div>
+          <div class="p-4 bg-[#151c28] rounded-lg border border-[#1e2533]">
+            <h3 class="font-bold text-white mb-2">Fall 2: Autonomes Fahren im Dilemma</h3>
+            <p class="text-slate-300 text-sm">Ein autonomes Fahrzeug befindet sich in einer unausweichlichen Unfallsituation. Wie sollte der Algorithmus entscheiden, wer im Falle eines Schadens priorisiert wird?</p>
+            <div class="mt-3 text-sm text-slate-500">Themen: Maschinenethik, Trolley-Problem, Haftung</div>
+          </div>
+          <div class="p-4 bg-[#151c28] rounded-lg border border-[#1e2533]">
+            <h3 class="font-bold text-white mb-2">Fall 3: Employee Tracking im Homeoffice</h3>
+            <p class="text-slate-300 text-sm">Eine Firma zwingt Angestellte im Homeoffice dazu, Überwachungssoftware mit Screenshots und Tastenanschlag-Tracking zu installieren. Ist dies DSGVO-konform?</p>
+            <div class="mt-3 text-sm text-slate-500">Themen: DSGVO, Privatsphäre, Arbeitnehmerdatenschutz</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Übungsklausur -->
+    <div id="tab-klausur" class="space-y-6 hidden-content">
+      <div class="cs-card rounded-xl p-6">
+        <h2 class="text-xl font-bold text-white font-heading mb-4">Quiz zur IuG-Klausur</h2>
+        <div class="space-y-6">
+          <div class="quiz-question" data-answer="1">
+            <h3 class="text-white font-medium mb-3">1. Welcher Grundsatz gehört NICHT zur DSGVO?</h3>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-3 bg-[#151c28] rounded-lg cursor-pointer hover:bg-[#1e2533] border border-[#1e2533]"><input type="radio" name="q1" value="0" class="w-4 h-4"><span class="text-sm">Datenminimierung</span></label>
+              <label class="flex items-center gap-3 p-3 bg-[#151c28] rounded-lg cursor-pointer hover:bg-[#1e2533] border border-[#1e2533]"><input type="radio" name="q1" value="1" class="w-4 h-4"><span class="text-sm">Datenmaximierung</span></label>
+              <label class="flex items-center gap-3 p-3 bg-[#151c28] rounded-lg cursor-pointer hover:bg-[#1e2533] border border-[#1e2533]"><input type="radio" name="q1" value="2" class="w-4 h-4"><span class="text-sm">Zweckbindung</span></label>
+            </div>
+            <div class="feedback hidden mt-2 text-sm font-medium"></div>
+          </div>
+          <div class="quiz-question" data-answer="2">
+            <h3 class="text-white font-medium mb-3">2. Was ist "Privacy by Design"?</h3>
+            <div class="space-y-2">
+              <label class="flex items-center gap-3 p-3 bg-[#151c28] rounded-lg cursor-pointer hover:bg-[#1e2533] border border-[#1e2533]"><input type="radio" name="q2" value="0" class="w-4 h-4"><span class="text-sm">Verschlüsselung der Festplatte im Büro.</span></label>
+              <label class="flex items-center gap-3 p-3 bg-[#151c28] rounded-lg cursor-pointer hover:bg-[#1e2533] border border-[#1e2533]"><input type="radio" name="q2" value="1" class="w-4 h-4"><span class="text-sm">Das Löschen von Daten nach Ablauf der Frist.</span></label>
+              <label class="flex items-center gap-3 p-3 bg-[#151c28] rounded-lg cursor-pointer hover:bg-[#1e2533] border border-[#1e2533]"><input type="radio" name="q2" value="2" class="w-4 h-4"><span class="text-sm">Datenschutz als Standard in die Systemarchitektur einbauen.</span></label>
+            </div>
+            <div class="feedback hidden mt-2 text-sm font-medium"></div>
+          </div>
+          <button onclick="checkQuiz()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm">Klausur auswerten</button>
+        </div>
+      </div>
     </div>
   </main>
 
   <div id="app-footer"></div>
   <script>renderFooter("../");</script>
+
+  <script>
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.cs-tab').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.add('hidden-content'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.remove('hidden-content');
+    }
+
+    const scenarioTree = {
+      start: { text: "Du entwickelst eine neue KI-Fitness-App, die Gesundheitsdaten der Nutzer analysiert. Wo speicherst du die Rohdaten?", options: [{ text: "Lokal auf dem Gerät des Nutzers", next: "local" }, { text: "In der Cloud, ohne Verschlüsselung", next: "cloud_plain" }, { text: "Auf einem EU-Server mit End-to-End-Verschlüsselung", next: "cloud_e2e" }] },
+      local: { text: "Gute Wahl für den Datenschutz! Dein ML-Modell kann sich aber so schwer weiterentwickeln. Was tust du?", options: [{ text: "Ich nutze Federated Learning – nur Modell-Updates, keine Rohdaten.", next: "federated" }, { text: "Ich biete Nutzern Geld an, damit sie Daten freigeben.", next: "money" }] },
+      cloud_plain: { text: "Kritischer Fehler! Gesundheitsdaten sind laut DSGVO Art. 9 besonders schützenswert. Es droht ein massives Bußgeld. ❌ Ende", options: [] },
+      cloud_e2e: { text: "Sicher! Zum KI-Training musst du die Daten serverseitig entschlüsseln. Hast du eine ausdrückliche Einwilligung (Opt-In) eingeholt?", options: [{ text: "Ja, mit klarer Erklärung in einfacher Sprache.", next: "optin_yes" }, { text: "Nein, es steht versteckt in den 50-seitigen AGBs.", next: "optin_no" }] },
+      federated: { text: "Hervorragend! Privacy by Design umgesetzt – ein Paradebeispiel für ethische KI. ✅ Erfolg", options: [] },
+      money: { text: "Ethisch riskant (Ausnutzung finanzieller Notlagen), aber unter Umständen legal. Dennoch problematisch. ⚠️ Ende", options: [] },
+      optin_yes: { text: "Perfekt. Transparenz geschaffen und die DSGVO-Anforderungen erfüllt. ✅ Erfolg", options: [] },
+      optin_no: { text: "Verstoß gegen Transparenzpflicht und Kopplungsverbot der DSGVO. Strafzahlung droht! ❌ Ende", options: [] }
+    };
+
+    function startScenario() { renderNode('start'); }
+
+    function renderNode(nodeId) {
+      const node = scenarioTree[nodeId];
+      document.getElementById('scenario-text').innerText = node.text;
+      const container = document.getElementById('scenario-options');
+      container.innerHTML = '';
+      node.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full text-left p-4 bg-[#151c28] hover:bg-[#1e2533] border border-[#273248] rounded-xl text-sm transition-colors text-slate-200';
+        btn.innerText = opt.text;
+        btn.onclick = () => renderNode(opt.next);
+        container.appendChild(btn);
+      });
+    }
+
+    startScenario();
+
+    function checkQuiz() {
+      document.querySelectorAll('.quiz-question').forEach(q => {
+        const correctVal = q.getAttribute('data-answer');
+        const selected = q.querySelector('input[type="radio"]:checked');
+        const feedback = q.querySelector('.feedback');
+        feedback.classList.remove('hidden', 'text-green-500', 'text-red-500', 'text-slate-400');
+        if (!selected) { feedback.textContent = 'Bitte wähle eine Antwort aus.'; feedback.classList.add('text-slate-400'); }
+        else if (selected.value === correctVal) { feedback.textContent = '✅ Richtig!'; feedback.classList.add('text-green-500'); }
+        else { feedback.textContent = '❌ Falsch. Versuch es noch einmal.'; feedback.classList.add('text-red-500'); }
+        feedback.classList.remove('hidden');
+      });
+    }
+  </script>
 </body>
 </html>
