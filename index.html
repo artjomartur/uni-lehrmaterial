@@ -46,6 +46,15 @@
       background: #1e2533;
       border-radius: 4px;
     }
+    @media (max-width: 767px) {
+      main {
+        padding-top: 1.5rem;
+        padding-bottom: 2rem;
+      }
+      .cs-card {
+        padding: 1.125rem;
+      }
+    }
   </style>
 </head>
 <body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-blue-600 selection:text-white">
@@ -56,7 +65,7 @@
   <script>renderHeader("./");</script>
 
   <!-- Main Content Area -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-10 space-y-12">
     
     <!-- Hero Section (Simple, Technical, Monospace Accents, Zero Color Gradient) -->
     <section class="border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 sm:p-8 space-y-4">
@@ -71,7 +80,7 @@
       </div>
 
       <div class="space-y-2 pt-2">
-        <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-white font-heading">
+        <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white font-heading">
           Interaktive Informatik-Labore &amp; Lehrmaterialien
         </h1>
         <p class="text-slate-300 max-w-3xl text-sm sm:text-base leading-relaxed">

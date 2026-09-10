@@ -114,6 +114,21 @@ function renderHeader(relativePath) {
       </div>
     </div>
   </header>
+  <nav class="md:hidden border-b border-[#1e2533] bg-[#0c1017] overflow-x-auto custom-scrollbar" aria-label="Mobile Modulnavigation">
+    <div class="flex min-w-max items-center gap-2 px-4 py-2 text-[11px] font-mono">
+      <a href="${relativePath}" class="shrink-0 rounded-md border border-[#273248] bg-[#151c28] px-3 py-1.5 text-slate-300">Startseite</a>
+      <a href="${relativePath}studienplanung/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Studienplanung</a>
+      <a href="${relativePath}informationsmanagement/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Informationsmanagement</a>
+      <a href="${relativePath}algorithmen-datenstrukturen/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Algorithmen &amp; Datenstrukturen</a>
+      <a href="${relativePath}rechnerorganisation/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Rechnerorganisation</a>
+      <a href="${relativePath}moses/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Modellierung, Spezifikation und Semantik</a>
+      <a href="${relativePath}afe/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Automaten, formale Sprachen und Entscheidbarkeit</a>
+      <a href="${relativePath}apl/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Aussagen- und Prädikatenlogik</a>
+      <a href="${relativePath}mathe-1/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Mathematik I</a>
+      <a href="${relativePath}mathe-2/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Mathematik II</a>
+      <a href="${relativePath}mathe-3/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Mathematik III &amp; ProMi</a>
+    </div>
+  </nav>
   `;
   const el = document.getElementById('app-header');
   if (el) el.innerHTML = headerHtml;
@@ -209,7 +224,7 @@ document.head.appendChild(printStyle);
   // ==========================================
   // Bug Reporter
   // ==========================================
-  const bugReporterHTML = \
+  const bugReporterHTML = `
     <div id="bug-reporter-widget" class="hidden-print">
       <!-- Floating Button -->
       <button onclick="document.getElementById('bug-modal').classList.remove('hidden')" class="fixed bottom-6 right-6 z-50 bg-rose-600 hover:bg-rose-500 text-white p-3 rounded-full shadow-[0_0_15px_rgba(225,29,72,0.4)] transition flex items-center justify-center group" title="Bug melden">
@@ -227,7 +242,7 @@ document.head.appendChild(printStyle);
           
           <div>
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Modul / URL</label>
-            <input type="text" id="bug-url" readonly value="\" class="w-full bg-[#151c28] border border-[#273248] rounded px-3 py-2 text-xs text-slate-300 font-mono">
+            <input type="text" id="bug-url" readonly value="" class="w-full bg-[#151c28] border border-[#273248] rounded px-3 py-2 text-xs text-slate-300 font-mono">
           </div>
 
           <div>
@@ -250,7 +265,7 @@ document.head.appendChild(printStyle);
         </div>
       </div>
     </div>
-  \;
+  `;
   document.body.insertAdjacentHTML('beforeend', bugReporterHTML);
 
   window.saveBugReport = function() {
