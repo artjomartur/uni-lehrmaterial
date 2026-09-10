@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Artjom Becker — Studienplanung, Stundenplan &amp; Notenspiegel | TU Darmstadt</title>
+  <title>Studienplanung, Stundenplan &amp; Notenspiegel | TU Darmstadt</title>
   
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -24,11 +24,11 @@
   
   <!-- OpenGraph / Social Media Meta-Tags -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Artjom Becker — Studienplanung, Stundenplan &amp; Notenspiegel | TU Darmstadt">
+  <meta property="og:title" content="Studienplanung, Stundenplan &amp; Notenspiegel | TU Darmstadt">
   <meta property="og:description" content="Wochenstundenplan, Zeitkollisionsprüfung, Notenverteilungen (1.0-5.0) und ECTS-gewichteter B.Sc. Gesamtschnittrechner für Informatik.">
-  <meta property="og:site_name" content="UniSuite // Artjom Becker">
+  <meta property="og:site_name" content="UniSuite">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Artjom Becker — Studienplanung &amp; Stundenplan">
+  <meta name="twitter:title" content="Studienplanung &amp; Stundenplan | TU Darmstadt">
   <meta name="twitter:description" content="Interaktive Studienplanung, Stundenplaner &amp; B.Sc. Notenrechner für TU Darmstadt Informatik.">
 
   <style>
@@ -78,9 +78,12 @@
       
       <!-- Brand & Semester Switcher -->
       <div class="flex items-center gap-3 sm:gap-4">
-        <div class="flex items-center gap-1.5">
-          <span class="text-white font-extrabold text-lg tracking-tight font-heading">Artjom</span><span class="text-blue-500 font-extrabold text-lg tracking-tight font-heading">Plan</span>
-          <span class="text-[10px] font-mono uppercase bg-blue-950/60 border border-blue-600/40 text-blue-400 px-1.5 py-0.5 rounded font-bold">TU Darmstadt</span>
+        <div class="flex items-center gap-2">
+          <span class="text-slate-200 font-bold text-sm tracking-tight font-heading flex items-center gap-1.5">
+            <span>📅</span>
+            <span>Studienplanung</span>
+          </span>
+          <span class="text-[10px] font-mono uppercase bg-[#151c28] border border-[#273248] text-slate-400 px-1.5 py-0.5 rounded font-bold">TU Darmstadt</span>
         </div>
 
         <div class="h-4 w-px bg-[#1e2533] hidden sm:block"></div>
@@ -601,7 +604,7 @@
   <div id="app-footer" class="hidden-print"></div>
   <script>renderFooter("../");</script>
 
-  <!-- Artjom Planer Core Script -->
+  <!-- Studienplaner Core Script -->
   <script>
     // =========================================================================
     // Kurs-Datensatz & Notenspiegel (FB20 Informatik & FB04 Mathe)
@@ -1426,7 +1429,7 @@
         return;
       }
       const activeMods = COURSE_CATALOG.filter(m => myPlannedModuleIds.includes(m.id));
-      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ArtjomBecker//Studienplaner//DE\nCALSCALE:GREGORIAN\n";
+      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//UniSuite//Studienplaner//DE\nCALSCALE:GREGORIAN\n";
       
       const offsets = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
       const baseMonday = new Date('2026-10-12T00:00:00Z');
@@ -1454,7 +1457,7 @@
       const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = "artjom_becker_stundenplan.ics";
+      a.download = "stundenplan.ics";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
