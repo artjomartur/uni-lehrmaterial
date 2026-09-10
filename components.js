@@ -566,11 +566,8 @@ function renderHeader(relativePath) {
         </nav>
       </div>
 
-      <div class="flex items-center space-x-3 text-xs font-mono">
-        <!-- New TUCaN Modal Button in Header -->
         <button onclick="window.openTucanModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-950/50 border border-blue-600/40 text-blue-300 hover:text-white hover:bg-blue-600/30 hover:border-blue-400 transition font-bold">
           <span>+ Modul hinzufügen</span>
-          <span class="hidden xl:inline text-[10px] text-blue-400/80 bg-blue-900/50 px-1.5 py-0.2 rounded border border-blue-700/50">TUCaN Live</span>
         </button>
 
         <button onclick="printAsPDF()" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#151c28] border border-[#273248] text-slate-300 hover:text-white hover:border-blue-500 transition">
@@ -899,43 +896,22 @@ function initTucanModal() {
             T
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <h2 id="tucan-modal-title" class="text-base sm:text-lg font-bold text-white font-heading">
-                TUCaN Modulkatalog &amp; Live-Vorlesungsverzeichnis
-              </h2>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 font-bold">
-                Live-Sync Aktiv
-              </span>
-            </div>
+            <h2 id="tucan-modal-title" class="text-base sm:text-lg font-bold text-white font-heading">
+              TUCaN Modulkatalog
+            </h2>
             <p class="text-xs text-slate-400 font-mono">
-              TU Darmstadt • FB 20 Informatik • Offizielle Hörsaalbelegungen &amp; Vorlesungszeiten
+              TU Darmstadt • FB 20 Informatik • Lehrveranstaltungen
             </p>
           </div>
         </div>
 
         <div class="flex items-center gap-2 font-mono text-xs">
-          <button id="tucan-sync-refresh-btn" onclick="triggerTucanLiveSync()" class="px-3 py-1.5 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 hover:text-white flex items-center gap-1.5 transition" title="Live-Sync ausführen">
-            <span id="tucan-sync-icon" class="inline-block transition-transform duration-500">🔄</span>
-            <span id="tucan-sync-text">Live aktualisieren</span>
-          </button>
-          
+          <a href="https://www.tucan.tu-darmstadt.de/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 hover:text-white flex items-center gap-1.5 transition">
+            <span>tucan.tu-darmstadt.de ↗</span>
+          </a>
           <button onclick="closeTucanModal()" class="w-8 h-8 rounded-lg bg-[#151c28] hover:bg-rose-950/40 border border-[#273248] hover:border-rose-500/50 text-slate-400 hover:text-rose-300 flex items-center justify-center transition" aria-label="Schließen">
             ✕
           </button>
-        </div>
-      </div>
-
-      <!-- Sync Status Banner -->
-      <div id="tucan-live-banner" class="px-5 py-2 bg-gradient-to-r from-blue-950/40 via-[#101726] to-emerald-950/30 border-b border-[#1e2533] flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-slate-300">
-        <div class="flex items-center gap-2">
-          <span class="text-blue-400 font-bold">● TUCaN Engine:</span>
-          <span id="tucan-sync-timestamp" class="text-slate-300">Letzter Abgleich: Vor wenigen Sekunden (VVws 2026/27 &amp; SoSe 2026)</span>
-        </div>
-        <div class="flex items-center gap-3 text-[11px] text-slate-400">
-          <span>📍 Alle Räume (S1|01 Audimax, S2|02 Piloty, S3|11 Hexagon) verifiziert</span>
-          <a href="https://www.tucan.tu-darmstadt.de/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline flex items-center gap-1">
-            tucan.tu-darmstadt.de ↗
-          </a>
         </div>
       </div>
 
@@ -1231,9 +1207,8 @@ function renderTucanCatalog() {
 
           <!-- Times & Room Table -->
           <div class="p-2.5 rounded-lg bg-[#0a0c10] border border-[#1e2533] space-y-1">
-            <div class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center justify-between">
-              <span>Termine &amp; Hörsäle (TUCaN)</span>
-              <span class="text-emerald-400 text-[9px]">● Live</span>
+            <div class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider mb-1">
+              Termine &amp; Hörsäle (TUCaN)
             </div>
             ${timesList}
           </div>
