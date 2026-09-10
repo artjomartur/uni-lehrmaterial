@@ -1,4 +1,20 @@
+function ensureUniformPageStyles() {
+  document.documentElement.classList.add('h-full', 'bg-[#0a0c10]', 'text-slate-200');
+  document.body.classList.add(
+    'min-h-full',
+    'flex',
+    'flex-col',
+    'bg-[#0a0c10]',
+    'text-slate-200',
+    'antialiased',
+    'custom-scrollbar',
+    'selection:bg-blue-600',
+    'selection:text-white'
+  );
+}
+
 function renderHeader(relativePath) {
+  ensureUniformPageStyles();
   const headerHtml = `
   <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
@@ -118,15 +134,24 @@ function renderHeader(relativePath) {
     <div class="flex min-w-max items-center gap-2 px-4 py-2 text-[11px] font-mono">
       <a href="${relativePath}" class="shrink-0 rounded-md border border-[#273248] bg-[#151c28] px-3 py-1.5 text-slate-300">Startseite</a>
       <a href="${relativePath}studienplanung/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Studienplanung</a>
+      <a href="${relativePath}fop/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">FOP</a>
       <a href="${relativePath}informationsmanagement/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Informationsmanagement</a>
       <a href="${relativePath}algorithmen-datenstrukturen/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Algorithmen &amp; Datenstrukturen</a>
+      <a href="${relativePath}software-engineering/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Software Engineering</a>
+      <a href="${relativePath}ki/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Künstliche Intelligenz</a>
+      <a href="${relativePath}parallele-programmierung/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Parallele Programmierung</a>
+      <a href="${relativePath}digitaltechnik/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Digitaltechnik</a>
       <a href="${relativePath}rechnerorganisation/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Rechnerorganisation</a>
+      <a href="${relativePath}computersystemsicherheit/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Computersystemsicherheit</a>
+      <a href="${relativePath}computernetze/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Computernetze</a>
       <a href="${relativePath}moses/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Modellierung, Spezifikation und Semantik</a>
       <a href="${relativePath}afe/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Automaten, formale Sprachen und Entscheidbarkeit</a>
       <a href="${relativePath}apl/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Aussagen- und Prädikatenlogik</a>
       <a href="${relativePath}mathe-1/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Mathematik I</a>
       <a href="${relativePath}mathe-2/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Mathematik II</a>
       <a href="${relativePath}mathe-3/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Mathematik III &amp; ProMi</a>
+      <a href="${relativePath}informatik-gesellschaft/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Informatik &amp; Gesellschaft</a>
+      <a href="${relativePath}wissenschaftliches-arbeiten/" class="shrink-0 rounded-md border border-[#273248] px-3 py-1.5 text-slate-300">Wissenschaftliches Arbeiten</a>
     </div>
   </nav>
   `;
@@ -298,4 +323,3 @@ document.head.appendChild(printStyle);
     if(countEl) countEl.textContent = bugs.length + ' Fehler gespeichert';
   }
   updateBugCount();
-
