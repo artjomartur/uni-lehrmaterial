@@ -91,9 +91,22 @@ cd uni-lehrmaterial
 # Lokalen Webserver starten
 npx serve .
 
+# Konsistenz-/QA-Checks über alle Module
+npm run qa
+
 # Deployment auf Cloudflare Pages
 npm run deploy
 ```
+
+### Optional: Zentrales Bug-Reporting aktivieren
+- Standardmäßig werden Bug-Reports lokal im Browser gespeichert (Fallback).
+- Für zentrale Team-Erfassung kann ein Endpoint gesetzt werden:
+  - global via `window.UNISUITE_BUG_REPORT_ENDPOINT`
+  - oder via `data-bug-report-endpoint` auf dem `<html>`-Element
+  - oder via `localStorage.setItem('unisuite_bug_report_endpoint', 'https://...')`
+
+### Offline/Resilienz
+- Die Plattform registriert einen Service Worker (`/sw.js`) für Core-Asset-Caching und bessere Offline-Verfügbarkeit.
 
 ---
 

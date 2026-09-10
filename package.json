@@ -4,6 +4,7 @@
   "description": "Interaktive Hochschul-Lehrmaterialien, Simulatoren und Visualisierungswerkzeuge für Informatik- und Datenbankvorlesungen (TU Darmstadt) von Artjom Becker.",
   "scripts": {
     "dev": "npx serve .",
+    "qa": "node ./scripts/qa-check.mjs",
     "deploy": "wrangler deploy",
     "preview": "wrangler dev"
   },
