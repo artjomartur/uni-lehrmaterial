@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
@@ -88,17 +88,34 @@
         </p>
       </div>
 
-      <!-- Quick Links -->
-      <div class="flex flex-wrap items-center gap-3 pt-4 mt-2 border-t border-[#1e2533]">
-        <a href="https://www.tucan.tu-darmstadt.de/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> TUCaN
-        </a>
-        <a href="https://moodle.tu-darmstadt.de/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-red-500"></span> TU Moodle
-        </a>
-        <a href="https://moodle.informatik.tu-darmstadt.de/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-blue-500"></span> Informatik Moodle
-        </a>
+      <!-- Quick Action: Modul hinzufügen / TUCaN Katalog & Quick Links -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-4 mt-2 border-t border-[#1e2533]">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="window.openTucanModal()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-xs sm:text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(59,130,246,0.3)] transition group">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>+ Modul hinzufügen &amp; TUCaN Katalog öffnen</span>
+            <span class="text-blue-200 text-xs opacity-75 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+          </button>
+
+          <button onclick="window.openTucanModal('WiSe')" class="px-3 py-2 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs font-mono text-slate-300 hover:text-white transition">
+            ❄️ WiSe Module
+          </button>
+          <button onclick="window.openTucanModal('SoSe')" class="px-3 py-2 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs font-mono text-slate-300 hover:text-white transition">
+            ☀️ SoSe Module
+          </button>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="https://www.tucan.tu-darmstadt.de/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> TUCaN Live
+          </a>
+          <a href="https://moodle.tu-darmstadt.de/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500"></span> TU Moodle
+          </a>
+          <a href="https://moodle.informatik.tu-darmstadt.de/" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-md bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs font-mono text-slate-300 hover:text-white transition flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Informatik Moodle
+          </a>
+        </div>
       </div>
     </section>
 

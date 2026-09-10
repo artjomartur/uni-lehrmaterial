@@ -99,15 +99,24 @@
       <div class="lg:col-span-3 space-y-4">
         <div class="cs-card rounded-xl p-5 flex flex-col h-full min-h-[700px]">
           <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
-            <h2 class="font-heading font-bold text-white text-lg print:text-black">Wochen-Stundenplan</h2>
-            <div class="flex items-center gap-2 hidden-print">
-              <button onclick="exportICS()" class="px-3 py-1.5 text-xs font-mono font-bold text-emerald-400 bg-emerald-950/30 border border-emerald-900/50 hover:bg-emerald-900/50 rounded transition flex items-center gap-1.5">
+            <div class="flex items-center gap-3">
+              <h2 class="font-heading font-bold text-white text-lg print:text-black">Wochen-Stundenplan</h2>
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950/50 border border-emerald-500/40 text-emerald-400 hidden sm:inline-flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> TUCaN Live-Sync
+              </span>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 hidden-print">
+              <button onclick="window.openTucanModal()" class="px-3 py-1.5 text-xs font-mono font-bold text-blue-300 bg-blue-950/50 border border-blue-600/50 hover:bg-blue-900/50 rounded-lg transition flex items-center gap-1.5 shadow-[0_0_10px_rgba(59,130,246,0.2)]">
+                <span>➕</span> Modul hinzufügen (TUCaN Katalog)
+              </button>
+              <button onclick="exportICS()" class="px-3 py-1.5 text-xs font-mono font-bold text-emerald-400 bg-emerald-950/30 border border-emerald-900/50 hover:bg-emerald-900/50 rounded-lg transition flex items-center gap-1.5">
                 <span>🗓️</span> als .ics Exportieren
               </button>
-              <button onclick="window.print()" class="px-3 py-1.5 text-xs font-mono font-bold text-blue-400 bg-blue-950/30 border border-blue-900/50 hover:bg-blue-900/50 rounded transition flex items-center gap-1.5">
-                <span>📄</span> als PDF Drucken
+              <button onclick="window.print()" class="px-3 py-1.5 text-xs font-mono font-bold text-slate-300 bg-[#151c28] border border-[#273248] hover:text-white rounded-lg transition flex items-center gap-1.5">
+                <span>📄</span> PDF
               </button>
-              <button onclick="clearPlan()" class="px-3 py-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/30 border border-red-900/50 hover:bg-red-900/50 rounded transition">
+              <button onclick="clearPlan()" class="px-3 py-1.5 text-xs font-mono font-bold text-red-400 bg-red-950/30 border border-red-900/50 hover:bg-red-900/50 rounded-lg transition">
                 Plan leeren
               </button>
             </div>
@@ -133,13 +142,25 @@
     // =============================================================
     const MOCK_MODULES = [
 
-      // ── FB01: Rechts- und Wirtschaftswissenschaften ──────────────
-      { id:"fb01-bwl1",  name:"Einführung in die BWL",         fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:1, startTime:"08:00", endTime:"09:40", room:"S101/A2",       contents:"Unternehmensführung, Kostenrechnung, Bilanz.", grades:"Ø 2.5 | Dfq: 12%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
-      { id:"fb01-vwl1",  name:"Einführung in die VWL",         fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:2, startTime:"09:50", endTime:"11:30", room:"S101/A2",       contents:"Mikro- und Makroökonomik, Marktversagen.", grades:"Ø 2.6 | Dfq: 14%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
-      { id:"fb01-recht", name:"Grundzüge des Privatrechts",    fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:3, startTime:"11:40", endTime:"13:20", room:"S101/A1",       contents:"BGB, Vertragsrecht, Sachenrecht.", grades:"Ø 2.7 | Dfq: 18%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
-      { id:"fb01-stats", name:"Statistik I",                   fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:4, startTime:"13:30", endTime:"15:10", room:"S311/08",       contents:"Deskriptive Statistik, Wahrscheinlichkeitsrechnung.", grades:"Ø 2.8 | Dfq: 22%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
-      { id:"fb01-marketing", name:"Marketing",                 fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:5, startTime:"08:00", endTime:"09:40", room:"S103/226",      contents:"Marktforschung, Produkt-, Preis-, Kommunikationspolitik.", grades:"Ø 2.3 | Dfq: 8%",   color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
-      { id:"fb01-finance", name:"Unternehmensfinanzierung",    fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:1, startTime:"15:20", endTime:"17:00", room:"S101/A2",       contents:"Investitionsrechnung, Kapitalstruktur, Bewertung.", grades:"Ø 2.9 | Dfq: 25%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
+      // ── FB20: Informatik (Offizielle TUCaN Belegungen & Räume) ───
+      { id:"20-00-0015-iv", name:"Informationsmanagement",            fb:"FB20 – Informatik", type:"VL+Ü", day:2, startTime:"09:50", endTime:"11:30", room:"S1|01 A01 (Audimax)", contents:"SQL, Normalisierung, 2PL, relationale Algebra, B+ Bäume.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"20-00-0004-iv", name:"Algorithmen und Datenstrukturen (AuD)", fb:"FB20 – Informatik", type:"VL+Ü", day:2, startTime:"11:40", endTime:"13:20", room:"S1|01 A01 (Audimax)", contents:"Dijkstra, AVL-Bäume, Sortierverfahren, Hashing, Master-Theorem.", grades:"Ø 3.2 | Dfq: 42%", color:"bg-amber-900/50 border-amber-500/50 text-amber-300" },
+      { id:"20-00-0016-iv", name:"Rechnerorganisation (RO)",          fb:"FB20 – Informatik", type:"VL+Ü", day:1, startTime:"09:50", endTime:"11:30", room:"S2|02 C120 (Piloty)", contents:"RISC-V 5-Stufen Pipeline, Caches, IEEE-754, Amdahl's Law.", grades:"Ø 2.9 | Dfq: 25%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id:"20-00-0017-iv", name:"Modellierung, Spezifikation und Semantik (MoSeS)", fb:"FB20 – Informatik", type:"VL+Ü", day:2, startTime:"13:30", endTime:"15:10", room:"S2|02 C120 (Piloty)", contents:"Hoare-Kalkül, Weakest Precondition wp, Big-Step Semantik, LTL/CTL Model Checking.", grades:"Ø 3.4 | Dfq: 38%", color:"bg-purple-900/50 border-purple-500/50 text-purple-300" },
+      { id:"20-00-0001-iv", name:"Funktionale & OOP (FOP)",           fb:"FB20 – Informatik", type:"VL+Pr", day:4, startTime:"15:20", endTime:"17:00", room:"S1|01 A01 (Audimax)", contents:"Java, Objektorientierung, Rekursion, Lambdas, Streams, Generics.", grades:"Ø 2.5 | Dfq: 15%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"20-00-0002-iv", name:"Automaten, formale Sprachen & Entsch. (AFE)", fb:"FB20 – Informatik", type:"VL+Ü", day:1, startTime:"15:20", endTime:"17:00", room:"S1|01 A01 (Audimax)", contents:"DFA, NFA, Reguläre Ausdrücke, Kellerautomaten, Turing-Maschinen.", grades:"Ø 3.6 | Dfq: 50%", color:"bg-purple-900/50 border-purple-500/50 text-purple-300" },
+      { id:"20-00-0003-iv", name:"Aussagen- & Prädikatenlogik (APL)", fb:"FB20 – Informatik", type:"VL+Ü", day:4, startTime:"11:40", endTime:"13:20", room:"S1|01 A01 (Audimax)", contents:"PL1, Resolution, Unifikation, Herbrand-Theorie, Prolog.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-purple-900/50 border-purple-500/50 text-purple-300" },
+      { id:"20-00-0005-iv", name:"Digitaltechnik (DT)",               fb:"FB20 – Informatik", type:"VL+Ü", day:5, startTime:"08:00", endTime:"09:40", room:"S3|11 0012 (Hexagon)", contents:"Logikgatter, Boolesche Algebra, KV-Diagramme, synchrone Schaltwerke, VHDL.", grades:"Ø 2.8 | Dfq: 22%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id:"20-00-0018-iv", name:"Computersystemsicherheit (CSS)",     fb:"FB20 – Informatik", type:"VL+Ü", day:3, startTime:"11:40", endTime:"13:20", room:"S2|02 C120 (Piloty)", contents:"Kryptographie, AES, RSA, TLS, Buffer Overflows, Trusted Execution.", grades:"Ø 2.6 | Dfq: 18%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id:"20-00-0019-iv", name:"Computernetze & Verteilte Systeme", fb:"FB20 – Informatik", type:"VL+Ü", day:1, startTime:"11:40", endTime:"13:20", room:"S3|11 0012 (Hexagon)", contents:"OSI-Modell, TCP/IP, Routing (BGP, OSPF), DNS, HTTP/3, Congestion Control.", grades:"Ø 2.8 | Dfq: 20%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id:"20-00-0020-iv", name:"Software Engineering (SE)",         fb:"FB20 – Informatik", type:"VL+Pr", day:4, startTime:"09:50", endTime:"11:30", room:"S2|02 C120 (Piloty)", contents:"Design Patterns, UML, SCRUM, Refactoring, CI/CD, Test-Driven Development.", grades:"Ø 2.2 | Dfq: 5%",  color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"20-00-0021-iv", name:"Einführung in die KI",             fb:"FB20 – Informatik", type:"VL+Ü", day:1, startTime:"13:30", endTime:"15:10", room:"S1|01 A01 (Audimax)", contents:"A*, Minimax, Bayes'sche Netze, Neuronale Netze, Reinforcement Learning.", grades:"Ø 2.4 | Dfq: 12%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"20-00-0023-iv", name:"Parallele Programmierung",         fb:"FB20 – Informatik", type:"VL+Ü", day:4, startTime:"13:30", endTime:"15:10", room:"S2|02 C120 (Piloty)", contents:"Threads, Mutex, Semaphoren, OpenMP, MPI, GPU CUDA.", grades:"Ø 3.1 | Dfq: 30%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"20-00-0025-iv", name:"Informatik und Gesellschaft (IuG)", fb:"FB20 – Informatik", type:"VL", day:1, startTime:"09:50", endTime:"11:30", room:"S1|03 226", contents:"Ethik, DSGVO, KI & Recht, Urheberrecht, Barrierefreiheit.", grades:"Ø 1.8 | Dfq: 2%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-300" },
+      { id:"20-00-0026-iv", name:"Wissenschaftliches Arbeiten",       fb:"FB20 – Informatik", type:"Seminar", day:2, startTime:"15:20", endTime:"17:00", room:"S2|02 C120 (Piloty)", contents:"LaTeX, Zitationen, Literaturrecherche, Plagiatsvermeidung.", grades:"Ø 1.5 | Dfq: 1%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-300" },
+      { id:"04-00-0111-iv", name:"Mathematik I (Analysis)",           fb:"FB04 – Mathematik", type:"VL+Ü", day:1, startTime:"08:00", endTime:"09:40", room:"S1|01 A01 (Audimax)", contents:"Grenzwerte, Stetigkeit, Differential- und Integralrechnung, Taylor.", grades:"Ø 3.1 | Dfq: 35%", color:"bg-rose-900/50 border-rose-500/50 text-rose-300" },
+      { id:"04-00-0112-iv", name:"Mathematik II (Lin. Algebra)",      fb:"FB04 – Mathematik", type:"VL+Ü", day:2, startTime:"08:00", endTime:"09:40", room:"S1|01 A01 (Audimax)", contents:"Vektorräume, Matrizen, Eigenwerte, Gauss-Jordan, Singulärwertzerlegung.", grades:"Ø 3.3 | Dfq: 40%", color:"bg-rose-900/50 border-rose-500/50 text-rose-300" },
+      { id:"04-00-0113-iv", name:"Mathe III / Probabilistische Meth.",fb:"FB04 – Mathematik", type:"VL+Ü", day:3, startTime:"11:40", endTime:"13:20", room:"S1|01 A01 (Audimax)", contents:"Stochastik, Wahrscheinlichkeit, Bayes, Markov-Ketten, Grenzwertsätze.", grades:"Ø 3.5 | Dfq: 48%", color:"bg-rose-900/50 border-rose-500/50 text-rose-300" },
 
       // ── FB02: Gesellschafts- und Geschichtswissenschaften ────────
       { id:"fb02-powi",       name:"Einführung in die Politikwiss.",  fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:2, startTime:"08:00", endTime:"09:40", room:"S103/213", contents:"Politische Systeme, Demokratietheorie, Internationale Beziehungen.", grades:"Ø 2.1 | Dfq: 5%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
