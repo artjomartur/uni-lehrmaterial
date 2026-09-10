@@ -128,225 +128,280 @@
   <script>renderFooter("../");</script>
 
   <script>
-    // --- Full Module Catalog ---
+    // =============================================================
+    // VOLLSTÄNDIGER TU DARMSTADT VV-KATALOG — alle Fachbereiche
+    // =============================================================
     const MOCK_MODULES = [
-      { id: "mathe1", name: "Mathematik I", type: "VL + Ü", day: 1, startTime: "08:00", endTime: "09:40", room: "S311/08", contents: "Analysis: Grenzwerte, Stetigkeit, Differentialrechnung.", grades: "Ø 3.1 | Dfq: 35%", color: "bg-rose-900/50 border-rose-500/50 text-rose-300" },
-      { id: "mathe2", name: "Mathematik II", type: "VL + Ü", day: 2, startTime: "09:50", endTime: "11:30", room: "S311/08", contents: "Lineare Algebra: Vektorräume, Matrizen.", grades: "Ø 3.3 | Dfq: 40%", color: "bg-rose-900/50 border-rose-500/50 text-rose-300" },
-      { id: "mathe3", name: "Probabilistische Methoden", type: "VL", day: 3, startTime: "11:40", endTime: "13:20", room: "S101/A1", contents: "Stochastik, Wahrscheinlichkeit, Bayes.", grades: "Ø 3.5 | Dfq: 48%", color: "bg-rose-900/50 border-rose-500/50 text-rose-300" },
-      { id: "fop", name: "Funktionale & OOP", type: "VL", day: 4, startTime: "13:30", endTime: "15:10", room: "S101/A1", contents: "Java, Objektorientierung, Rekursion.", grades: "Ø 2.5 | Dfq: 15%", color: "bg-purple-900/50 border-purple-500/50 text-purple-300" },
-      { id: "dt", name: "Digitaltechnik", type: "VL", day: 5, startTime: "08:00", endTime: "09:40", room: "S311/08", contents: "Logikgatter, Boolesche Algebra, Automaten.", grades: "Ø 2.8 | Dfq: 22%", color: "bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id: "aud", name: "Algorithmen & Daten", type: "VL", day: 1, startTime: "11:40", endTime: "13:20", room: "S101/A1", contents: "Graphen, Sortierverfahren, Hashing.", grades: "Ø 3.2 | Dfq: 42%", color: "bg-amber-900/50 border-amber-500/50 text-amber-300" },
-      { id: "ro", name: "Rechnerorganisation", type: "VL", day: 2, startTime: "13:30", endTime: "15:10", room: "S311/08", contents: "RISC-V, Caches, IEEE-754.", grades: "Ø 2.9 | Dfq: 25%", color: "bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
-      { id: "apl", name: "Aussagen- & Prädikaten.", type: "VL", day: 3, startTime: "15:20", endTime: "17:00", room: "S103/226", contents: "PL1, Resolution, Unifikation, Prolog.", grades: "Ø 3.0 | Dfq: 28%", color: "bg-purple-900/50 border-purple-500/50 text-purple-300" },
-      { id: "se", name: "Software Engineering", type: "VL", day: 4, startTime: "09:50", endTime: "11:30", room: "S101/A1", contents: "Design Patterns, UML, SCRUM.", grades: "Ø 2.2 | Dfq: 5%", color: "bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id: "sec", name: "Computersicherheit", type: "VL", day: 5, startTime: "11:40", endTime: "13:20", room: "S311/08", contents: "Kryptografie, RSA, AES, Network Security.", grades: "Ø 2.6 | Dfq: 18%", color: "bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id: "ki", name: "Künstliche Intelligenz", type: "VL", day: 1, startTime: "15:20", endTime: "17:00", room: "S101/A1", contents: "Suchalgorithmen, Neuronale Netze.", grades: "Ø 2.4 | Dfq: 12%", color: "bg-fuchsia-900/50 border-fuchsia-500/50 text-fuchsia-300" },
-      { id: "moses", name: "Modell., Spezifikation & Sem.", type: "VL", day: 2, startTime: "08:00", endTime: "09:40", room: "S103/226", contents: "Hoare-Kalkül, LTL, Kripke.", grades: "Ø 3.4 | Dfq: 38%", color: "bg-purple-900/50 border-purple-500/50 text-purple-300" },
-      { id: "infoman", name: "Informationsmanagement", type: "VL", day: 3, startTime: "09:50", endTime: "11:30", room: "S311/08", contents: "SQL, Normalisierung, 2PL.", grades: "Ø 2.7 | Dfq: 18%", color: "bg-blue-900/50 border-blue-500/50 text-blue-300" },
-      { id: "netz", name: "Computernetze", type: "VL", day: 4, startTime: "11:40", endTime: "13:20", room: "S101/A1", contents: "OSI-Modell, TCP/IP, Routing.", grades: "Ø 2.8 | Dfq: 20%", color: "bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
-      { id: "parallel", name: "Parallele Prog.", type: "VL", day: 5, startTime: "13:30", endTime: "15:10", room: "S311/08", contents: "Threads, Deadlocks, Mutex.", grades: "Ø 3.1 | Dfq: 30%", color: "bg-teal-900/50 border-teal-500/50 text-teal-300" },
-      { id: "iug", name: "Informatik und Gesellschaft", type: "VL", day: 1, startTime: "09:50", endTime: "11:30", room: "S103/226", contents: "Ethik, Datenschutz, KI & Recht.", grades: "Ø 1.8 | Dfq: 2%", color: "bg-yellow-900/50 border-yellow-500/50 text-yellow-300" },
-      { id: "wiss", name: "Wiss. Arbeiten", type: "VL", day: 2, startTime: "15:20", endTime: "17:00", room: "S103/226", contents: "LaTeX, Zitationen, Literaturrecherche.", grades: "Ø 1.5 | Dfq: 1%", color: "bg-yellow-900/50 border-yellow-500/50 text-yellow-300" },
-      { id: "afe", name: "Automaten & Sprachen", type: "VL", day: 3, startTime: "13:30", endTime: "15:10", room: "S311/08", contents: "DFA, NFA, Reguläre Ausdrücke, Turing.", grades: "Ø 3.6 | Dfq: 50%", color: "bg-purple-900/50 border-purple-500/50 text-purple-300" }
+
+      // ── FB01: Rechts- und Wirtschaftswissenschaften ──────────────
+      { id:"fb01-bwl1",  name:"Einführung in die BWL",         fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:1, startTime:"08:00", endTime:"09:40", room:"S101/A2",       contents:"Unternehmensführung, Kostenrechnung, Bilanz.", grades:"Ø 2.5 | Dfq: 12%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
+      { id:"fb01-vwl1",  name:"Einführung in die VWL",         fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:2, startTime:"09:50", endTime:"11:30", room:"S101/A2",       contents:"Mikro- und Makroökonomik, Marktversagen.", grades:"Ø 2.6 | Dfq: 14%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
+      { id:"fb01-recht", name:"Grundzüge des Privatrechts",    fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:3, startTime:"11:40", endTime:"13:20", room:"S101/A1",       contents:"BGB, Vertragsrecht, Sachenrecht.", grades:"Ø 2.7 | Dfq: 18%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
+      { id:"fb01-stats", name:"Statistik I",                   fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:4, startTime:"13:30", endTime:"15:10", room:"S311/08",       contents:"Deskriptive Statistik, Wahrscheinlichkeitsrechnung.", grades:"Ø 2.8 | Dfq: 22%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
+      { id:"fb01-marketing", name:"Marketing",                 fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:5, startTime:"08:00", endTime:"09:40", room:"S103/226",      contents:"Marktforschung, Produkt-, Preis-, Kommunikationspolitik.", grades:"Ø 2.3 | Dfq: 8%",   color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
+      { id:"fb01-finance", name:"Unternehmensfinanzierung",    fb:"FB01 – Rechts- & Wirtschaftsw.", type:"VL",       day:1, startTime:"15:20", endTime:"17:00", room:"S101/A2",       contents:"Investitionsrechnung, Kapitalstruktur, Bewertung.", grades:"Ø 2.9 | Dfq: 25%",  color:"bg-orange-900/50 border-orange-500/50 text-orange-300" },
+
+      // ── FB02: Gesellschafts- und Geschichtswissenschaften ────────
+      { id:"fb02-powi",       name:"Einführung in die Politikwiss.",  fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:2, startTime:"08:00", endTime:"09:40", room:"S103/213", contents:"Politische Systeme, Demokratietheorie, Internationale Beziehungen.", grades:"Ø 2.1 | Dfq: 5%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
+      { id:"fb02-soziologie", name:"Einführung in die Soziologie",    fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:3, startTime:"09:50", endTime:"11:30", room:"S103/226", contents:"Soziale Strukturen, Ungleichheit, Institutionen.", grades:"Ø 2.0 | Dfq: 3%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
+      { id:"fb02-geschichte", name:"Geschichte der Technik",          fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:4, startTime:"11:40", endTime:"13:20", room:"S103/213", contents:"Industrialisierung, Digitalisierung, Technik und Gesellschaft.", grades:"Ø 1.8 | Dfq: 2%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
+      { id:"fb02-philosophie", name:"Wissenschaftstheorie und Ethik", fb:"FB02 – Gesellschafts- & Geschichtswiss.", type:"VL", day:5, startTime:"13:30", endTime:"15:10", room:"S101/A1", contents:"Erkenntnistheorie, Wissenschaftsethik, angewandte Ethik.", grades:"Ø 1.9 | Dfq: 4%",   color:"bg-rose-900/50 border-rose-400/50 text-rose-200" },
+
+      // ── FB03: Humanwissenschaften ────────────────────────────────
+      { id:"fb03-psych", name:"Einführung in die Psychologie", fb:"FB03 – Humanwissenschaften", type:"VL", day:1, startTime:"09:50", endTime:"11:30", room:"S101/A2",  contents:"Kognition, Wahrnehmung, Lernen, Sozialpsychologie.", grades:"Ø 2.2 | Dfq: 7%", color:"bg-violet-900/50 border-violet-400/50 text-violet-200" },
+      { id:"fb03-sport",  name:"Sportwissenschaft Grundlagen", fb:"FB03 – Humanwissenschaften", type:"VL", day:2, startTime:"11:40", endTime:"13:20", room:"Sporthalle", contents:"Trainingslehre, Bewegungswissenschaft.", grades:"Ø 1.7 | Dfq: 1%", color:"bg-violet-900/50 border-violet-400/50 text-violet-200" },
+      { id:"fb03-paed",  name:"Allgemeine Pädagogik",          fb:"FB03 – Humanwissenschaften", type:"VL", day:3, startTime:"13:30", endTime:"15:10", room:"S103/226",  contents:"Bildungstheorien, Didaktik, Unterrichtsgestaltung.", grades:"Ø 1.9 | Dfq: 3%", color:"bg-violet-900/50 border-violet-400/50 text-violet-200" },
+
+      // ── FB04: Mathematik ─────────────────────────────────────────
+      { id:"mathe1",        name:"Mathematik I (Analysis)",     fb:"FB04 – Mathematik", type:"VL+Ü", day:1, startTime:"08:00", endTime:"09:40", room:"S311/08", contents:"Grenzwerte, Stetigkeit, Differential- und Integralrechnung.", grades:"Ø 3.1 | Dfq: 35%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
+      { id:"mathe2",        name:"Mathematik II (Lin. Algebra)",fb:"FB04 – Mathematik", type:"VL+Ü", day:2, startTime:"09:50", endTime:"11:30", room:"S311/08", contents:"Vektorräume, Matrizen, Eigenwerte.", grades:"Ø 3.3 | Dfq: 40%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
+      { id:"mathe3",        name:"Probabilistische Methoden",   fb:"FB04 – Mathematik", type:"VL",   day:3, startTime:"11:40", endTime:"13:20", room:"S101/A1", contents:"Stochastik, Wahrscheinlichkeit, Bayes, Markov-Ketten.", grades:"Ø 3.5 | Dfq: 48%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
+      { id:"fb04-nummath",  name:"Numerische Mathematik",       fb:"FB04 – Mathematik", type:"VL+Ü", day:4, startTime:"09:50", endTime:"11:30", room:"S311/08", contents:"Numerische Integration, Differentialgleichungen, Fehleranalyse.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
+      { id:"fb04-diskret",  name:"Diskrete Mathematik",         fb:"FB04 – Mathematik", type:"VL+Ü", day:5, startTime:"08:00", endTime:"09:40", room:"S101/A1", contents:"Kombinatorik, Graphentheorie, Zahlentheorie.", grades:"Ø 3.2 | Dfq: 36%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
+      { id:"fb04-algebra",  name:"Algebra",                     fb:"FB04 – Mathematik", type:"VL",   day:1, startTime:"11:40", endTime:"13:20", room:"S311/08", contents:"Gruppen, Ringe, Körper, Galois-Theorie.", grades:"Ø 3.4 | Dfq: 42%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
+      { id:"fb04-stochastik", name:"Stochastik",                fb:"FB04 – Mathematik", type:"VL",   day:2, startTime:"13:30", endTime:"15:10", room:"S311/08", contents:"Maßtheoretische Wahrscheinlichkeit, Martingale, Brownsche Bewegung.", grades:"Ø 3.6 | Dfq: 50%", color:"bg-red-900/50 border-red-500/50 text-red-300" },
+
+      // ── FB05: Physik ─────────────────────────────────────────────
+      { id:"fb05-exp1",       name:"Experimentalphysik I (Mech.)",   fb:"FB05 – Physik", type:"VL+Ü", day:1, startTime:"09:50", endTime:"11:30", room:"PhysikHS", contents:"Kinematik, Dynamik, Schwingungen, Wellen.", grades:"Ø 3.0 | Dfq: 30%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
+      { id:"fb05-exp2",       name:"Experimentalphysik II (E-Lehre)",fb:"FB05 – Physik", type:"VL+Ü", day:3, startTime:"09:50", endTime:"11:30", room:"PhysikHS", contents:"Elektrodynamik, Magnetismus, Maxwell-Gleichungen.", grades:"Ø 3.1 | Dfq: 33%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
+      { id:"fb05-theo1",      name:"Theoretische Physik I",          fb:"FB05 – Physik", type:"VL+Ü", day:2, startTime:"11:40", endTime:"13:20", room:"PhysikHS", contents:"Lagrange, Hamilton-Formalismus, Variationsrechnung.", grades:"Ø 3.4 | Dfq: 45%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
+      { id:"fb05-qm",         name:"Quantenmechanik",               fb:"FB05 – Physik", type:"VL+Ü", day:4, startTime:"09:50", endTime:"11:30", room:"PhysikHS", contents:"Schrödinger-Gleichung, Operatoren, Spin, Unschärferelation.", grades:"Ø 3.5 | Dfq: 47%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
+      { id:"fb05-festkoerper", name:"Festkörperphysik",             fb:"FB05 – Physik", type:"VL",   day:5, startTime:"11:40", endTime:"13:20", room:"PhysikHS", contents:"Kristallstrukturen, Bändermodell, Halbleiter.", grades:"Ø 3.2 | Dfq: 38%", color:"bg-cyan-900/50 border-cyan-500/50 text-cyan-300" },
+
+      // ── FB07: Chemie ─────────────────────────────────────────────
+      { id:"fb07-ac",      name:"Allgemeine und Anorg. Chemie", fb:"FB07 – Chemie", type:"VL+Pr.", day:1, startTime:"13:30", endTime:"15:10", room:"ChemHS", contents:"Atombau, chem. Bindung, Reaktionen, Periodensystem.", grades:"Ø 2.9 | Dfq: 25%", color:"bg-lime-900/50 border-lime-500/50 text-lime-300" },
+      { id:"fb07-oc",      name:"Organische Chemie I",          fb:"FB07 – Chemie", type:"VL",    day:2, startTime:"13:30", endTime:"15:10", room:"ChemHS", contents:"Alkane, Alkene, Aromaten, Reaktionsmechanismen.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-lime-900/50 border-lime-500/50 text-lime-300" },
+      { id:"fb07-physchem", name:"Physikalische Chemie I",      fb:"FB07 – Chemie", type:"VL",    day:3, startTime:"15:20", endTime:"17:00", room:"ChemHS", contents:"Thermodynamik, kinetische Gastheorie, chem. Gleichgewicht.", grades:"Ø 3.2 | Dfq: 35%", color:"bg-lime-900/50 border-lime-500/50 text-lime-300" },
+      { id:"fb07-biochem",  name:"Biochemie I",                 fb:"FB07 – Chemie", type:"VL",    day:4, startTime:"15:20", endTime:"17:00", room:"ChemHS", contents:"Aminosäuren, Proteine, Enzyme, Kohlenhydrate.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-lime-900/50 border-lime-500/50 text-lime-300" },
+
+      // ── FB10: Biologie ───────────────────────────────────────────
+      { id:"fb10-bio1",    name:"Allgemeine Biologie I",  fb:"FB10 – Biologie", type:"VL",    day:1, startTime:"11:40", endTime:"13:20", room:"BioHS", contents:"Zellbiologie, Genetik, Evolution.", grades:"Ø 2.4 | Dfq: 10%", color:"bg-green-900/50 border-green-500/50 text-green-300" },
+      { id:"fb10-genetik", name:"Genetik",                fb:"FB10 – Biologie", type:"VL",    day:3, startTime:"08:00", endTime:"09:40", room:"BioHS", contents:"Mendel-Gesetze, Molekulargenetik, Genomik.", grades:"Ø 2.6 | Dfq: 15%", color:"bg-green-900/50 border-green-500/50 text-green-300" },
+      { id:"fb10-mikrobio", name:"Mikrobiologie",         fb:"FB10 – Biologie", type:"VL+Pr.", day:5, startTime:"09:50", endTime:"11:30", room:"BioHS", contents:"Bakterien, Viren, Pilze, Wachstum, Antibiotikaresistenz.", grades:"Ø 2.3 | Dfq: 8%",  color:"bg-green-900/50 border-green-500/50 text-green-300" },
+
+      // ── FB11: Geowissenschaften ──────────────────────────────────
+      { id:"fb11-geo1",         name:"Allgemeine Geologie",          fb:"FB11 – Geowissenschaften", type:"VL",    day:2, startTime:"08:00", endTime:"09:40", room:"GeoHS", contents:"Plattentektonik, Gesteinskunde, Mineralien.", grades:"Ø 2.2 | Dfq: 6%",  color:"bg-stone-700/60 border-stone-400/50 text-stone-200" },
+      { id:"fb11-geodaesie",    name:"Geodäsie Grundlagen",          fb:"FB11 – Geowissenschaften", type:"VL+Ü", day:4, startTime:"08:00", endTime:"09:40", room:"GeoHS", contents:"Vermessungstechnik, GPS, GIS, Kartographie.", grades:"Ø 2.5 | Dfq: 12%", color:"bg-stone-700/60 border-stone-400/50 text-stone-200" },
+      { id:"fb11-meteorologie", name:"Meteorologie und Klimatologie", fb:"FB11 – Geowissenschaften", type:"VL",   day:1, startTime:"15:20", endTime:"17:00", room:"GeoHS", contents:"Atmosphärenphysik, Klimamodelle, Wettervorhersage.", grades:"Ø 2.3 | Dfq: 9%",  color:"bg-stone-700/60 border-stone-400/50 text-stone-200" },
+
+      // ── FB13: Bauingenieurwesen ───────────────────────────────────
+      { id:"fb13-statik",    name:"Technische Mechanik I (Statik)", fb:"FB13 – Bauingenieurwesen", type:"VL+Ü", day:1, startTime:"13:30", endTime:"15:10", room:"L2|06 100", contents:"Kräftegleichgewicht, Schnittgrößen, Stabwerke.", grades:"Ø 3.2 | Dfq: 38%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-200" },
+      { id:"fb13-dynamik",   name:"Technische Mechanik III (Dyn.)", fb:"FB13 – Bauingenieurwesen", type:"VL+Ü", day:3, startTime:"13:30", endTime:"15:10", room:"L2|06 100", contents:"Kinetik, Schwingungen, Mehrkörpersysteme.", grades:"Ø 3.4 | Dfq: 42%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-200" },
+      { id:"fb13-werkstoff", name:"Werkstoffkunde I",               fb:"FB13 – Bauingenieurwesen", type:"VL",   day:2, startTime:"15:20", endTime:"17:00", room:"L2|06 100", contents:"Metalle, Polymere, Keramiken, Verbundwerkstoffe.", grades:"Ø 2.8 | Dfq: 22%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-200" },
+      { id:"fb13-hydro",     name:"Hydromechanik und Hydrologie",   fb:"FB13 – Bauingenieurwesen", type:"VL",   day:4, startTime:"13:30", endTime:"15:10", room:"L2|06 100", contents:"Strömungsmechanik, Wasserhaushalt, Hochwasserschutz.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-yellow-900/50 border-yellow-500/50 text-yellow-200" },
+
+      // ── FB15: Architektur ────────────────────────────────────────
+      { id:"fb15-entwerfen",    name:"Grundlagen des Entwerfens", fb:"FB15 – Architektur", type:"VL+Studio", day:1, startTime:"09:50", endTime:"13:20", room:"El-Lissitzky-Str.1", contents:"Architektonisches Entwerfen, Raum- und Formgestalten.", grades:"Ø 2.1 | Dfq: 5%",  color:"bg-sky-900/50 border-sky-500/50 text-sky-200" },
+      { id:"fb15-baugeschichte", name:"Architekturgeschichte I",  fb:"FB15 – Architektur", type:"VL",       day:3, startTime:"08:00", endTime:"09:40", room:"El-Lissitzky-Str.1", contents:"Antike bis Renaissance, Bautypen, Stilentwicklung.", grades:"Ø 1.9 | Dfq: 3%",  color:"bg-sky-900/50 border-sky-500/50 text-sky-200" },
+      { id:"fb15-tragwerk",     name:"Tragwerkslehre I",          fb:"FB15 – Architektur", type:"VL+Ü",     day:5, startTime:"11:40", endTime:"13:20", room:"El-Lissitzky-Str.1", contents:"Statik für Architekten, Baustoffe, Lastabtragung.", grades:"Ø 2.8 | Dfq: 20%", color:"bg-sky-900/50 border-sky-500/50 text-sky-200" },
+
+      // ── FB16: Maschinenbau ───────────────────────────────────────
+      { id:"fb16-thermo",           name:"Technische Thermodynamik I", fb:"FB16 – Maschinenbau", type:"VL+Ü",  day:1, startTime:"11:40", endTime:"13:20", room:"L2|06 200", contents:"Hauptsätze, Zustandsgrößen, Kreisprozesse.", grades:"Ø 3.3 | Dfq: 40%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id:"fb16-stroemung",        name:"Strömungslehre I",           fb:"FB16 – Maschinenbau", type:"VL+Ü",  day:3, startTime:"11:40", endTime:"13:20", room:"L2|06 200", contents:"Euler-/Navier-Stokes-Gleichungen, Grenzschicht, Turbulenz.", grades:"Ø 3.4 | Dfq: 44%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id:"fb16-maschinenelemente", name:"Maschinenelemente I",       fb:"FB16 – Maschinenbau", type:"VL+Ü",  day:2, startTime:"09:50", endTime:"11:30", room:"L2|06 200", contents:"Schrauben, Federn, Wälzlager, Getriebe.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id:"fb16-fertig",           name:"Fertigungslehre",             fb:"FB16 – Maschinenbau", type:"VL",    day:4, startTime:"11:40", endTime:"13:20", room:"L2|06 200", contents:"Urformen, Umformen, Trennen, Fügen, CNC.", grades:"Ø 2.9 | Dfq: 24%", color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+      { id:"fb16-cad",              name:"CAD / Konstruktionslehre",    fb:"FB16 – Maschinenbau", type:"VL+Pr.", day:5, startTime:"09:50", endTime:"11:30", room:"L2|06 200", contents:"SolidWorks, parametrisches Konstruieren, Baugruppenmodellierung.", grades:"Ø 2.2 | Dfq: 7%",  color:"bg-emerald-900/50 border-emerald-500/50 text-emerald-300" },
+
+      // ── FB18: Elektro- und Informationstechnik ────────────────────
+      { id:"fb18-get",        name:"Grundlagen der Elektrotechnik I",  fb:"FB18 – Elektro- & Informationstechnik", type:"VL+Ü", day:1, startTime:"09:50", endTime:"11:30", room:"S311/08", contents:"Gleichstromnetzwerke, Kirchhoff, Kondensatoren.", grades:"Ø 3.1 | Dfq: 33%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"fb18-get2",       name:"Grundlagen der Elektrotechnik II", fb:"FB18 – Elektro- & Informationstechnik", type:"VL+Ü", day:3, startTime:"09:50", endTime:"11:30", room:"S311/08", contents:"Wechselstrom, Frequenzgang, Fourier.", grades:"Ø 3.2 | Dfq: 36%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"fb18-signale",    name:"Signale und Systeme",              fb:"FB18 – Elektro- & Informationstechnik", type:"VL+Ü", day:2, startTime:"13:30", endTime:"15:10", room:"S311/08", contents:"LTI-Systeme, Laplace, Z-Transformation, Filter.", grades:"Ø 3.3 | Dfq: 38%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"fb18-halbleiter", name:"Halbleiterbauelemente",            fb:"FB18 – Elektro- & Informationstechnik", type:"VL",   day:4, startTime:"15:20", endTime:"17:00", room:"S311/08", contents:"Dioden, Transistoren (BJT, MOSFET), Schaltkreisdesign.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"fb18-nachrich",   name:"Nachrichtentechnik",               fb:"FB18 – Elektro- & Informationstechnik", type:"VL",   day:5, startTime:"13:30", endTime:"15:10", room:"S311/08", contents:"Modulation, Kanalkapazität, Informationstheorie.", grades:"Ø 3.1 | Dfq: 32%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+      { id:"fb18-regelung",   name:"Regelungstechnik I",               fb:"FB18 – Elektro- & Informationstechnik", type:"VL+Ü", day:1, startTime:"15:20", endTime:"17:00", room:"S311/08", contents:"PID-Regler, Stabilitätsanalyse, Bode-Diagramm.", grades:"Ø 3.2 | Dfq: 36%", color:"bg-blue-900/50 border-blue-500/50 text-blue-300" },
+
+      // ── FB20: Informatik ──────────────────────────────────────────
+      { id:"fop",           name:"Funktionale & OOP (FOP)",           fb:"FB20 – Informatik", type:"VL",    day:4, startTime:"13:30", endTime:"15:10", room:"S101/A1",  contents:"Java, Objektorientierung, Rekursion, Lambdas, Streams.", grades:"Ø 2.5 | Dfq: 15%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"aud",           name:"Algorithmen & Datenstrukturen",     fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"11:40", endTime:"13:20", room:"S101/A1",  contents:"Graphen, Sortierverfahren, Hashing, Laufzeitanalyse.", grades:"Ø 3.2 | Dfq: 42%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"infoman",       name:"Informationsmanagement",            fb:"FB20 – Informatik", type:"VL",    day:3, startTime:"09:50", endTime:"11:30", room:"S311/08",  contents:"SQL, Normalisierung, 2PL, relationale Algebra.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"ro",            name:"Rechnerorganisation",               fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"13:30", endTime:"15:10", room:"S311/08",  contents:"RISC-V, Caches, Pipeline, IEEE-754.", grades:"Ø 2.9 | Dfq: 25%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"dt",            name:"Digitaltechnik",                    fb:"FB20 – Informatik", type:"VL",    day:5, startTime:"08:00", endTime:"09:40", room:"S311/08",  contents:"Logikgatter, Boolesche Algebra, Automaten, KV-Diagramm.", grades:"Ø 2.8 | Dfq: 22%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"apl",           name:"Aussagen- & Prädikatenlogik",       fb:"FB20 – Informatik", type:"VL",    day:3, startTime:"15:20", endTime:"17:00", room:"S103/226", contents:"PL1, Resolution, Unifikation, Prolog.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"se",            name:"Software Engineering",              fb:"FB20 – Informatik", type:"VL",    day:4, startTime:"09:50", endTime:"11:30", room:"S101/A1",  contents:"Design Patterns, UML, SCRUM, Agile.", grades:"Ø 2.2 | Dfq: 5%",  color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"sec",           name:"Computersystemsicherheit",          fb:"FB20 – Informatik", type:"VL",    day:5, startTime:"11:40", endTime:"13:20", room:"S311/08",  contents:"Kryptographie, RSA, TLS, Buffer Overflow, SQL-Injection.", grades:"Ø 2.6 | Dfq: 18%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"ki",            name:"Einführung in die KI",              fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"15:20", endTime:"17:00", room:"S101/A1",  contents:"A*, Minimax, Neuronale Netze, Maschinelles Lernen.", grades:"Ø 2.4 | Dfq: 12%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"moses",         name:"Modellierung & Semantik (MoSeS)",   fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"08:00", endTime:"09:40", room:"S103/226", contents:"Hoare-Kalkül, LTL, Kripke-Strukturen.", grades:"Ø 3.4 | Dfq: 38%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"netz",          name:"Computernetze",                     fb:"FB20 – Informatik", type:"VL",    day:4, startTime:"11:40", endTime:"13:20", room:"S101/A1",  contents:"OSI-Modell, TCP/IP, Routing, DNS.", grades:"Ø 2.8 | Dfq: 20%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"parallel",      name:"Parallele Programmierung",          fb:"FB20 – Informatik", type:"VL",    day:5, startTime:"13:30", endTime:"15:10", room:"S311/08",  contents:"Threads, Deadlocks, Mutex, Semaphoren, OpenMP.", grades:"Ø 3.1 | Dfq: 30%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"iug",           name:"Informatik und Gesellschaft",       fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"09:50", endTime:"11:30", room:"S103/226", contents:"Ethik, DSGVO, KI & Recht, Urheberrecht.", grades:"Ø 1.8 | Dfq: 2%",  color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"wiss",          name:"Wissenschaftliches Arbeiten",       fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"15:20", endTime:"17:00", room:"S103/226", contents:"LaTeX, Zitationen, Literaturrecherche, Plagiat.", grades:"Ø 1.5 | Dfq: 1%",  color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"afe",           name:"Automaten, form. Sprachen & Entsch.",fb:"FB20 – Informatik", type:"VL",   day:3, startTime:"13:30", endTime:"15:10", room:"S311/08",  contents:"DFA, NFA, Reguläre Ausdrücke, Kellerautomaten, Turing.", grades:"Ø 3.6 | Dfq: 50%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-os",       name:"Betriebssysteme",                   fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"13:30", endTime:"15:10", room:"S101/A1",  contents:"Prozesse, Speicherverwaltung, Dateisysteme, Scheduling.", grades:"Ø 2.8 | Dfq: 22%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-compiler", name:"Übersetzerbau (Compilerbau)",       fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"11:40", endTime:"13:20", room:"S103/226", contents:"Lexer, Parser, Codegenerierung, Optimierung.", grades:"Ø 3.0 | Dfq: 28%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-ml",       name:"Maschinelles Lernen",               fb:"FB20 – Informatik", type:"VL",    day:4, startTime:"15:20", endTime:"17:00", room:"S101/A1",  contents:"Regression, SVM, Deep Learning, Reinforcement Learning.", grades:"Ø 2.6 | Dfq: 16%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-crypto",   name:"Kryptographie",                     fb:"FB20 – Informatik", type:"VL",    day:5, startTime:"15:20", endTime:"17:00", room:"S311/08",  contents:"Symmetrische Verfahren, Public-Key, Protokolle, Zero-Knowledge.", grades:"Ø 2.9 | Dfq: 24%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-dbs",      name:"Datenbanksysteme",                  fb:"FB20 – Informatik", type:"VL",    day:3, startTime:"08:00", endTime:"09:40", room:"S311/08",  contents:"Relationale Algebra, SQL, Transaktionen, NoSQL.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-cv",       name:"Computer Vision",                   fb:"FB20 – Informatik", type:"VL",    day:1, startTime:"13:30", endTime:"15:10", room:"S103/226", contents:"Bildverarbeitung, Segmentierung, CNNs, 3D-Rekonstruktion.", grades:"Ø 2.5 | Dfq: 13%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-nlp",      name:"Natural Language Processing",       fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"09:50", endTime:"11:30", room:"S101/A1",  contents:"Tokenisierung, Sprachmodelle, Transformers, BERT, GPT.", grades:"Ø 2.4 | Dfq: 10%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-hci",      name:"Mensch-Computer-Interaktion",       fb:"FB20 – Informatik", type:"VL+Pr.",day:4, startTime:"08:00", endTime:"09:40", room:"S103/226", contents:"Usability, User Research, Prototyping, Accessibility.", grades:"Ø 1.9 | Dfq: 3%",  color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-verteilt", name:"Verteilte Systeme",                 fb:"FB20 – Informatik", type:"VL",    day:3, startTime:"15:20", endTime:"17:00", room:"S101/A1",  contents:"RPC, Konsistenz, Replikation, Blockchain, Microservices.", grades:"Ø 2.8 | Dfq: 20%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-embedded", name:"Eingebettete Systeme",              fb:"FB20 – Informatik", type:"VL+Pr.",day:5, startTime:"08:00", endTime:"09:40", room:"S311/08",  contents:"RTOS, Hardware-Schnittstellen, ARM, Echtzeitsysteme.", grades:"Ø 2.7 | Dfq: 18%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-graphik",  name:"Computergraphik",                   fb:"FB20 – Informatik", type:"VL+Pr.",day:1, startTime:"08:00", endTime:"09:40", room:"S103/226", contents:"OpenGL, Rasterisierung, Ray Tracing, Shader.", grades:"Ø 2.6 | Dfq: 15%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+      { id:"fb20-formal",   name:"Formale Methoden",                  fb:"FB20 – Informatik", type:"VL",    day:2, startTime:"15:20", endTime:"17:00", room:"S103/213", contents:"Modellprüfung, SAT/SMT-Solver, Theorembeweiser (Coq, Isabelle).", grades:"Ø 3.3 | Dfq: 40%", color:"bg-indigo-900/50 border-indigo-500/50 text-indigo-300" },
+
+      // ── Sprachenzentrum ───────────────────────────────────────────
+      { id:"spz-en-b2",    name:"English for Academic Purposes B2", fb:"Sprachenzentrum", type:"Ü", day:1, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Wissenschaftliche Texte, Präsentationen, akademische Kommunikation.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
+      { id:"spz-en-c1",    name:"English for Academic Purposes C1", fb:"Sprachenzentrum", type:"Ü", day:3, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Akademisches Schreiben, Debatte, Scientific Writing.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
+      { id:"spz-french",   name:"Französisch A1",                   fb:"Sprachenzentrum", type:"Ü", day:2, startTime:"15:20", endTime:"17:00", room:"S103/213", contents:"Grundlagen Französisch, Alltag, Kommunikation.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
+      { id:"spz-spanisch", name:"Spanisch A1",                      fb:"Sprachenzentrum", type:"Ü", day:4, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Grundlagen Spanisch, Alltag, Kommunikation.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
+      { id:"spz-chinesisch", name:"Chinesisch A1 (Mandarin)",       fb:"Sprachenzentrum", type:"Ü", day:5, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Pinyin, Grundvokabular, Begrüßung, Zahlen.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
+      { id:"spz-russisch",  name:"Russisch A1",                     fb:"Sprachenzentrum", type:"Ü", day:2, startTime:"09:50", endTime:"11:30", room:"S103/213", contents:"Kyrillisches Alphabet, Grundwortschatz, Grußformeln.", grades:"Bestanden/Nicht best.", color:"bg-teal-900/50 border-teal-500/50 text-teal-300" },
     ];
 
+    const allFachbereiche = ["Alle Fachbereiche", ...new Set(MOCK_MODULES.map(m => m.fb))];
     let myPlan = JSON.parse(localStorage.getItem('unisuite_stundenplan_v2')) || [];
 
     function timeToPercent(timeStr) {
-      // timeStr format "HH:MM"
       const [h, m] = timeStr.split(':').map(Number);
-      const startHour = 8;
-      const endHour = 18;
-      const totalMinutes = (endHour - startHour) * 60;
-      const currentMinutes = (h - startHour) * 60 + m;
+      const totalMinutes = (18 - 8) * 60;
+      const currentMinutes = (h - 8) * 60 + m;
       return (currentMinutes / totalMinutes) * 100;
     }
 
     function renderTimetable() {
       const cal = document.getElementById('weekly-calendar');
       cal.innerHTML = '';
-      
       const days = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag"];
-      
-      // Draw grid lines
-      const hours = 10; // 8:00 to 18:00
+
       let gridHTML = '<div class="absolute inset-0 flex flex-col pointer-events-none z-0">';
-      for(let i = 0; i < hours; i++) {
-        gridHTML += `<div class="flex-1 border-b border-[#1e2533] relative">
-          <span class="absolute -top-3 -left-10 text-[10px] text-slate-500 font-mono hidden md:block">${8+i}:00</span>
-        </div>`;
+      for(let i = 0; i < 10; i++) {
+        gridHTML += `<div class="flex-1 border-b border-[#1e2533] relative"><span class="absolute -top-3 -left-10 text-[10px] text-slate-500 font-mono hidden md:block">${8+i}:00</span></div>`;
       }
       gridHTML += '</div>';
       cal.innerHTML += gridHTML;
 
-      // Draw day columns
       days.forEach((dayName, index) => {
         const dayNum = index + 1;
         let col = document.createElement('div');
         col.className = "flex-1 border-r border-[#1e2533] relative flex flex-col z-10";
-        
         let header = document.createElement('div');
         header.className = "text-center py-2 border-b border-[#1e2533] font-bold text-slate-400 text-xs uppercase tracking-wider bg-[#0d1117] print:bg-white print:text-black sticky top-0 z-20";
         header.textContent = dayName;
         col.appendChild(header);
-
         let eventContainer = document.createElement('div');
         eventContainer.className = "relative flex-1";
-        
-        // Add events for this day
-        const dayEvents = myPlan.filter(p => p.day === dayNum);
-        dayEvents.forEach(ev => {
+
+        myPlan.filter(p => p.day === dayNum).forEach(ev => {
           const mod = MOCK_MODULES.find(m => m.id === ev.id);
           if(!mod) return;
-          
-          const topPercent = timeToPercent(mod.startTime);
-          const bottomPercent = timeToPercent(mod.endTime);
-          const heightPercent = bottomPercent - topPercent;
-
+          const topPct = timeToPercent(mod.startTime);
+          const heightPct = timeToPercent(mod.endTime) - topPct;
           let block = document.createElement('div');
           block.className = `absolute left-1 right-1 rounded border ${mod.color} p-2 overflow-hidden shadow-lg hover:brightness-125 transition-all cursor-pointer`;
-          block.style.top = topPercent + '%';
-          block.style.height = heightPercent + '%';
+          block.style.top = topPct + '%';
+          block.style.height = heightPct + '%';
           block.onclick = () => showDetails(mod.id);
-          
-          block.innerHTML = `
-            <div class="font-bold text-[11px] leading-tight text-white print:text-black">${mod.name}</div>
-            <div class="text-[9px] font-mono mt-1 opacity-80 print:text-black">${mod.startTime}-${mod.endTime}</div>
-            <div class="text-[9px] font-mono opacity-80 print:text-black">${mod.room}</div>
-          `;
+          block.innerHTML = `<div class="font-bold text-[11px] leading-tight text-white">${mod.name}</div><div class="text-[9px] font-mono mt-1 opacity-80">${mod.startTime}-${mod.endTime}</div><div class="text-[9px] font-mono opacity-80">${mod.room}</div>`;
           eventContainer.appendChild(block);
         });
 
         col.appendChild(eventContainer);
         cal.appendChild(col);
       });
-
       localStorage.setItem('unisuite_stundenplan_v2', JSON.stringify(myPlan));
     }
 
-    function renderSearchResults(query = "") {
+    function renderSearchResults(query = "", fbFilter = "Alle Fachbereiche") {
       const resDiv = document.getElementById('search-results');
       resDiv.innerHTML = '';
-      
-      const filtered = MOCK_MODULES.filter(m => m.name.toLowerCase().includes(query.toLowerCase()) || m.id.toLowerCase().includes(query.toLowerCase()));
-      
-      filtered.forEach(mod => {
-        const isAdded = myPlan.some(p => p.id === mod.id);
-        const div = document.createElement('div');
-        div.className = "p-3 bg-[#151c28] border border-[#273248] rounded-lg flex items-center justify-between shrink-0";
-        const daysArr = ["", "Mo", "Di", "Mi", "Do", "Fr"];
-        div.innerHTML = `
-          <div>
-            <div class="text-sm font-bold text-white cursor-pointer hover:text-blue-400 transition truncate max-w-[150px]" title="${mod.name}" onclick="showDetails('${mod.id}')">${mod.name}</div>
-            <div class="text-[10px] font-mono text-slate-500">${daysArr[mod.day]} ${mod.startTime}-${mod.endTime}</div>
-          </div>
-          <button onclick="toggleModul('${mod.id}')" class="px-2 py-1 rounded text-[10px] font-bold font-mono transition ${isAdded ? 'bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white' : 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500 hover:text-white'}">
-            ${isAdded ? 'Entf.' : 'Add'}
-          </button>
-        `;
-        resDiv.appendChild(div);
+      const q = query.toLowerCase();
+      const filtered = MOCK_MODULES.filter(m => {
+        const matchQuery = !q || m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q) || m.fb.toLowerCase().includes(q) || m.contents.toLowerCase().includes(q);
+        const matchFB = fbFilter === "Alle Fachbereiche" || m.fb === fbFilter;
+        return matchQuery && matchFB;
+      });
+      document.getElementById('module-count').textContent = `${filtered.length} / ${MOCK_MODULES.length}`;
+      if(!filtered.length) {
+        resDiv.innerHTML = '<div class="text-slate-500 text-xs text-center py-4">Keine Module gefunden.</div>';
+        return;
+      }
+      const grouped = {};
+      filtered.forEach(mod => { if(!grouped[mod.fb]) grouped[mod.fb] = []; grouped[mod.fb].push(mod); });
+      Object.entries(grouped).forEach(([fb, mods]) => {
+        const hdr = document.createElement('div');
+        hdr.className = "text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider px-1 pt-3 pb-1 border-b border-[#1e2533]";
+        hdr.textContent = fb;
+        resDiv.appendChild(hdr);
+        mods.forEach(mod => {
+          const isAdded = myPlan.some(p => p.id === mod.id);
+          const daysArr = ["","Mo","Di","Mi","Do","Fr"];
+          const div = document.createElement('div');
+          div.className = "p-2.5 bg-[#151c28] border border-[#273248] rounded-lg flex items-center gap-2";
+          div.innerHTML = `<div class="min-w-0 flex-1"><div class="text-xs font-bold text-white cursor-pointer hover:text-blue-400 transition truncate" title="${mod.name}" onclick="showDetails('${mod.id}')">${mod.name}</div><div class="text-[10px] font-mono text-slate-500">${daysArr[mod.day]||'?'} ${mod.startTime}–${mod.endTime}</div></div><button onclick="toggleModul('${mod.id}')" class="flex-shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold font-mono transition ${isAdded ? 'bg-red-900/50 text-red-400 border border-red-500/50 hover:bg-red-500 hover:text-white' : 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500 hover:text-white'}">${isAdded ? '✕' : '+'}</button>`;
+          resDiv.appendChild(div);
+        });
       });
     }
 
     function toggleModul(id) {
       const idx = myPlan.findIndex(p => p.id === id);
-      if (idx >= 0) {
-        myPlan.splice(idx, 1);
-      } else {
-        const mod = MOCK_MODULES.find(m => m.id === id);
-        myPlan.push({ id: mod.id, day: mod.day });
-      }
-      renderSearchResults(document.getElementById('search-input').value);
+      if(idx >= 0) myPlan.splice(idx, 1);
+      else { const mod = MOCK_MODULES.find(m => m.id === id); myPlan.push({ id: mod.id, day: mod.day }); }
+      renderSearchResults(document.getElementById('search-input').value, document.getElementById('fb-filter').value);
       renderTimetable();
     }
 
     function showDetails(id) {
       const mod = MOCK_MODULES.find(m => m.id === id);
-      const detDiv = document.getElementById('module-details');
-      detDiv.innerHTML = `
+      const isAdded = myPlan.some(p => p.id === id);
+      document.getElementById('module-details').innerHTML = `
         <div class="space-y-3">
-          <div class="text-lg font-bold text-white font-heading">${mod.name}</div>
+          <div class="text-base font-bold text-white font-heading">${mod.name}</div>
+          <div class="text-[10px] font-mono text-slate-500 leading-tight">${mod.fb}</div>
           <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
-              <span class="text-slate-500 block mb-1">Typ:</span>
-              <span class="text-slate-300">${mod.type}</span>
-            </div>
-            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded">
-              <span class="text-slate-500 block mb-1">Zeit:</span>
-              <span class="text-slate-300">${mod.startTime} - ${mod.endTime}</span>
-            </div>
-            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded col-span-2">
-              <span class="text-slate-500 block mb-1">Raum:</span>
-              <span class="text-slate-300">${mod.room}</span>
-            </div>
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded"><span class="text-slate-500 block mb-0.5">Typ:</span><span class="text-slate-300">${mod.type}</span></div>
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded"><span class="text-slate-500 block mb-0.5">Zeit:</span><span class="text-slate-300">${mod.startTime}–${mod.endTime}</span></div>
+            <div class="p-2 bg-[#0a0c10] border border-[#1e2533] rounded col-span-2"><span class="text-slate-500 block mb-0.5">Raum:</span><span class="text-slate-300">${mod.room}</span></div>
           </div>
-          <div class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded text-sm text-slate-300">
-            <span class="font-bold text-white block mb-1">Inhalte:</span>
-            ${mod.contents}
-          </div>
-          <div class="p-3 bg-indigo-950/20 border border-indigo-900/50 rounded text-sm text-indigo-200">
-            <span class="font-bold text-indigo-400 block mb-1">📊 Historischer Notenspiegel:</span>
-            ${mod.grades}
-          </div>
-        </div>
-      `;
+          <div class="p-3 bg-[#0a0c10] border border-[#1e2533] rounded text-xs text-slate-300"><span class="font-bold text-white block mb-1">Inhalte:</span>${mod.contents}</div>
+          <div class="p-3 bg-indigo-950/20 border border-indigo-900/50 rounded text-xs text-indigo-200"><span class="font-bold text-indigo-400 block mb-1">📊 Notenspiegel:</span>${mod.grades}</div>
+          <button onclick="toggleModul('${mod.id}')" class="w-full py-1.5 rounded text-xs font-bold transition ${isAdded ? 'bg-red-900/50 text-red-400 border border-red-500/50' : 'bg-emerald-900/50 text-emerald-400 border border-emerald-500/50'}">
+            ${isAdded ? '✕ Aus Stundenplan entfernen' : '+ In Stundenplan eintragen'}
+          </button>
+        </div>`;
     }
 
     function clearPlan() {
       myPlan = [];
-      renderSearchResults();
+      renderSearchResults(document.getElementById('search-input').value, document.getElementById('fb-filter').value);
       renderTimetable();
     }
 
     function exportICS() {
-      if(myPlan.length === 0) {
-        alert("Der Stundenplan ist leer.");
-        return;
-      }
-      
-      let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//UniSuite//Stundenplaner//DE\n";
-      
-      const daysOffset = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 }; // Offset from a base Monday
-      // Let's use a dummy base Monday date like 2026-10-12
-      const baseDate = new Date('2026-10-12T00:00:00Z');
-
+      if(!myPlan.length) { alert("Der Stundenplan ist leer."); return; }
+      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//UniSuite//Stundenplaner//DE\n";
+      const offsets = {1:0,2:1,3:2,4:3,5:4};
+      const base = new Date('2026-10-12T00:00:00Z');
       myPlan.forEach(ev => {
         const mod = MOCK_MODULES.find(m => m.id === ev.id);
         if(!mod) return;
-        
-        let evtDate = new Date(baseDate);
-        evtDate.setDate(evtDate.getDate() + daysOffset[mod.day]);
-        
-        const dateStr = evtDate.toISOString().split('T')[0].replace(/-/g, '');
-        const startStr = mod.startTime.replace(':', '') + '00';
-        const endStr = mod.endTime.replace(':', '') + '00';
-        
-        icsContent += "BEGIN:VEVENT\n";
-        icsContent += `DTSTART;TZID=Europe/Berlin:${dateStr}T${startStr}\n`;
-        icsContent += `DTEND;TZID=Europe/Berlin:${dateStr}T${endStr}\n`;
-        icsContent += `RRULE:FREQ=WEEKLY;UNTIL=20270215T000000Z\n`;
-        icsContent += `SUMMARY:${mod.name}\n`;
-        icsContent += `LOCATION:${mod.room}\n`;
-        icsContent += `DESCRIPTION:${mod.contents}\n`;
-        icsContent += "END:VEVENT\n";
+        let d = new Date(base);
+        d.setDate(d.getDate() + offsets[mod.day]);
+        const ds = d.toISOString().split('T')[0].replace(/-/g,'');
+        ics += `BEGIN:VEVENT\nDTSTART;TZID=Europe/Berlin:${ds}T${mod.startTime.replace(':','')}00\nDTEND;TZID=Europe/Berlin:${ds}T${mod.endTime.replace(':','')}00\nRRULE:FREQ=WEEKLY;UNTIL=20270215T000000Z\nSUMMARY:${mod.name}\nLOCATION:${mod.room}\nDESCRIPTION:${mod.contents} [${mod.fb}]\nEND:VEVENT\n`;
       });
-
-      icsContent += "END:VCALENDAR";
-      
-      const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = "stundenplan.ics";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      ics += "END:VCALENDAR";
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([ics], {type:'text/calendar;charset=utf-8'}));
+      a.download = "stundenplan.ics";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
 
-    document.getElementById('search-input').addEventListener('input', (e) => {
-      renderSearchResults(e.target.value);
+    function buildFBFilter() {
+      const sel = document.getElementById('fb-filter');
+      allFachbereiche.forEach(fb => {
+        const opt = document.createElement('option');
+        opt.value = fb; opt.textContent = fb;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', () => renderSearchResults(document.getElementById('search-input').value, sel.value));
+    }
+
+    document.getElementById('search-input').addEventListener('input', e => {
+      renderSearchResults(e.target.value, document.getElementById('fb-filter').value);
     });
 
-    // Init
+    buildFBFilter();
     renderSearchResults();
     renderTimetable();
   </script>
