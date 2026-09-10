@@ -568,8 +568,7 @@ function renderHeader(relativePath) {
 
       <div class="flex items-center space-x-3 text-xs font-mono">
         <!-- New TUCaN Modal Button in Header -->
-        <button onclick="window.openTucanModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-950/50 border border-blue-600/40 text-blue-300 hover:text-white hover:bg-blue-600/30 hover:border-blue-400 transition shadow-[0_0_12px_rgba(59,130,246,0.15)] font-bold">
-          <span class="text-emerald-400 animate-pulse">●</span>
+        <button onclick="window.openTucanModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-950/50 border border-blue-600/40 text-blue-300 hover:text-white hover:bg-blue-600/30 hover:border-blue-400 transition font-bold">
           <span>+ Modul hinzufügen</span>
           <span class="hidden xl:inline text-[10px] text-blue-400/80 bg-blue-900/50 px-1.5 py-0.2 rounded border border-blue-700/50">TUCaN Live</span>
         </button>
@@ -904,8 +903,8 @@ function initTucanModal() {
               <h2 id="tucan-modal-title" class="text-base sm:text-lg font-bold text-white font-heading">
                 TUCaN Modulkatalog &amp; Live-Vorlesungsverzeichnis
               </h2>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 flex items-center gap-1.5 font-bold">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live-Sync Aktiv
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 font-bold">
+                Live-Sync Aktiv
               </span>
             </div>
             <p class="text-xs text-slate-400 font-mono">

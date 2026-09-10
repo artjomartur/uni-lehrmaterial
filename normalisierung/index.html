@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de" class="h-full bg-[#0a0c10] text-slate-200">
 <head>
   <meta charset="UTF-8">
@@ -178,7 +178,7 @@ VorlNr -> Titel, PersNr</textarea>
       <div class="bg-[#0a0c10] border border-[#1e2533] rounded-lg p-4 space-y-3 font-mono text-xs">
         <div class="flex items-center justify-between text-slate-400 border-b border-[#1e2533] pb-2">
           <span class="text-[11px] text-blue-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
-            <span class="inline-block w-2 h-2 rounded bg-blue-400 animate-pulse"></span> Aktiver Prüfschritt
+            <span class="inline-block w-2 h-2 rounded bg-blue-400"></span> Aktiver Prüfschritt
           </span>
           <span id="anim-step-badge" class="px-2 py-0.5 rounded bg-[#151c28] border border-[#273248] text-slate-300 text-[10px]">
             Bereit
@@ -971,11 +971,11 @@ VorlNr -> Titel, PersNr</textarea>
         badgesEl.innerHTML = `<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-bold">✓ 1NF: Atomare Werte</span>`;
       } else if (stepIdx === 3) {
         badgesEl.innerHTML = currentV2NF.length > 0 
-          ? `<span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500/30 font-bold animate-pulse">✗ 2NF: Partielle Abhängigkeiten</span>`
+          ? `<span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500/30 font-bold">✗ 2NF: Partielle Abhängigkeiten</span>`
           : `<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-bold">✓ 2NF: Voll funktional abhängig</span>`;
       } else if (stepIdx === 4) {
         badgesEl.innerHTML = currentV3NF.length > 0
-          ? `<span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500/30 font-bold animate-pulse">✗ 3NF: Transitive Abhängigkeit</span>`
+          ? `<span class="px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-500/30 font-bold">✗ 3NF: Transitive Abhängigkeit</span>`
           : `<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-500/30 font-bold">✓ 3NF Erfüllt</span>`;
       }
 
@@ -1032,7 +1032,7 @@ VorlNr -> Titel, PersNr</textarea>
           }
         } else if (stepIdx === 3) { // 2NF step
           if (violatingAttrs2NF.has(attr)) {
-            thClass = "p-2.5 bg-rose-950/70 text-rose-200 font-bold border-b-2 border-rose-500 border-r border-[#1e2533] animate-pulse";
+            thClass = "p-2.5 bg-rose-950/70 text-rose-200 font-bold border-b-2 border-rose-500 border-r border-[#1e2533]";
             badge = `<span class="block text-[9px] text-rose-300 font-bold">✗ 2NF-Verletzung</span>`;
           } else if (isKeyAttr(attr)) {
             thClass = "p-2.5 bg-amber-950/40 text-amber-300 font-bold border-r border-[#1e2533]";
@@ -1040,7 +1040,7 @@ VorlNr -> Titel, PersNr</textarea>
           }
         } else if (stepIdx === 4) { // 3NF step
           if (violatingAttrs3NF.has(attr)) {
-            thClass = "p-2.5 bg-rose-950/70 text-rose-200 font-bold border-b-2 border-rose-500 border-r border-[#1e2533] animate-pulse";
+            thClass = "p-2.5 bg-rose-950/70 text-rose-200 font-bold border-b-2 border-rose-500 border-r border-[#1e2533]";
             badge = `<span class="block text-[9px] text-rose-300 font-bold">✗ Transitive 3NF</span>`;
           } else if (isKeyAttr(attr)) {
             thClass = "p-2.5 bg-amber-950/40 text-amber-300 font-bold border-r border-[#1e2533]";
@@ -1121,7 +1121,7 @@ VorlNr -> Titel, PersNr</textarea>
       } else if (stepIdx === 3) {
         legendEl.innerHTML = currentV2NF.length > 0 ? `
           <div class="flex items-center gap-2 text-rose-300">
-            <span class="w-2 h-2 rounded bg-rose-500 animate-pulse"></span>
+            <span class="w-2 h-2 rounded bg-rose-500"></span>
             <span><b>Rot markiert (2NF-Verletzung):</b> Nicht-Primattribute hängen nur von einem Teilschlüssel ab &rarr; <b>Redundanz!</b></span>
           </div>
           <span class="text-rose-400 text-[10px] font-bold">Anomalie-Gefahr</span>
@@ -1134,7 +1134,7 @@ VorlNr -> Titel, PersNr</textarea>
       } else if (stepIdx === 4) {
         legendEl.innerHTML = currentV3NF.length > 0 ? `
           <div class="flex items-center gap-2 text-rose-300">
-            <span class="w-2 h-2 rounded bg-rose-500 animate-pulse"></span>
+            <span class="w-2 h-2 rounded bg-rose-500"></span>
             <span><b>Rot markiert (3NF-Verletzung):</b> Transitive Kette erkannt &rarr; Bei Raumwechsel droht <b>Update-Anomalie</b> in mehreren Zeilen!</span>
           </div>
           <span class="text-rose-400 text-[10px] font-bold">Transitivität</span>

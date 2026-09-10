@@ -196,8 +196,8 @@
             <div class="flex flex-wrap items-center justify-between mb-4 gap-3 border-b border-[#1e2533] pb-3">
               <div class="flex items-center gap-3">
                 <h2 class="font-heading font-bold text-white text-lg">Wochenplaner</h2>
-                <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 flex items-center gap-1.5">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Hörsäle verifiziert
+                <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40 text-emerald-400">
+                  Hörsäle verifiziert
                 </span>
               </div>
 
@@ -992,7 +992,7 @@
           );
 
           const block = document.createElement('div');
-          block.className = `absolute left-1 right-1 rounded-lg border ${isConflicted ? 'border-rose-500 bg-rose-950/85 text-rose-100 ring-1 ring-rose-500 animate-pulse' : mod.color} p-2 overflow-hidden shadow-lg hover:brightness-125 transition-all cursor-pointer select-none group`;
+          block.className = `absolute left-1 right-1 rounded-lg border ${isConflicted ? 'border-rose-500 bg-rose-950/85 text-rose-100 ring-1 ring-rose-500' : mod.color} p-2 overflow-hidden shadow-lg hover:brightness-125 transition-all cursor-pointer select-none group`;
           block.style.top = `${topPct}%`;
           block.style.height = `${heightPct}%`;
           block.onclick = () => openCourseDetailModal(mod.id);
