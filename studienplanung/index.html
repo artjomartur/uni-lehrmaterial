@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TUPlan — Studienplanung, Stundenplan & Notenspiegel | TU Darmstadt</title>
+  <title>Artjom Becker — Studienplanung, Stundenplan &amp; Notenspiegel | TU Darmstadt</title>
   
   <link rel="icon" type="image/svg+xml" href="../favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -42,14 +42,14 @@
   <script src="../components.js"></script>
   <script>renderHeader("../");</script>
 
-  <!-- TUPlan Sub-Navigation & Controls Bar -->
+  <!-- Sub-Navigation & Controls Bar -->
   <div class="border-b border-[#1e2533] bg-[#0c1017]/90 sticky top-14 z-40 backdrop-blur hidden-print">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
       
       <!-- Brand & Semester Switcher -->
       <div class="flex items-center gap-3 sm:gap-4">
         <div class="flex items-center gap-1.5">
-          <span class="text-white font-extrabold text-lg tracking-tight font-heading">TU</span><span class="text-blue-500 font-extrabold text-lg tracking-tight font-heading">Plan</span>
+          <span class="text-white font-extrabold text-lg tracking-tight font-heading">Artjom</span><span class="text-blue-500 font-extrabold text-lg tracking-tight font-heading">Plan</span>
           <span class="text-[10px] font-mono uppercase bg-blue-950/60 border border-blue-600/40 text-blue-400 px-1.5 py-0.5 rounded font-bold">TU Darmstadt</span>
         </div>
 
@@ -208,7 +208,7 @@
 
             <!-- Calendar Canvas -->
             <div class="flex-1 overflow-x-auto custom-scrollbar">
-              <div class="min-w-[680px] h-[680px] flex border border-[#1e2533] rounded-lg text-xs relative bg-[#0a0c10]" id="tuplan-weekly-grid">
+              <div class="min-w-[680px] h-[680px] flex border border-[#1e2533] rounded-lg text-xs relative bg-[#0a0c10]" id="weekly-schedule-grid">
                 <!-- Drawn by drawWeeklyGrid() -->
               </div>
             </div>
@@ -344,12 +344,12 @@
   <div id="app-footer" class="hidden-print"></div>
   <script>renderFooter("../");</script>
 
-  <!-- TUPlan Core Script -->
+  <!-- Artjom Planer Core Script -->
   <script>
     // =========================================================================
-    // TUPlan Dataset & Grade Statistics (FB20 Informatik & FB04 Mathe)
+    // Kurs-Datensatz & Notenspiegel (FB20 Informatik & FB04 Mathe)
     // =========================================================================
-    const TUPLAN_COURSES = [
+    const COURSE_CATALOG = [
       {
         id: "20-00-0015-iv",
         slug: "informationsmanagement",
@@ -805,7 +805,7 @@
     function savePlan() {
       try {
         const structured = myPlannedModuleIds.map(id => {
-          const mod = TUPLAN_COURSES.find(m => m.id === id);
+          const mod = COURSE_CATALOG.find(m => m.id === id);
           return { id, day: (mod && mod.times[0]) ? mod.times[0].dayNum : 1 };
         });
         localStorage.setItem('unisuite_stundenplan_v2', JSON.stringify(structured));
@@ -871,7 +871,7 @@
     }
 
     function detectTimeConflicts() {
-      const activeModules = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id));
+      const activeModules = COURSE_CATALOG.filter(m => myPlannedModuleIds.includes(m.id));
       const sessions = [];
 
       activeModules.forEach(mod => {
@@ -934,7 +934,7 @@
     }
 
     function drawWeeklyGrid() {
-      const container = document.getElementById('tuplan-weekly-grid');
+      const container = document.getElementById('weekly-schedule-grid');
       if (!container) return;
       container.innerHTML = '';
 
@@ -974,7 +974,7 @@
 
         // Gather all sessions for this day
         const daySessions = [];
-        TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id)).forEach(mod => {
+        COURSE_CATALOG.filter(m => myPlannedModuleIds.includes(m.id)).forEach(mod => {
           mod.times.filter(t => t.dayNum === dayNum).forEach(t => {
             daySessions.push({ mod, time: t });
           });
@@ -1020,7 +1020,7 @@
       const empty = document.getElementById('planner-empty-state');
       if (!list) return;
 
-      const activeMods = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id));
+      const activeMods = COURSE_CATALOG.filter(m => myPlannedModuleIds.includes(m.id));
 
       if (activeMods.length === 0) {
         list.innerHTML = '';
@@ -1087,7 +1087,7 @@
     }
 
     function updateGlobalBadges() {
-      const activeMods = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id));
+      const activeMods = COURSE_CATALOG.filter(m => myPlannedModuleIds.includes(m.id));
       const totalCp = activeMods.reduce((sum, m) => sum + m.cp, 0);
       const totalSws = activeMods.reduce((sum, m) => sum + m.sws, 0);
       const conflicts = detectTimeConflicts();
@@ -1157,8 +1157,8 @@
         alert('Der Stundenplan ist leer. Bitte zuerst Module hinzufügen.');
         return;
       }
-      const activeMods = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id));
-      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//UniSuite//TUPlan//DE\nCALSCALE:GREGORIAN\n";
+      const activeMods = COURSE_CATALOG.filter(m => myPlannedModuleIds.includes(m.id));
+      let ics = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//ArtjomBecker//Studienplaner//DE\nCALSCALE:GREGORIAN\n";
       
       const offsets = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4 };
       const baseMonday = new Date('2026-10-12T00:00:00Z');
@@ -1186,7 +1186,7 @@
       const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = "tuplan_stundenplan.ics";
+      a.download = "artjom_becker_stundenplan.ics";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1215,7 +1215,7 @@
 
       const q = currentCoursesSearch.trim().toLowerCase();
 
-      const filtered = TUPLAN_COURSES.filter(mod => {
+      const filtered = COURSE_CATALOG.filter(mod => {
         // Search filter
         const matchSearch = !q ||
           mod.name.toLowerCase().includes(q) ||
@@ -1235,7 +1235,7 @@
         return mod.category === currentCoursesCategoryFilter;
       });
 
-      if (countLabel) countLabel.textContent = `${filtered.length} von ${TUPLAN_COURSES.length} Kursen`;
+      if (countLabel) countLabel.textContent = `${filtered.length} von ${COURSE_CATALOG.length} Kursen`;
 
       if (filtered.length === 0) {
         grid.innerHTML = `
@@ -1390,7 +1390,7 @@
       const container = document.getElementById('exams-schedule-container');
       if (!container) return;
 
-      const activeMods = TUPLAN_COURSES.filter(m => myPlannedModuleIds.includes(m.id))
+      const activeMods = COURSE_CATALOG.filter(m => myPlannedModuleIds.includes(m.id))
         .sort((a, b) => new Date(a.examDate) - new Date(b.examDate));
 
       if (activeMods.length === 0) {
@@ -1461,7 +1461,7 @@
       const tbody = document.getElementById('grade-comparison-tbody');
       if (!tbody) return;
 
-      tbody.innerHTML = TUPLAN_COURSES.map(mod => {
+      tbody.innerHTML = COURSE_CATALOG.map(mod => {
         const isAdded = myPlannedModuleIds.includes(mod.id);
         const maxVal = Math.max(...mod.gradesDist);
 
@@ -1503,7 +1503,7 @@
     // MODAL DIALOGS
     // =========================================================================
     function openCourseDetailModal(modId) {
-      const mod = TUPLAN_COURSES.find(m => m.id === modId);
+      const mod = COURSE_CATALOG.find(m => m.id === modId);
       if (!mod) return;
 
       const modal = document.getElementById('course-detail-modal');
