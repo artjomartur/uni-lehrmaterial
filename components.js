@@ -564,10 +564,15 @@ function renderHeader(relativePath) {
         <nav class="hidden md:flex items-center space-x-2 border-l border-[#1e2533] pl-6 text-xs font-mono">
           ${renderDesktopMenu(relativePath)}
         </nav>
-      </div>
+      <div class="flex items-center space-x-2 sm:space-x-3 text-xs font-mono">
+        <button onclick="window.openTucanModal()" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-950/50 border border-blue-600/40 text-blue-300 hover:text-white hover:bg-blue-600/30 hover:border-blue-400 transition font-bold">
+          <span>+ Modul</span>
+        </button>
 
-        <button onclick="window.openTucanModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-950/50 border border-blue-600/40 text-blue-300 hover:text-white hover:bg-blue-600/30 hover:border-blue-400 transition font-bold">
-          <span>+ Modul hinzufügen</span>
+        <!-- User Account Button -->
+        <button onclick="window.openAccountModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-200 hover:text-white transition font-mono group" title="Account &amp; Profile verwalten">
+          <span class="text-sm">👤</span>
+          <span id="header-user-display" class="font-bold text-xs max-w-[120px] truncate">Artjom Becker</span>
         </button>
 
         <button onclick="printAsPDF()" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded bg-[#151c28] border border-[#273248] text-slate-300 hover:text-white hover:border-blue-500 transition">
@@ -633,6 +638,8 @@ document.addEventListener('DOMContentLoaded', () => {
   registerServiceWorker()
   initBugReporter()
   initTucanModal()
+  initAccountModal()
+  updateHeaderUserDisplay()
 })
 
 function printAsPDF() {
@@ -1257,6 +1264,383 @@ function renderTucanCatalog() {
   }).join('');
 }
 
+// ============================================================================
+// MULTI-USER ACCOUNT SYSTEM & CLOUD-SYNC (UniSuiteAuth)
+// ============================================================================
+
+const DEFAULT_MASTER_ACCOUNT = {
+  id: "user_master_artjom",
+  name: "Artjom Becker",
+  email: "artjom.becker@stud.tu-darmstadt.de",
+  major: "B.Sc. Informatik (TU Darmstadt)",
+  avatar: "👨‍💻",
+  created: new Date().toISOString(),
+  data: {
+    plan: ["20-00-0015-iv", "20-00-0004-iv", "20-00-0017-iv", "04-00-0111-iv"],
+    grades: {
+      "20-00-0015-iv": 1.7,
+      "20-00-0004-iv": 2.3,
+      "20-00-0016-iv": 1.3,
+      "20-00-0001-iv": 1.0,
+      "20-00-0005-iv": 2.0,
+      "04-00-0111-iv": 2.7,
+      "04-00-0112-iv": 2.0,
+      "20-00-0025-iv": 1.3,
+      "20-00-0026-iv": 1.0
+    }
+  }
+};
+
+const UniSuiteAuth = {
+  getAccounts() {
+    try {
+      const raw = localStorage.getItem('unisuite_accounts_v2');
+      if (!raw) {
+        const initial = [DEFAULT_MASTER_ACCOUNT];
+        localStorage.setItem('unisuite_accounts_v2', JSON.stringify(initial));
+        return initial;
+      }
+      return JSON.parse(raw);
+    } catch {
+      return [DEFAULT_MASTER_ACCOUNT];
+    }
+  },
+
+  getCurrentUser() {
+    const accounts = this.getAccounts();
+    const activeId = localStorage.getItem('unisuite_active_user_id');
+    const found = accounts.find(a => a.id === activeId);
+    if (found) return found;
+    // Fallback to first
+    if (accounts.length > 0) {
+      localStorage.setItem('unisuite_active_user_id', accounts[0].id);
+      return accounts[0];
+    }
+    return DEFAULT_MASTER_ACCOUNT;
+  },
+
+  saveAccountData(userUpdates) {
+    const accounts = this.getAccounts();
+    const cur = this.getCurrentUser();
+    const idx = accounts.findIndex(a => a.id === cur.id);
+    if (idx >= 0) {
+      accounts[idx] = { ...accounts[idx], ...userUpdates };
+      localStorage.setItem('unisuite_accounts_v2', JSON.stringify(accounts));
+    }
+  },
+
+  syncCurrentStorageToActiveAccount() {
+    const plan = JSON.parse(localStorage.getItem('unisuite_stundenplan_v2') || '[]');
+    const grades = JSON.parse(localStorage.getItem('unisuite_my_grades') || '{}');
+    const cur = this.getCurrentUser();
+    cur.data = {
+      plan: Array.isArray(plan) ? plan.map(x => typeof x === 'string' ? x : x.id) : [],
+      grades
+    };
+    this.saveAccountData({ data: cur.data });
+  },
+
+  loadActiveAccountToStorage(user) {
+    if (!user || !user.data) return;
+    const planStructured = (user.data.plan || []).map(id => ({ id, day: 1 }));
+    localStorage.setItem('unisuite_stundenplan_v2', JSON.stringify(planStructured));
+    localStorage.setItem('unisuite_my_plan', JSON.stringify(user.data.plan || []));
+    localStorage.setItem('unisuite_my_grades', JSON.stringify(user.data.grades || {}));
+  },
+
+  createAccount(name, email, major, avatar = "👤") {
+    const trimmed = name.trim();
+    if (!trimmed) return null;
+
+    const accounts = this.getAccounts();
+    const newId = "user_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
+    const newAccount = {
+      id: newId,
+      name: trimmed,
+      email: email.trim() || `${trimmed.toLowerCase().replace(/\s+/g, '.')}@stud.tu-darmstadt.de`,
+      major: major.trim() || "B.Sc. Informatik",
+      avatar: avatar || "👤",
+      created: new Date().toISOString(),
+      data: {
+        plan: [],
+        grades: {}
+      }
+    };
+
+    accounts.push(newAccount);
+    localStorage.setItem('unisuite_accounts_v2', JSON.stringify(accounts));
+    this.switchAccount(newId);
+    return newAccount;
+  },
+
+  switchAccount(userId) {
+    // First, save current active user's state
+    this.syncCurrentStorageToActiveAccount();
+
+    const accounts = this.getAccounts();
+    const target = accounts.find(a => a.id === userId);
+    if (!target) return;
+
+    localStorage.setItem('unisuite_active_user_id', target.id);
+    this.loadActiveAccountToStorage(target);
+    updateHeaderUserDisplay();
+
+    // Reload page or trigger render if in planner
+    window.location.reload();
+  },
+
+  deleteAccount(userId) {
+    const accounts = this.getAccounts();
+    if (accounts.length <= 1) {
+      alert("Der letzte verbleibende Account kann nicht gelöscht werden.");
+      return;
+    }
+    const filtered = accounts.filter(a => a.id !== userId);
+    localStorage.setItem('unisuite_accounts_v2', JSON.stringify(filtered));
+    if (localStorage.getItem('unisuite_active_user_id') === userId) {
+      this.switchAccount(filtered[0].id);
+    } else {
+      renderAccountModalContent();
+    }
+  },
+
+  exportBackup() {
+    this.syncCurrentStorageToActiveAccount();
+    const accounts = this.getAccounts();
+    const active = this.getCurrentUser();
+    const payload = {
+      app: "UniSuite",
+      version: "2.6.0",
+      exportDate: new Date().toISOString(),
+      activeUserId: active.id,
+      accounts
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `unisuite_backup_${active.name.toLowerCase().replace(/\s+/g, '_')}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  },
+
+  importBackup(jsonString) {
+    try {
+      const parsed = JSON.parse(jsonString);
+      if (parsed && Array.isArray(parsed.accounts) && parsed.accounts.length > 0) {
+        localStorage.setItem('unisuite_accounts_v2', JSON.stringify(parsed.accounts));
+        if (parsed.activeUserId) {
+          localStorage.setItem('unisuite_active_user_id', parsed.activeUserId);
+        }
+        const active = this.getCurrentUser();
+        this.loadActiveAccountToStorage(active);
+        alert("Account-Backup erfolgreich wiederhergestellt!");
+        window.location.reload();
+      } else {
+        alert("Ungültiges Backup-Format.");
+      }
+    } catch (e) {
+      alert("Fehler beim Importieren: " + e.message);
+    }
+  }
+};
+
+function updateHeaderUserDisplay() {
+  const el = document.getElementById('header-user-display');
+  if (el) {
+    const cur = UniSuiteAuth.getCurrentUser();
+    el.textContent = cur.name;
+  }
+}
+
+function initAccountModal() {
+  if (document.getElementById('account-modal-container')) return;
+
+  const modalHtml = `
+    <div id="account-modal-container" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="account-modal-title">
+      <div class="bg-[#0f131a] border border-[#1e2533] rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+        
+        <!-- Header -->
+        <div class="px-5 py-4 bg-[#0c1017] border-b border-[#1e2533] flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-blue-950/80 border border-blue-500/40 flex items-center justify-center text-lg">
+              👤
+            </div>
+            <div>
+              <h2 id="account-modal-title" class="text-base sm:text-lg font-bold text-white font-heading">
+                Benutzer-Accounts &amp; Profil-Verwaltung
+              </h2>
+              <p class="text-xs text-slate-400 font-mono">
+                Getrennte Stundenpläne, Notenspiegel &amp; Einstellungen pro Person
+              </p>
+            </div>
+          </div>
+
+          <button onclick="closeAccountModal()" class="w-8 h-8 rounded-lg bg-[#151c28] hover:bg-rose-950/40 border border-[#273248] hover:border-rose-500/50 text-slate-400 hover:text-rose-300 flex items-center justify-center transition">
+            ✕
+          </button>
+        </div>
+
+        <!-- Body Content -->
+        <div id="account-modal-body" class="p-5 overflow-y-auto custom-scrollbar space-y-6 flex-1 text-xs font-mono">
+          <!-- Dynamically populated -->
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  const container = document.getElementById('account-modal-container');
+  if (container) {
+    container.addEventListener('click', (e) => {
+      if (e.target === container) closeAccountModal();
+    });
+  }
+}
+
+function openAccountModal() {
+  initAccountModal();
+  renderAccountModalContent();
+  const container = document.getElementById('account-modal-container');
+  if (container) {
+    container.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+}
+
+function closeAccountModal() {
+  const container = document.getElementById('account-modal-container');
+  if (container) {
+    container.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+}
+
+function renderAccountModalContent() {
+  const body = document.getElementById('account-modal-body');
+  if (!body) return;
+
+  const current = UniSuiteAuth.getCurrentUser();
+  const accounts = UniSuiteAuth.getAccounts();
+
+  const accountsListHTML = accounts.map(acc => {
+    const isActive = acc.id === current.id;
+    const planCount = (acc.data && acc.data.plan) ? acc.data.plan.length : 0;
+    const gradesCount = (acc.data && acc.data.grades) ? Object.keys(acc.data.grades).length : 0;
+
+    return `
+      <div class="p-3 bg-[#151c28] border ${isActive ? 'border-blue-500 bg-blue-950/20' : 'border-[#273248]'} rounded-xl flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0 flex-1">
+          <div class="w-8 h-8 rounded-lg bg-[#0d1117] border border-[#273248] flex items-center justify-center text-sm shrink-0">
+            ${acc.avatar || '👤'}
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white text-sm truncate">${acc.name}</span>
+              ${isActive ? '<span class="px-1.5 py-0.2 rounded bg-blue-600 text-white text-[9px] font-bold">Aktiv</span>' : ''}
+            </div>
+            <div class="text-[11px] text-slate-400 truncate mt-0.5">${acc.major} • ${planCount} Kurse • ${gradesCount} Noten</div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          ${!isActive ? `
+            <button onclick="UniSuiteAuth.switchAccount('${acc.id}')" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition">
+              Wechseln
+            </button>
+          ` : ''}
+
+          ${accounts.length > 1 ? `
+            <button onclick="UniSuiteAuth.deleteAccount('${acc.id}')" class="w-7 h-7 rounded-lg bg-[#1f293d] hover:bg-rose-950/60 border border-[#2e3b52] hover:border-rose-500/50 text-slate-400 hover:text-rose-300 flex items-center justify-center transition" title="Account löschen">
+              🗑️
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  body.innerHTML = `
+    <!-- Active Account Details -->
+    <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-xl space-y-3">
+      <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Aktives Profil</div>
+      <div class="flex items-center gap-3">
+        <div class="text-3xl">${current.avatar || '👨‍💻'}</div>
+        <div>
+          <h3 class="text-base font-bold text-white font-heading">${current.name}</h3>
+          <div class="text-slate-400 text-xs">${current.email}</div>
+          <div class="text-blue-400 text-[11px] mt-0.5">${current.major}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accounts Switcher List -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Alle Accounts auf diesem Gerät (${accounts.length})</span>
+      </div>
+      <div class="space-y-2 max-h-[200px] overflow-y-auto custom-scrollbar pr-1">
+        ${accountsListHTML}
+      </div>
+    </div>
+
+    <!-- Create New Account Form -->
+    <div class="p-4 bg-[#0a0c10] border border-[#1e2533] rounded-xl space-y-3">
+      <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">+ Neuen Account / Profil anlegen</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
+          <label class="block text-[10px] text-slate-500 mb-1">Vor- &amp; Nachname</label>
+          <input type="text" id="new-account-name" placeholder="z.B. Lukas Schmidt" class="w-full bg-[#151c28] border border-[#273248] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <div>
+          <label class="block text-[10px] text-slate-500 mb-1">Studiengang</label>
+          <input type="text" id="new-account-major" placeholder="z.B. B.Sc. Informatik" value="B.Sc. Informatik" class="w-full bg-[#151c28] border border-[#273248] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
+        </div>
+      </div>
+      <div class="flex justify-end pt-1">
+        <button onclick="handleCreateAccountSubmit()" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition">
+          + Account erstellen &amp; einloggen
+        </button>
+      </div>
+    </div>
+
+    <!-- Backup & Restore Actions -->
+    <div class="pt-2 border-t border-[#1e2533] flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <button onclick="UniSuiteAuth.exportBackup()" class="px-3 py-1.5 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 hover:text-white transition flex items-center gap-1.5">
+          <span>💾</span> Backup herunterladen (.json)
+        </button>
+        <label class="px-3 py-1.5 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-slate-300 hover:text-white transition flex items-center gap-1.5 cursor-pointer">
+          <span>📂</span> Backup importieren
+          <input type="file" accept=".json" onchange="handleImportBackupFile(this)" class="hidden">
+        </label>
+      </div>
+    </div>
+  `;
+}
+
+function handleCreateAccountSubmit() {
+  const nameInput = document.getElementById('new-account-name');
+  const majorInput = document.getElementById('new-account-major');
+  if (!nameInput || !nameInput.value.trim()) {
+    alert("Bitte gib einen Namen für das neue Profil ein.");
+    return;
+  }
+  UniSuiteAuth.createAccount(nameInput.value, "", majorInput.value || "B.Sc. Informatik");
+}
+
+function handleImportBackupFile(inputEl) {
+  const file = inputEl.files && inputEl.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    UniSuiteAuth.importBackup(e.target.result);
+  };
+  reader.readAsText(file);
+}
+
 // Global functions for window access
 window.openTucanModal = openTucanModal;
 window.closeTucanModal = closeTucanModal;
@@ -1264,4 +1648,10 @@ window.setTucanCatalogFilter = setTucanCatalogFilter;
 window.triggerTucanLiveSync = triggerTucanLiveSync;
 window.toggleTucanModule = toggleTucanModule;
 window.TUCAN_CATALOG = TUCAN_CATALOG;
+window.UniSuiteAuth = UniSuiteAuth;
+window.openAccountModal = openAccountModal;
+window.closeAccountModal = closeAccountModal;
+window.handleCreateAccountSubmit = handleCreateAccountSubmit;
+window.handleImportBackupFile = handleImportBackupFile;
+
 

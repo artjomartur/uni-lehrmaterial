@@ -933,6 +933,9 @@
         });
         localStorage.setItem('unisuite_stundenplan_v2', JSON.stringify(structured));
         localStorage.setItem('unisuite_my_plan', JSON.stringify(myPlannedModuleIds));
+        if (window.UniSuiteAuth) {
+          UniSuiteAuth.syncCurrentStorageToActiveAccount();
+        }
       } catch (e) {
         console.error(e);
       }
@@ -942,6 +945,9 @@
     // =========================================================================
     // TAB SWITCHING
     // =========================================================================
+    function switchTab(tabId) {
+      currentTab = tabId;
+
       const vPlanner = document.getElementById('view-planner');
       const vCourses = document.getElementById('view-courses');
       const vCompare = document.getElementById('view-compare');
@@ -1775,6 +1781,9 @@
 
     function saveGrades(gradesObj) {
       localStorage.setItem('unisuite_my_grades', JSON.stringify(gradesObj));
+      if (window.UniSuiteAuth) {
+        UniSuiteAuth.syncCurrentStorageToActiveAccount();
+      }
       renderGradeCalculator();
     }
 
