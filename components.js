@@ -100,6 +100,65 @@ function ensureUniformPageStyles() {
   )
 }
 
+function standardizeModuleHero() {
+  const pathSegments = window.location.pathname.split('/').filter(Boolean)
+  if (pathSegments.length === 0) return
+
+  const slug = pathSegments[pathSegments[pathSegments.length - 1] === 'index.html' ? pathSegments.length - 2 : 0]
+  if (!slug) return
+
+  const moduleMeta = MODULE_GROUPS.flatMap(group =>
+    group.modules.map(module => ({
+      ...module,
+      groupLabel: group.label,
+      groupPrefix: group.prefix,
+      colorClass: group.colorClass
+    }))
+  ).find(module => module.path.replace(/\/$/, '') === slug)
+
+  if (!moduleMeta) return
+
+  const main = document.querySelector('main')
+  if (!main || main.querySelector('[data-unisuite-standard-hero="true"]')) return
+
+  const h1 = main.querySelector('h1')
+  if (!h1) return
+
+  let topLevelHeroBlock = h1
+  while (topLevelHeroBlock.parentElement && topLevelHeroBlock.parentElement !== main) {
+    topLevelHeroBlock = topLevelHeroBlock.parentElement
+  }
+  if (topLevelHeroBlock.parentElement !== main) return
+
+  const title = h1.textContent?.trim() || moduleMeta.mobileLabel || moduleMeta.label
+  const subtitle =
+    topLevelHeroBlock.querySelector('p')?.textContent?.trim() ||
+    `${moduleMeta.groupLabel}-Modul in UniSuite.`
+  const moduleTag =
+    /^\d+_/.test(moduleMeta.label) ? moduleMeta.label : `${moduleMeta.groupPrefix}_${moduleMeta.mobileLabel || slug}`
+
+  const standardHero = document.createElement('div')
+  standardHero.dataset.unisuiteStandardHero = 'true'
+  standardHero.className = 'border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 sm:p-8 space-y-4'
+  standardHero.innerHTML = `
+    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
+      <div class="flex items-center gap-2">
+        <span class="${moduleMeta.colorClass} font-bold">$</span>
+        <span>cat /etc/unisuite/modules/${slug}.md</span>
+      </div>
+      <div class="text-[11px] text-slate-500">
+        TU Darmstadt • FB Informatik • ${moduleTag}
+      </div>
+    </div>
+    <div class="space-y-2 pt-1">
+      <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white font-heading">${title}</h1>
+      <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">${subtitle}</p>
+    </div>
+  `
+
+  topLevelHeroBlock.replaceWith(standardHero)
+}
+
 function renderDesktopMenu(relativePath) {
   return MODULE_GROUPS.map(group => {
     const dropdownAlign = group.alignClass || 'left-0'
@@ -209,6 +268,8 @@ function renderFooter(relativePath) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  standardizeModuleHero()
+
   const inputs = document.querySelectorAll('input[type="text"], input[type="number"], select, textarea')
   inputs.forEach(input => {
     if (!input.id) return
