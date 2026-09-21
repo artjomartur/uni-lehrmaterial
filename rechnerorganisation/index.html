@@ -76,6 +76,9 @@
 
     <!-- Main Section Tabs -->
     <div class="flex flex-wrap gap-2 border-b border-[#1e2533] pb-3 font-mono text-xs">
+      <button onclick="switchROTab('lecture')" id="tab-btn-lecture" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        Vorlesung kompakt
+      </button>
       <button onclick="switchROTab('pipeline')" id="tab-btn-pipeline" class="ro-tab-btn px-4 py-2 rounded-lg bg-emerald-600 text-white font-bold transition">
         5-Stufen RISC-V Pipeline
       </button>
@@ -92,6 +95,63 @@
         KV-Diagramm Minimierer
       </button>
     </div>
+
+    <!-- ======================================================== -->
+    <!-- SECTION 0: VORLESUNGSKOMPENDIUM                         -->
+    <!-- ======================================================== -->
+    <section id="section-lecture" class="space-y-6 hidden">
+      <div class="border border-[#1e2533] rounded-2xl bg-[#0d1117] p-6 space-y-4 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2533] pb-4">
+          <div>
+            <div class="text-[11px] font-mono uppercase tracking-wider text-emerald-400">Vorlesung 1–3 · SoSe 2026</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white font-heading">Rechnerorganisation: das Gesamtbild</h2>
+          </div>
+          <span class="px-2.5 py-1 rounded border border-emerald-500/30 bg-emerald-950/40 text-[11px] font-mono text-emerald-300">lecture-notes --all</span>
+        </div>
+        <p class="text-sm text-slate-300 leading-relaxed max-w-4xl">Dieser Bereich fasst die zentralen Konzepte der drei Vorlesungsteile und der RISC-V-Unterlagen zusammen: von Zahlendarstellung und ISA über Prozessor-Datenpfade, Performance und Parallelität bis zu Speicherhierarchie und I/O. Die Simulatoren in den anderen Tabs machen die wichtigsten Modelle direkt ausführbar.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+          <a href="#lecture-part-1" class="p-3 rounded-xl bg-[#070919] border border-indigo-950 hover:border-indigo-500/50 transition"><span class="text-indigo-300">01</span><span class="block mt-1 text-slate-200 font-bold">ISA &amp; Datenpfad</span><span class="block mt-1 text-slate-500">RISC-V, ABI, Toolchain</span></a>
+          <a href="#lecture-part-2" class="p-3 rounded-xl bg-[#070919] border border-indigo-950 hover:border-emerald-500/50 transition"><span class="text-emerald-300">02</span><span class="block mt-1 text-slate-200 font-bold">Mikroarchitektur</span><span class="block mt-1 text-slate-500">CPI, Pipeline, OoO</span></a>
+          <a href="#lecture-part-3" class="p-3 rounded-xl bg-[#070919] border border-indigo-950 hover:border-amber-500/50 transition"><span class="text-amber-300">03</span><span class="block mt-1 text-slate-200 font-bold">Speicher &amp; I/O</span><span class="block mt-1 text-slate-500">Caches, AMAT, MMIO</span></a>
+        </div>
+      </div>
+
+      <div id="lecture-part-1" class="space-y-4">
+        <div class="flex items-end justify-between border-b border-[#1e2533] pb-2"><div><div class="text-[11px] font-mono uppercase tracking-wider text-indigo-400">Teil 1 · Architektur, ISA &amp; RISC-V</div><h2 class="text-lg font-bold text-white font-heading">Vom Programm zur Instruktion</h2></div><span class="text-[10px] font-mono text-slate-500">Organisation.pdf · Teil 1 · RISCV.pdf</span></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Abstraktion &amp; Entwurfsprinzipien</h3><p class="text-xs text-slate-300 leading-relaxed">Ein Programm durchläuft die Ebenen Anwendung, Betriebssystem, ISA, Mikroarchitektur, digitale Logik und Halbleiterphysik. Die ISA ist der Vertrag zwischen Software und Hardware: Sie definiert sichtbare Register, Datentypen, Instruktionen, Adressierung und Exceptions.</p><p class="text-xs text-slate-400 leading-relaxed"><b class="text-indigo-300">RISC:</b> wenige, regelmäßige Instruktionen, feste Länge, Load/Store und gute Pipeline-Eignung. <b class="text-indigo-300">CISC:</b> variable Länge und komplexere Instruktionen, oft mit Mikrocode.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Zahlen, Bytes &amp; Endianness</h3><p class="text-xs text-slate-300 leading-relaxed">Unsigned-Werte reichen bei $n$ Bits von $0$ bis $2^n-1$. Im Zweierkomplement repräsentieren $n$ Bits $-2^{n-1}$ bis $2^{n-1}-1$; Negation erfolgt durch Invertieren und Addieren von 1.</p><div class="p-3 rounded-lg bg-[#070919] border border-indigo-950 text-[11px] font-mono text-indigo-200">Little-Endian: 0xAABBCCDD → +0: DD · +1: CC · +2: BB · +3: AA</div><p class="text-xs text-slate-400">Byte- und wortadressierte Speicher unterscheiden sich darin, ob jede Adresse ein Byte oder ein Wort bezeichnet.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">RISC-V RV32I: Register &amp; Formate</h3><p class="text-xs text-slate-300 leading-relaxed">RV32I besitzt 32 Register mit 32 Bit. <code class="text-indigo-300">x0</code> ist konstant 0. Rechenoperationen arbeiten auf Registern; Speicherzugriff erfolgt über <code class="text-indigo-300">lw</code>/<code class="text-indigo-300">sw</code>. Die Basisformate sind R, I, S, B, U und J.</p><div class="grid grid-cols-2 gap-2 text-[11px] font-mono"><div class="p-2 rounded bg-[#070919] text-slate-300">R: rd, rs1, rs2</div><div class="p-2 rounded bg-[#070919] text-slate-300">I: rd, rs1, imm</div><div class="p-2 rounded bg-[#070919] text-slate-300">S: rs1, rs2, imm</div><div class="p-2 rounded bg-[#070919] text-slate-300">B/J: PC-relativ</div></div></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Kontrollfluss, Konstanten &amp; Funktionen</h3><p class="text-xs text-slate-300 leading-relaxed"><code class="text-indigo-300">lui</code> lädt die oberen 20 Bit, <code class="text-indigo-300">addi</code> ergänzt ein sign-erweitertes 12-Bit-Immediate. Für Arrays gilt Adresse = Basis + Index × Elementgröße; ein Linksshift ersetzt die Multiplikation durch eine Zweierpotenz.</p><p class="text-xs text-slate-400 leading-relaxed">Branches sind PC-relativ. Die ABI nutzt <code class="text-indigo-300">a0–a7</code> für Argumente/Returnwerte, <code class="text-indigo-300">t0–t6</code> und <code class="text-indigo-300">ra</code> als caller-saved sowie <code class="text-indigo-300">s0–s11</code> als callee-saved Register.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Stack, Toolchain &amp; ELF</h3><p class="text-xs text-slate-300 leading-relaxed">Der Stack wächst zu kleineren Adressen und bleibt ABI-konform ausgerichtet. Ein Funktionsprolog reserviert Platz und sichert <code class="text-indigo-300">ra</code> sowie callee-saved Register; der Epilog restauriert sie und gibt den Frame frei.</p><p class="text-xs text-slate-400 leading-relaxed"><b class="text-indigo-300">Compiler:</b> C → Assembly · <b class="text-indigo-300">Assembler:</b> Assembly → Objektdatei · <b class="text-indigo-300">Linker:</b> Symbole/Relocations → ELF · <b class="text-indigo-300">Loader:</b> Segmente in den Speicher.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Exceptions, Interrupts &amp; CSRs</h3><p class="text-xs text-slate-300 leading-relaxed">Eine Exception ist synchron und entsteht durch die aktuelle Instruktion, ein Interrupt ist asynchron und kommt etwa von Timer oder I/O. In Machine Mode sichern <code class="text-indigo-300">mepc</code> den PC, <code class="text-indigo-300">mcause</code> die Ursache und <code class="text-indigo-300">mtvec</code> die Handler-Adresse; <code class="text-indigo-300">mret</code> kehrt zurück.</p></article>
+        </div>
+      </div>
+
+      <div id="lecture-part-2" class="space-y-4">
+        <div class="flex items-end justify-between border-b border-[#1e2533] pb-2"><div><div class="text-[11px] font-mono uppercase tracking-wider text-emerald-400">Teil 2 · Mikroarchitektur</div><h2 class="text-lg font-bold text-white font-heading">Vom Datenpfad zum parallelen Prozessor</h2></div><span class="text-[10px] font-mono text-slate-500">Teil 2.pdf</span></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Performance-Grundlagen</h3><div class="p-3 rounded-lg bg-[#070919] border border-emerald-950 text-[11px] font-mono text-emerald-200 space-y-1"><div>CPU-Zeit = IC × CPI × Taktperiode</div><div>Taktperiode = 1 / Taktfrequenz</div><div>IPC = Instruktionen / Zyklus = 1 / CPI</div><div>Speedup = alte Zeit / neue Zeit</div></div><p class="text-xs text-slate-400">Latenz beschreibt die Zeit einer Aufgabe, Durchsatz die Aufgaben pro Zeit. Amdahl begrenzt: $S = 1 / ((1-f) + f/k)$.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Single-Cycle &amp; Multi-Cycle</h3><p class="text-xs text-slate-300 leading-relaxed">Im Single-Cycle-Prozessor beendet jede Instruktion ihren Weg in einem Takt. CPI ist 1, aber der längste Pfad, typischerweise <code class="text-emerald-300">lw</code>, bestimmt die Taktperiode. Ein Multi-Cycle-Prozessor teilt Fetch, Decode, Execute, Memory und Write-Back auf mehrere Takte auf und verwendet Einheiten wieder.</p><p class="text-xs text-slate-400">Eine FSM erzeugt die Steuersignale zustandsabhängig; dadurch sinkt die Taktzeit.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">5-Stufen-Pipeline</h3><div class="flex flex-wrap gap-1.5 text-[11px] font-mono"><span class="stage-if border rounded px-2 py-1">IF · Fetch</span><span class="stage-id border rounded px-2 py-1">ID · Decode</span><span class="stage-ex border rounded px-2 py-1">EX · ALU</span><span class="stage-mem border rounded px-2 py-1">MEM · RAM</span><span class="stage-wb border rounded px-2 py-1">WB · Register</span></div><p class="text-xs text-slate-300 leading-relaxed">Pipeline-Register trennen die Stufen. Nach dem Auffüllen kann idealerweise eine Instruktion pro Takt fertig werden; die Pipeline verkürzt vor allem die Taktperiode.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Hazards &amp; Gegenmaßnahmen</h3><p class="text-xs text-slate-300 leading-relaxed"><b class="text-emerald-300">RAW:</b> echte Datenabhängigkeit, durch Forwarding oder Stall. Ein direktes <code class="text-emerald-300">lw</code>-Use braucht typischerweise einen Stall, weil die Daten erst nach MEM verfügbar sind. <b class="text-emerald-300">WAR/WAW:</b> Namensabhängigkeiten, lösbar durch Register-Renaming.</p><p class="text-xs text-slate-400"><b>Control Hazard:</b> falsche Pfade werden geflusht. <b>Structural Hazard:</b> Ressourcen werden dupliziert oder zeitlich geteilt.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Out-of-Order &amp; Spekulation</h3><p class="text-xs text-slate-300 leading-relaxed">Reservation Stations, Register-Renaming und ein Reorder Buffer erlauben interne Parallelität, während das sichtbare Ergebnis in Programmreihenfolge committed wird. RAW bleibt erhalten; WAR und WAW werden durch neue physische Register entfernt.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">IEEE 754 Gleitkomma</h3><p class="text-xs text-slate-300 leading-relaxed">Single Precision besteht aus 1 Vorzeichenbit, 8 Exponentbits mit Bias 127 und 23 Mantissenbits. Für normale Zahlen gilt $(-1)^s × 1.f × 2^{e-127}$. Exponent 0 beschreibt Null/Subnormals, Exponent 255 Infinity oder NaN.</p></article>
+        </div>
+      </div>
+
+      <div id="lecture-part-3" class="space-y-4">
+        <div class="flex items-end justify-between border-b border-[#1e2533] pb-2"><div><div class="text-[11px] font-mono uppercase tracking-wider text-amber-400">Teil 3 · Speicherhierarchie &amp; I/O</div><h2 class="text-lg font-bold text-white font-heading">Nähe, Lokalität und adressierte Geräte</h2></div><span class="text-[10px] font-mono text-slate-500">Teil 3.pdf</span></div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Lokalität &amp; Cache-Aufbau</h3><p class="text-xs text-slate-300 leading-relaxed">Caches nutzen zeitliche und räumliche Lokalität. Eine Adresse zerfällt in <b>Tag | Set-Index | Block-/Byte-Offset</b>. Offset-Bits = $log_2(Blockgröße)$, Index-Bits = $log_2(Anzahl Sets)$, Tag-Bits = Adressbreite − Index − Offset.</p><p class="text-xs text-slate-400">Direct-Mapped hat eine Zeile je Set, N-Way mehrere Wege, vollassoziativ keine feste Set-Zuordnung.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Die 3 Cs &amp; Ersetzung</h3><p class="text-xs text-slate-300 leading-relaxed"><b class="text-amber-300">Compulsory:</b> erster Zugriff. <b class="text-amber-300">Capacity:</b> Arbeitsmenge passt nicht. <b class="text-amber-300">Conflict:</b> Kollision wegen der Zuordnung. Bei mehreren Wegen helfen LRU, FIFO oder Random bei der Opferauswahl.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">AMAT &amp; Schreibstrategien</h3><div class="p-3 rounded-lg bg-[#070919] border border-amber-950 text-[11px] font-mono text-amber-200">AMAT = Hit Time + Miss Rate × Miss Penalty</div><p class="text-xs text-slate-300 leading-relaxed"><b>Write-through</b> schreibt Treffer sofort weiter. <b>Write-back</b> schreibt erst bei Verdrängung zurück und nutzt ein Dirty-Bit. Bei mehreren Ebenen wird die nächste Ebene Teil der Miss Penalty.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Virtueller Speicher</h3><p class="text-xs text-slate-300 leading-relaxed">Virtuelle Adressen werden über Seiten- und Seitentabellen in physische Frames übersetzt; der TLB cached Übersetzungen. Ein Page Fault lädt eine Seite aus dem Sekundärspeicher und ist deutlich teurer als ein Cache-Miss.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Memory-Mapped I/O</h3><p class="text-xs text-slate-300 leading-relaxed">Geräteregister liegen in einem reservierten physischen Adressbereich. CPU-Zugriffe auf diese Adressen werden mit normalen Load/Store-Instruktionen zu I/O-Operationen. Volatile-Zugriffe, Reihenfolge und Interrupts sind dabei entscheidend.</p></article>
+          <article class="cs-card rounded-xl p-5 space-y-3"><h3 class="text-sm font-bold text-white">Klausur-Checkliste</h3><ol class="list-decimal list-inside text-xs text-slate-300 space-y-1.5"><li>Bei Assembler Registerrollen, Immediate und Datenformat markieren.</li><li>Bei Pipeline-Aufgaben RAW und Load-Use getrennt prüfen.</li><li>Bei Cache-Aufgaben zuerst Sets, Offset und Tag berechnen.</li><li>Bei Performance-Aufgaben Einheiten kontrollieren und Amdahl anwenden.</li><li>Bei Exceptions Ursache, CSR-Sicherung, Handler und <code class="text-amber-300">mret</code> notieren.</li></ol></article>
+        </div>
+      </div>
+    </section>
 
     <!-- ======================================================== -->
     <!-- SECTION 1: 5-STUFEN RISC-V PIPELINE SIMULATOR            -->
@@ -549,7 +609,7 @@
        TAB SWITCHING
        ========================================================================== */
     function switchROTab(tabId) {
-      const tabs = ['pipeline', 'cache', 'ieee', 'performance', 'kv'];
+      const tabs = ['lecture', 'pipeline', 'cache', 'ieee', 'performance', 'kv'];
       tabs.forEach(t => {
         const sec = document.getElementById('section-' + t);
         const btn = document.getElementById('tab-btn-' + t);
