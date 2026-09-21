@@ -105,6 +105,9 @@
       <button onclick="switchROTab('kv')" id="tab-btn-kv" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
         KV-Diagramm Minimierer
       </button>
+      <button onclick="switchROTab('calling')" id="tab-btn-calling" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+        Aufrufkonventionen
+      </button>
     </div>
 
     <!-- ======================================================== -->
@@ -650,6 +653,285 @@
       </div>
     </section>
 
+    <!-- ======================================================== -->
+    <!-- SECTION 6: AUFRUFKONVENTIONEN (CALLING CONVENTIONS)      -->
+    <!-- ======================================================== -->
+    <section id="section-calling" class="space-y-6 hidden">
+
+      <!-- Header -->
+      <div class="border border-[#1e2533] rounded-2xl bg-[#0d1117] p-6 space-y-3 shadow-xl">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2533] pb-4">
+          <div>
+            <div class="text-[11px] font-mono uppercase tracking-wider text-emerald-400">ABI · RISC-V Calling Convention · SoSe 2026</div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white font-heading">Aufrufkonventionen &amp; Stack-Frame Werkzeug</h2>
+          </div>
+          <span class="px-2.5 py-1 rounded border border-emerald-500/30 bg-emerald-950/40 text-[11px] font-mono text-emerald-300">abi --riscv32 --stackframe</span>
+        </div>
+        <p class="text-sm text-slate-300 leading-relaxed max-w-4xl">
+          Interaktives Werkzeug für die RISC-V ABI: Register-Rollen, caller/callee-saved Regeln, Stack-Frame Visualisierung und animierter Funktionsaufruf-Simulator mit echtem Prolog- und Epilog-Assembly.
+        </p>
+        <!-- Sub-Tabs -->
+        <div class="flex flex-wrap gap-2 pt-2 font-mono text-xs">
+          <button onclick="switchCallingTab('registers')" id="ctab-btn-registers" class="calling-tab-btn px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold transition shadow">Registerübersicht</button>
+          <button onclick="switchCallingTab('stackframe')" id="ctab-btn-stackframe" class="calling-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">Stack-Frame Visualizer</button>
+          <button onclick="switchCallingTab('simulator')" id="ctab-btn-simulator" class="calling-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">Funktionsaufruf-Simulator</button>
+          <button onclick="switchCallingTab('quiz')" id="ctab-btn-quiz" class="calling-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">ABI-Quiz</button>
+        </div>
+      </div>
+
+      <!-- Sub-Section: Registerübersicht -->
+      <div id="ctab-registers" class="space-y-5">
+        <!-- Filter Bar -->
+        <div class="flex flex-wrap gap-2 items-center text-xs font-mono">
+          <span class="text-slate-400 font-semibold">Filter:</span>
+          <button onclick="filterRegs('all')" id="rfilt-all" class="reg-filter-btn px-3 py-1.5 rounded bg-indigo-600 text-white border border-indigo-500 transition">Alle 32</button>
+          <button onclick="filterRegs('args')" id="rfilt-args" class="reg-filter-btn px-3 py-1.5 rounded bg-[#070919] text-sky-300 border border-sky-800 hover:bg-sky-950/40 transition">Argumente / Rückgabe (a0–a7)</button>
+          <button onclick="filterRegs('caller')" id="rfilt-caller" class="reg-filter-btn px-3 py-1.5 rounded bg-[#070919] text-amber-300 border border-amber-800 hover:bg-amber-950/40 transition">Caller-Saved (t0–t6, ra)</button>
+          <button onclick="filterRegs('callee')" id="rfilt-callee" class="reg-filter-btn px-3 py-1.5 rounded bg-[#070919] text-emerald-300 border border-emerald-800 hover:bg-emerald-950/40 transition">Callee-Saved (s0–s11)</button>
+          <button onclick="filterRegs('special')" id="rfilt-special" class="reg-filter-btn px-3 py-1.5 rounded bg-[#070919] text-rose-300 border border-rose-800 hover:bg-rose-950/40 transition">Sonder (zero, sp, gp…)</button>
+        </div>
+
+        <!-- Register Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="reg-grid">
+          <!-- JS populated -->
+        </div>
+
+        <!-- Legend -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono pt-2 border-t border-[#1e2533]">
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-rose-600 flex-shrink-0"></span><span class="text-slate-300">Sonderregister</span></div>
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-sky-600 flex-shrink-0"></span><span class="text-slate-300">Argument / Rückgabe</span></div>
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-amber-600 flex-shrink-0"></span><span class="text-slate-300">Caller-Saved (temporär)</span></div>
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-emerald-600 flex-shrink-0"></span><span class="text-slate-300">Callee-Saved (gesichert)</span></div>
+        </div>
+
+        <!-- Caller vs Callee Explanation -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+          <div class="bg-[#0b0e26] border border-amber-900/50 rounded-xl p-5 space-y-3">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-amber-400"></div>
+              <h3 class="font-bold text-amber-300 text-sm">Caller-Saved Register</h3>
+            </div>
+            <p class="text-slate-300 leading-relaxed">Der <b class="text-amber-300">Aufrufer</b> ist dafür verantwortlich, diese Register <b>vor dem Aufruf</b> auf dem Stack zu sichern, wenn er sie danach noch benötigt. Nach dem Aufruf kann die aufgerufene Funktion diese Register verändert haben.</p>
+            <div class="p-3 bg-[#070919] rounded-lg border border-amber-900/30 font-mono text-amber-200 text-[11px] space-y-1">
+              <div># Caller sichert t0, wenn nach dem call gebraucht</div>
+              <div class="text-slate-400">addi sp, sp, -4</div>
+              <div class="text-slate-400">sw   t0, 0(sp)    # sichern</div>
+              <div class="text-amber-300">call foo</div>
+              <div class="text-slate-400">lw   t0, 0(sp)    # wiederherstellen</div>
+              <div class="text-slate-400">addi sp, sp, 4</div>
+            </div>
+            <p class="text-slate-500 text-[10px]">Register: <code class="text-amber-300">ra, t0–t6</code></p>
+          </div>
+          <div class="bg-[#0b0e26] border border-emerald-900/50 rounded-xl p-5 space-y-3">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+              <h3 class="font-bold text-emerald-300 text-sm">Callee-Saved Register</h3>
+            </div>
+            <p class="text-slate-300 leading-relaxed">Die <b class="text-emerald-300">aufgerufene Funktion</b> muss diese Register <b>am Ende wiederherstellen</b>, bevor sie zurückkehrt. Der Aufrufer kann darauf vertrauen, dass sie unverändert sind.</p>
+            <div class="p-3 bg-[#070919] rounded-lg border border-emerald-900/30 font-mono text-emerald-200 text-[11px] space-y-1">
+              <div># Callee-Prolog: s0 sichern</div>
+              <div class="text-slate-400">addi sp, sp, -8</div>
+              <div class="text-slate-400">sw   ra, 4(sp)    # (falls non-leaf)</div>
+              <div class="text-slate-400">sw   s0, 0(sp)    # callee sichert</div>
+              <div class="text-emerald-300"># ... Funktionskörper ...</div>
+              <div class="text-slate-400">lw   s0, 0(sp)    # wiederherstellen</div>
+              <div class="text-slate-400">lw   ra, 4(sp)</div>
+              <div class="text-slate-400">addi sp, sp, 8</div>
+              <div class="text-slate-400">ret</div>
+            </div>
+            <p class="text-slate-500 text-[10px]">Register: <code class="text-emerald-300">s0–s11 (fp), sp</code></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Section: Stack-Frame Visualizer -->
+      <div id="ctab-stackframe" class="hidden space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Controls -->
+          <div class="lg:col-span-5 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl">
+            <div class="border-b border-indigo-950 pb-3">
+              <h3 class="font-bold text-white text-sm">🏗 Stack-Frame Konfigurator</h3>
+              <p class="text-xs text-slate-400 mt-1">Konfiguriere eine Funktion und beobachte den erzeugten Stack-Frame.</p>
+            </div>
+
+            <!-- Presets -->
+            <div class="space-y-2">
+              <label class="text-xs text-slate-400 font-semibold">Szenario laden:</label>
+              <div class="flex flex-wrap gap-2 text-xs font-mono">
+                <button onclick="loadSFPreset('leaf')" class="px-2.5 py-1.5 rounded bg-[#070919] border border-emerald-800 text-emerald-300 hover:bg-emerald-950/40 transition">Leaf-Funktion</button>
+                <button onclick="loadSFPreset('nonleaf')" class="px-2.5 py-1.5 rounded bg-[#070919] border border-amber-800 text-amber-300 hover:bg-amber-950/40 transition">Non-Leaf Funktion</button>
+                <button onclick="loadSFPreset('recursive')" class="px-2.5 py-1.5 rounded bg-[#070919] border border-rose-800 text-rose-300 hover:bg-rose-950/40 transition">Rekursive Funktion</button>
+              </div>
+            </div>
+
+            <!-- Config Fields -->
+            <div class="space-y-3 text-xs">
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-slate-400 mb-1">Funktion (nicht-leaf?)</label>
+                  <select id="sf-isleaf" onchange="buildStackFrame()" class="w-full bg-[#070919] border border-indigo-900 rounded-lg p-2 text-white outline-none font-mono">
+                    <option value="leaf">Leaf (kein Untercall)</option>
+                    <option value="nonleaf">Non-Leaf (ruft andere auf)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-slate-400 mb-1">Anzahl Argumente (a0–a7)</label>
+                  <select id="sf-args" onchange="buildStackFrame()" class="w-full bg-[#070919] border border-indigo-900 rounded-lg p-2 text-white outline-none font-mono">
+                    <option value="1">1 (a0)</option>
+                    <option value="2" selected>2 (a0, a1)</option>
+                    <option value="3">3 (a0–a2)</option>
+                    <option value="4">4 (a0–a3)</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Callee-saved Register benutzt</label>
+                <div class="flex flex-wrap gap-2" id="sf-saved-regs">
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="sf-s0" onchange="buildStackFrame()" class="accent-emerald-500"><span class="text-slate-300 font-mono">s0/fp</span></label>
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="sf-s1" onchange="buildStackFrame()" class="accent-emerald-500"><span class="text-slate-300 font-mono">s1</span></label>
+                  <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="sf-s2" onchange="buildStackFrame()" class="accent-emerald-500"><span class="text-slate-300 font-mono">s2</span></label>
+                </div>
+              </div>
+              <div>
+                <label class="block text-slate-400 mb-1">Lokale Variablen (Wörter à 4 Bytes)</label>
+                <input type="range" id="sf-locals" min="0" max="6" value="1" oninput="buildStackFrame()" class="w-full accent-indigo-500">
+                <div class="flex justify-between text-[10px] text-slate-500 font-mono"><span>0</span><span id="sf-locals-val">1 Wort (4 Bytes)</span><span>6</span></div>
+              </div>
+            </div>
+
+            <!-- Generated Assembly -->
+            <div class="space-y-2">
+              <div class="text-xs font-semibold text-slate-300">Erzeugtes RISC-V Assembly:</div>
+              <div id="sf-asm-out" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 font-mono text-[11px] text-slate-300 leading-relaxed whitespace-pre overflow-x-auto custom-scrollbar min-h-[120px]">
+                <!-- JS populated -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Stack Diagram -->
+          <div class="lg:col-span-7 bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-4 shadow-xl">
+            <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+              <h3 class="font-bold text-white text-sm">📊 Stack-Frame Diagramm</h3>
+              <span class="text-xs font-mono text-slate-400">Stack wächst ↓ (zu kleineren Adressen)</span>
+            </div>
+            <div id="sf-diagram" class="space-y-1 font-mono text-xs overflow-y-auto custom-scrollbar max-h-[500px]">
+              <!-- JS populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Section: Funktionsaufruf-Simulator -->
+      <div id="ctab-simulator" class="hidden space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Left: Code + Controls -->
+          <div class="lg:col-span-5 space-y-5">
+            <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
+              <div class="border-b border-indigo-950 pb-3">
+                <h3 class="font-bold text-white text-sm">🎬 Funktionsaufruf-Szenarien</h3>
+                <p class="text-xs text-slate-400 mt-1">Schritt für Schritt durch Prolog, Call, und Epilog.</p>
+              </div>
+              <div class="flex flex-wrap gap-2 text-xs font-mono">
+                <button onclick="loadCallScenario('simple')" class="px-3 py-1.5 rounded bg-[#070919] border border-indigo-800 text-indigo-300 hover:bg-indigo-950/40 transition">int add(a, b)</button>
+                <button onclick="loadCallScenario('factorial')" class="px-3 py-1.5 rounded bg-[#070919] border border-amber-800 text-amber-300 hover:bg-amber-950/40 transition">int factorial(n) – rekursiv</button>
+                <button onclick="loadCallScenario('nested')" class="px-3 py-1.5 rounded bg-[#070919] border border-rose-800 text-rose-300 hover:bg-rose-950/40 transition">void foo() ruft bar()</button>
+              </div>
+              <!-- Assembly Steps -->
+              <div id="sim-asm-steps" class="space-y-1 font-mono text-[11px]">
+                <!-- JS populated -->
+              </div>
+              <!-- Controls -->
+              <div class="flex gap-2">
+                <button onclick="simReset()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition">↺ Reset</button>
+                <button onclick="simStep(-1)" class="px-3 py-1.5 rounded-lg bg-[#151c28] hover:bg-[#1e293b] border border-[#273248] text-xs text-slate-300 transition">← Zurück</button>
+                <button onclick="simStep(1)" id="sim-step-btn" class="flex-1 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition shadow-md">Schritt vor →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Stack + Register State -->
+          <div class="lg:col-span-7 space-y-5">
+            <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-4 shadow-xl">
+              <div class="flex items-center justify-between border-b border-indigo-950 pb-2">
+                <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Live Stack</h3>
+                <span id="sim-step-badge" class="font-mono text-xs text-indigo-400 font-bold">Schritt 0</span>
+              </div>
+              <div id="sim-stack-vis" class="font-mono text-xs space-y-1 max-h-[300px] overflow-y-auto custom-scrollbar">
+                <!-- JS populated -->
+              </div>
+            </div>
+            <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-5 space-y-3 shadow-xl">
+              <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider">Register-Zustand</h3>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs" id="sim-reg-state">
+                <!-- JS populated -->
+              </div>
+              <div id="sim-explanation" class="p-3 bg-[#070919] rounded-xl border border-indigo-950 text-xs text-slate-300 leading-relaxed mt-2">
+                Wähle ein Szenario und klicke auf „Schritt vor".
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-Section: ABI-Quiz -->
+      <div id="ctab-quiz" class="hidden space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-5 shadow-xl" id="abi-quiz-card">
+            <div class="flex items-center justify-between border-b border-indigo-950 pb-3">
+              <h3 class="font-bold text-white text-sm">🎓 ABI-Quiz</h3>
+              <span id="abi-quiz-q-num" class="font-mono text-xs text-indigo-400">Frage 1 von 6</span>
+            </div>
+            <p id="abi-quiz-q-text" class="text-sm text-slate-200 leading-relaxed font-semibold"></p>
+            <div id="abi-quiz-options" class="space-y-2 text-xs"></div>
+            <div id="abi-quiz-feedback" class="hidden text-xs p-3 rounded-xl leading-relaxed"></div>
+            <div class="flex items-center justify-between pt-2 border-t border-indigo-950">
+              <span id="abi-quiz-score" class="font-mono text-xs text-slate-400">0 / 6 Punkte</span>
+              <button onclick="nextABIQuestion()" id="btn-abi-quiz-next" class="hidden px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition">Nächste Frage →</button>
+            </div>
+          </div>
+          <!-- ABI Quick-Reference -->
+          <div class="bg-[#0b0e26] border border-indigo-950 rounded-2xl p-6 space-y-4 shadow-xl">
+            <h3 class="font-bold text-white text-sm border-b border-indigo-950 pb-3">📋 ABI Schnellreferenz</h3>
+            <div class="space-y-3 text-xs font-mono">
+              <div class="p-2.5 rounded-lg bg-[#070919] border border-sky-900/40">
+                <div class="text-sky-300 font-bold mb-1">Argumente &amp; Rückgabe</div>
+                <div class="text-slate-400">a0–a7 (x10–x17): erste 8 Argumente</div>
+                <div class="text-slate-400">a0–a1: Rückgabewert(e)</div>
+                <div class="text-slate-500 text-[10px] mt-1">Mehr als 8 Args → Stack</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-[#070919] border border-amber-900/40">
+                <div class="text-amber-300 font-bold mb-1">Caller-Saved (temporär)</div>
+                <div class="text-slate-400">ra (x1), t0–t2 (x5–x7), t3–t6 (x28–x31)</div>
+                <div class="text-slate-500 text-[10px] mt-1">Nach call evtl. überschrieben</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-[#070919] border border-emerald-900/40">
+                <div class="text-emerald-300 font-bold mb-1">Callee-Saved (gesichert)</div>
+                <div class="text-slate-400">sp (x2), s0/fp–s11 (x8–x9, x18–x27)</div>
+                <div class="text-slate-500 text-[10px] mt-1">Callee stellt vor ret wieder her</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-[#070919] border border-rose-900/40">
+                <div class="text-rose-300 font-bold mb-1">Sonderregister</div>
+                <div class="text-slate-400">zero (x0): hardwired 0</div>
+                <div class="text-slate-400">sp (x2): Stack Pointer</div>
+                <div class="text-slate-400">gp (x3): Global Pointer</div>
+                <div class="text-slate-400">tp (x4): Thread Pointer</div>
+                <div class="text-slate-400">fp/s0 (x8): Frame Pointer</div>
+                <div class="text-slate-400">ra (x1): Return Address</div>
+              </div>
+              <div class="p-2.5 rounded-lg bg-[#070919] border border-indigo-900/40">
+                <div class="text-indigo-300 font-bold mb-1">Stack-Regeln</div>
+                <div class="text-slate-400">• Wächst zu kleineren Adressen (↓)</div>
+                <div class="text-slate-400">• sp muss 16-Byte-aligned sein (RISC-V ABI)</div>
+                <div class="text-slate-400">• Prolog: sp -= frame_size</div>
+                <div class="text-slate-400">• Epilog: sp += frame_size, dann ret</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
   </main>
 
   <!-- Footer -->
@@ -662,7 +944,7 @@
        TAB SWITCHING
        ========================================================================== */
     function switchROTab(tabId) {
-      const tabs = ['lecture', 'pipeline', 'cache', 'ieee', 'performance', 'kv'];
+      const tabs = ['lecture', 'pipeline', 'cache', 'ieee', 'performance', 'kv', 'calling'];
       tabs.forEach(t => {
         const sec = document.getElementById('section-' + t);
         const btn = document.getElementById('tab-btn-' + t);
@@ -679,6 +961,7 @@
       if (tabId === 'cache') updateCacheParams();
       if (tabId === 'ieee') renderIEEEBits();
       if (tabId === 'performance') calcAmdahl();
+      if (tabId === 'calling') initCallingConv();
     }
 
     /* ==========================================================================
@@ -1272,6 +1555,611 @@
       renderROQuestion();
       initKV();
     });
+
+    /* ==========================================================================
+       6. AUFRUFKONVENTIONEN (CALLING CONVENTIONS) WERKZEUG
+       ========================================================================== */
+
+    // --- Register Database ---
+    const RISCV_REGISTERS = [
+      { x: 0,  abi: 'zero', role: 'Hardwired Zero',          saved: 'special', note: 'Lesen → immer 0, Schreiben → ignoriert' },
+      { x: 1,  abi: 'ra',   role: 'Return Address',          saved: 'caller',  note: 'Rücksprungadresse; wird von JAL/JALR gesetzt; caller-saved, da Untercall überschreibt' },
+      { x: 2,  abi: 'sp',   role: 'Stack Pointer',           saved: 'callee',  note: 'Zeigt auf TOS; muss 16-Byte-aligned sein; callee muss ihn wiederherstellen' },
+      { x: 3,  abi: 'gp',   role: 'Global Pointer',          saved: 'special', note: 'Zeigt in .data/.bss; wird vom Linker gesetzt, nicht von der Funktion' },
+      { x: 4,  abi: 'tp',   role: 'Thread Pointer',          saved: 'special', note: 'Thread-Local-Storage; darf in Anwendungen kaum geändert werden' },
+      { x: 5,  abi: 't0',   role: 'Temporär / Alt-Link',     saved: 'caller',  note: 'Kurzlebige Zwischenwerte; auch als alternativer Link-Register nutzbar' },
+      { x: 6,  abi: 't1',   role: 'Temporär',                saved: 'caller',  note: 'Kurzlebig; Caller muss sichern, wenn nach call gebraucht' },
+      { x: 7,  abi: 't2',   role: 'Temporär',                saved: 'caller',  note: 'Kurzlebig; Caller muss sichern, wenn nach call gebraucht' },
+      { x: 8,  abi: 's0/fp',role: 'Saved / Frame Pointer',   saved: 'callee',  note: 'Callee-saved; wird oft als Frame Pointer (fp) verwendet' },
+      { x: 9,  abi: 's1',   role: 'Saved Register 1',        saved: 'callee',  note: 'Callee sichert im Prolog und stellt im Epilog wieder her' },
+      { x: 10, abi: 'a0',   role: 'Argument 0 / Return 0',   saved: 'args',    note: 'Erstes Argument und erster Rückgabewert' },
+      { x: 11, abi: 'a1',   role: 'Argument 1 / Return 1',   saved: 'args',    note: 'Zweites Argument; bei 64-Bit-Rückgabe: obere Hälfte' },
+      { x: 12, abi: 'a2',   role: 'Argument 2',              saved: 'args',    note: 'Drittes Argument' },
+      { x: 13, abi: 'a3',   role: 'Argument 3',              saved: 'args',    note: 'Viertes Argument' },
+      { x: 14, abi: 'a4',   role: 'Argument 4',              saved: 'args',    note: 'Fünftes Argument' },
+      { x: 15, abi: 'a5',   role: 'Argument 5',              saved: 'args',    note: 'Sechstes Argument' },
+      { x: 16, abi: 'a6',   role: 'Argument 6',              saved: 'args',    note: 'Siebtes Argument' },
+      { x: 17, abi: 'a7',   role: 'Argument 7 / Syscall Nr.',saved: 'args',    note: 'Achtes Argument; bei ecall: Syscall-Nummer' },
+      { x: 18, abi: 's2',   role: 'Saved Register 2',        saved: 'callee',  note: 'Callee-saved' },
+      { x: 19, abi: 's3',   role: 'Saved Register 3',        saved: 'callee',  note: 'Callee-saved' },
+      { x: 20, abi: 's4',   role: 'Saved Register 4',        saved: 'callee',  note: 'Callee-saved' },
+      { x: 21, abi: 's5',   role: 'Saved Register 5',        saved: 'callee',  note: 'Callee-saved' },
+      { x: 22, abi: 's6',   role: 'Saved Register 6',        saved: 'callee',  note: 'Callee-saved' },
+      { x: 23, abi: 's7',   role: 'Saved Register 7',        saved: 'callee',  note: 'Callee-saved' },
+      { x: 24, abi: 's8',   role: 'Saved Register 8',        saved: 'callee',  note: 'Callee-saved' },
+      { x: 25, abi: 's9',   role: 'Saved Register 9',        saved: 'callee',  note: 'Callee-saved' },
+      { x: 26, abi: 's10',  role: 'Saved Register 10',       saved: 'callee',  note: 'Callee-saved' },
+      { x: 27, abi: 's11',  role: 'Saved Register 11',       saved: 'callee',  note: 'Callee-saved' },
+      { x: 28, abi: 't3',   role: 'Temporär',                saved: 'caller',  note: 'Kurzlebig' },
+      { x: 29, abi: 't4',   role: 'Temporär',                saved: 'caller',  note: 'Kurzlebig' },
+      { x: 30, abi: 't5',   role: 'Temporär',                saved: 'caller',  note: 'Kurzlebig' },
+      { x: 31, abi: 't6',   role: 'Temporär',                saved: 'caller',  note: 'Kurzlebig' },
+    ];
+
+    const REG_COLORS = {
+      special: { bg: 'bg-rose-950/60',   border: 'border-rose-700/50',   badge: 'bg-rose-700 text-white',    text: 'text-rose-300' },
+      args:    { bg: 'bg-sky-950/60',    border: 'border-sky-700/50',    badge: 'bg-sky-700 text-white',     text: 'text-sky-300' },
+      caller:  { bg: 'bg-amber-950/60',  border: 'border-amber-700/50',  badge: 'bg-amber-700 text-white',   text: 'text-amber-300' },
+      callee:  { bg: 'bg-emerald-950/60',border: 'border-emerald-700/50',badge: 'bg-emerald-700 text-white', text: 'text-emerald-300' },
+    };
+
+    const BADGE_LABEL = { special: 'Sonder', args: 'Arg/Ret', caller: 'Caller-Saved', callee: 'Callee-Saved' };
+
+    let currentRegFilter = 'all';
+
+    function filterRegs(filter) {
+      currentRegFilter = filter;
+      // Update button styles
+      ['all','args','caller','callee','special'].forEach(f => {
+        const btn = document.getElementById('rfilt-' + f);
+        if (!btn) return;
+        if (f === filter) {
+          const baseColors = { all: 'bg-indigo-600 text-white border-indigo-500', args: 'bg-sky-700 text-white border-sky-500', caller: 'bg-amber-700 text-white border-amber-500', callee: 'bg-emerald-700 text-white border-emerald-500', special: 'bg-rose-700 text-white border-rose-500' };
+          btn.className = `reg-filter-btn px-3 py-1.5 rounded font-bold border transition ${baseColors[f]}`;
+        } else {
+          const offColors = { all: 'text-slate-300 border-slate-700', args: 'text-sky-300 border-sky-800', caller: 'text-amber-300 border-amber-800', callee: 'text-emerald-300 border-emerald-800', special: 'text-rose-300 border-rose-800' };
+          btn.className = `reg-filter-btn px-3 py-1.5 rounded bg-[#070919] border hover:opacity-80 transition ${offColors[f]}`;
+        }
+      });
+      renderRegGrid();
+    }
+
+    function renderRegGrid() {
+      const grid = document.getElementById('reg-grid');
+      if (!grid) return;
+      const regs = currentRegFilter === 'all'
+        ? RISCV_REGISTERS
+        : RISCV_REGISTERS.filter(r => r.saved === currentRegFilter);
+
+      grid.innerHTML = regs.map(r => {
+        const c = REG_COLORS[r.saved];
+        return `
+          <div class="${c.bg} border ${c.border} rounded-xl p-3 space-y-1.5 hover:brightness-110 transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] text-slate-500">x${r.x}</span>
+                <span class="font-mono font-bold ${c.text} text-sm">${r.abi}</span>
+              </div>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${c.badge}">${BADGE_LABEL[r.saved]}</span>
+            </div>
+            <div class="text-[11px] text-slate-300 font-semibold">${r.role}</div>
+            <div class="text-[10px] text-slate-500 leading-relaxed">${r.note}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // --- Sub-tab switching ---
+    function switchCallingTab(tabId) {
+      ['registers','stackframe','simulator','quiz'].forEach(t => {
+        const sec = document.getElementById('ctab-' + t);
+        const btn = document.getElementById('ctab-btn-' + t);
+        if (sec) sec.classList.toggle('hidden', t !== tabId);
+        if (btn) {
+          if (t === tabId) {
+            btn.className = 'calling-tab-btn px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold transition shadow';
+          } else {
+            btn.className = 'calling-tab-btn px-3 py-1.5 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition';
+          }
+        }
+      });
+      if (tabId === 'stackframe') buildStackFrame();
+      if (tabId === 'simulator') { loadCallScenario('simple'); }
+      if (tabId === 'quiz') { abiQuizIdx = 0; abiQuizScore = 0; renderABIQuestion(); }
+    }
+
+    function initCallingConv() {
+      renderRegGrid();
+    }
+
+    // --- Stack Frame Visualizer ---
+    const SF_PRESETS = {
+      leaf:      { isleaf: 'leaf',    args: '2', s0: false, s1: false, s2: false, locals: 1 },
+      nonleaf:   { isleaf: 'nonleaf', args: '3', s0: true,  s1: true,  s2: false, locals: 2 },
+      recursive: { isleaf: 'nonleaf', args: '1', s0: true,  s1: false, s2: false, locals: 1 },
+    };
+
+    function loadSFPreset(key) {
+      const p = SF_PRESETS[key];
+      document.getElementById('sf-isleaf').value = p.isleaf;
+      document.getElementById('sf-args').value   = p.args;
+      document.getElementById('sf-s0').checked   = p.s0;
+      document.getElementById('sf-s1').checked   = p.s1;
+      document.getElementById('sf-s2').checked   = p.s2;
+      document.getElementById('sf-locals').value = p.locals;
+      buildStackFrame();
+    }
+
+    function buildStackFrame() {
+      const isLeaf  = document.getElementById('sf-isleaf').value === 'leaf';
+      const nArgs   = parseInt(document.getElementById('sf-args').value);
+      const useS0   = document.getElementById('sf-s0').checked;
+      const useS1   = document.getElementById('sf-s1').checked;
+      const useS2   = document.getElementById('sf-s2').checked;
+      const nLocals = parseInt(document.getElementById('sf-locals').value);
+
+      const locLabel = document.getElementById('sf-locals-val');
+      locLabel.textContent = nLocals === 0 ? 'keine' : `${nLocals} Wort${nLocals > 1 ? 'er' : ''} (${nLocals * 4} Bytes)`;
+
+      // Compute frame size
+      let slots = [];
+      if (!isLeaf) slots.push({ label: 'ra', color: 'amber', desc: 'Rücksprungadresse (caller-saved durch callee gesichert)' });
+      if (useS0)   slots.push({ label: 's0/fp', color: 'emerald', desc: 'Saved Register s0 (Frame Pointer)' });
+      if (useS1)   slots.push({ label: 's1', color: 'emerald', desc: 'Saved Register s1' });
+      if (useS2)   slots.push({ label: 's2', color: 'emerald', desc: 'Saved Register s2' });
+      for (let i = 0; i < nLocals; i++) slots.push({ label: `var${i}`, color: 'indigo', desc: `Lokale Variable ${i}` });
+
+      // Pad to 4-word alignment (16 Bytes = RISC-V ABI requirement)
+      while (slots.length % 4 !== 0) slots.push({ label: '(padding)', color: 'slate', desc: 'Auffüllung für 16-Byte Alignment' });
+      const frameSize = slots.length * 4;
+
+      // Generate Assembly
+      const savedRegs = [];
+      if (!isLeaf) savedRegs.push('ra');
+      if (useS0)   savedRegs.push('s0');
+      if (useS1)   savedRegs.push('s1');
+      if (useS2)   savedRegs.push('s2');
+
+      let prolog = `# Prolog\naddi sp, sp, -${frameSize}   # Frame ${frameSize} Bytes reservieren\n`;
+      let epilog = `\n# Epilog\n`;
+      let offset = frameSize - 4;
+      savedRegs.forEach(r => {
+        prolog += `sw   ${r.padEnd(5)}, ${offset}(sp)   # ${r} sichern\n`;
+        epilog += `lw   ${r.padEnd(5)}, ${offset}(sp)   # ${r} wiederherstellen\n`;
+        offset -= 4;
+      });
+      if (useS0) prolog += `addi s0, sp, ${frameSize}   # fp = sp + frame_size\n`;
+      prolog += `\n# ... Funktionskörper ...\n`;
+      epilog += `addi sp, sp, ${frameSize}   # Frame freigeben\nret`;
+
+      document.getElementById('sf-asm-out').textContent = prolog + epilog;
+
+      // Render Diagram
+      const BASE_ADDR = 0x7FFFFFF0;
+      const callerSpAddr = BASE_ADDR;
+      const calleeSpAddr = BASE_ADDR - frameSize;
+
+      const colorMap = { amber: '#fbbf24', emerald: '#34d399', indigo: '#818cf8', slate: '#475569' };
+      const bgMap    = { amber: '#451a03', emerald: '#064e3b', indigo: '#1e1b4b', slate: '#1e293b' };
+
+      let diagHtml = '';
+
+      // Caller's frame indicator (above)
+      diagHtml += `<div class="flex items-center gap-2 mb-1">
+        <div class="w-2 h-2 rounded-full bg-slate-500"></div>
+        <span class="text-slate-400 text-[10px]">Caller-Stack (höhere Adressen, vor dem Aufruf)</span>
+      </div>`;
+
+      diagHtml += `<div class="border-dashed border-b-2 border-slate-600 mb-2 pb-1 text-[10px] text-slate-500 flex justify-between">
+        <span>← sp (alt, vor Prolog) = 0x${callerSpAddr.toString(16).toUpperCase()}</span>
+        <span class="text-slate-600">high</span>
+      </div>`;
+
+      // Stack rows (top = highest addr = caller sp - 4)
+      slots.forEach((slot, i) => {
+        const addr = callerSpAddr - (i + 1) * 4;
+        const isSp = i === slots.length - 1;
+        const col = colorMap[slot.color] || '#94a3b8';
+        const bg  = bgMap[slot.color]  || '#1e293b';
+        diagHtml += `
+          <div class="flex items-stretch gap-2 group relative">
+            <div class="w-28 text-right text-[10px] text-slate-500 font-mono self-center flex-shrink-0">
+              0x${addr.toString(16).toUpperCase()}${isSp ? '<br><span class="text-indigo-400 font-bold">← sp (nach Prolog)</span>' : ''}
+            </div>
+            <div class="flex-1 border rounded px-3 py-1.5 flex justify-between items-center transition"
+                 style="border-color: ${col}55; background-color: ${bg};">
+              <span class="font-bold" style="color: ${col}">${slot.label}</span>
+              <span class="text-[10px] text-slate-400 hidden group-hover:block">${slot.desc}</span>
+              <span class="text-[10px] text-slate-500">${slot.label.startsWith('(') ? '—' : '+' + ((slots.length - 1 - i) * 4) + '(sp)'}</span>
+            </div>
+          </div>`;
+      });
+
+      diagHtml += `<div class="border-t-2 border-dashed border-indigo-700 mt-2 pt-1 text-[10px] text-indigo-400 flex justify-between">
+        <span>sp (nach Prolog) = 0x${calleeSpAddr.toString(16).toUpperCase()}</span>
+        <span class="text-slate-600">low ↓</span>
+      </div>`;
+      diagHtml += `<div class="text-[10px] text-slate-500 mt-1">Frame-Größe: <span class="text-white font-bold">${frameSize} Bytes</span> · ${slots.length} Slots · ${savedRegs.length > 0 ? savedRegs.join(', ') + ' gesichert' : 'keine saved Regs'}</div>`;
+
+      document.getElementById('sf-diagram').innerHTML = diagHtml;
+    }
+
+    // --- Call Simulator ---
+    const CALL_SCENARIOS = {
+      simple: {
+        title: 'int add(int a, int b)  — Leaf-Funktion',
+        steps: [
+          {
+            label: 'CALLER: Argumente vorbereiten',
+            asm:   'li   a0, 5       # arg0 = 5\nli   a1, 3       # arg1 = 3',
+            regs:  { ra: '?', sp: '0x1000', a0: 5, a1: 3, a2: '?', t0: '?' },
+            stack: [],
+            sp:    0x1000,
+            explain: 'Argumente werden in a0 und a1 geladen. Da add() nur 2 Argumente hat, reichen a0 und a1.'
+          },
+          {
+            label: 'CALLER: Funktion aufrufen (jal ra, add)',
+            asm:   'jal  ra, add     # call; ra = PC+4',
+            regs:  { ra: '0x1008', sp: '0x1000', a0: 5, a1: 3, a2: '?', t0: '?' },
+            stack: [],
+            sp:    0x1000,
+            explain: 'JAL springt zu add() und schreibt die Rücksprungadresse (PC+4) in ra. Da add() eine Leaf-Funktion ist, braucht sie ra nicht zu sichern.'
+          },
+          {
+            label: 'CALLEE add(): Leaf — kein Prolog nötig',
+            asm:   'add: # Leaf-Funktion\n     # kein Prolog (kein Untercall)',
+            regs:  { ra: '0x1008', sp: '0x1000', a0: 5, a1: 3, a2: '?', t0: '?' },
+            stack: [],
+            sp:    0x1000,
+            explain: 'Eine Leaf-Funktion ruft keine weiteren Funktionen auf, daher wird ra nicht überschrieben. Kein Stackframe nötig.'
+          },
+          {
+            label: 'CALLEE add(): Berechnung',
+            asm:   'add  a0, a0, a1  # a0 = a0 + a1 = 5+3 = 8',
+            regs:  { ra: '0x1008', sp: '0x1000', a0: 8, a1: 3, a2: '?', t0: '?' },
+            stack: [],
+            sp:    0x1000,
+            explain: 'Ergebnis wird in a0 geschrieben (Rückgabewert gemäß ABI). a1 bleibt unverändert.'
+          },
+          {
+            label: 'CALLEE add(): Return (ret)',
+            asm:   'ret  # = jalr x0, ra, 0\n     # springt zurück zu 0x1008',
+            regs:  { ra: '0x1008', sp: '0x1000', a0: 8, a1: 3, a2: '?', t0: '?' },
+            stack: [],
+            sp:    0x1000,
+            explain: '`ret` ist ein Pseudobefehl für JALR x0, ra, 0. Er springt zur Adresse in ra. SP ist unverändert (kein Frame wurde angelegt).'
+          },
+          {
+            label: 'CALLER: Rückgabewert in a0',
+            asm:   '# Zurück beim Caller\n# a0 enthält jetzt 8 (Ergebnis)',
+            regs:  { ra: '0x1008', sp: '0x1000', a0: 8, a1: 3, a2: '?', t0: '?' },
+            stack: [],
+            sp:    0x1000,
+            explain: 'Der Caller kann a0 direkt verwenden. SP und alle callee-saved Register sind garantiert unverändert.'
+          },
+        ]
+      },
+      factorial: {
+        title: 'int factorial(int n)  — Rekursive Non-Leaf-Funktion',
+        steps: [
+          {
+            label: 'CALLER: n=4 als Argument',
+            asm:   'li   a0, 4       # arg0 = n = 4\njal  ra, fact   # call factorial',
+            regs:  { ra: '?', sp: '0x2000', a0: 4, s0: '?', t0: '?' },
+            stack: [],
+            sp:    0x2000,
+            explain: 'n=4 in a0, JAL springt zu factorial() und setzt ra auf die Rücksprungadresse.'
+          },
+          {
+            label: 'fact(4): Prolog — Frame anlegen',
+            asm:   'fact:\naddi sp, sp, -8  # Frame: 2 Slots\nsw   ra, 4(sp)   # ra sichern (Non-Leaf!)\nsw   a0, 0(sp)   # n=4 sichern (wird in Untercall überschrieben)',
+            regs:  { ra: 'caller_ra', sp: '0x1FF8', a0: 4, s0: '?', t0: '?' },
+            stack: [{ addr: '0x1FFC', label: 'ra (caller_ra)', color: 'amber' }, { addr: '0x1FF8', label: 'n=4 (a0 backup)', color: 'indigo' }],
+            sp:    0x1FF8,
+            explain: 'Prolog: sp -= 8. ra wird gesichert, weil der rekursive Aufruf ra überschreiben wird. n wird gesichert, weil a0 für den rekursiven Aufruf gebraucht wird.'
+          },
+          {
+            label: 'fact(4): Basisfall prüfen & Rekursion',
+            asm:   'addi t0, a0, -1\nbeqz t0, base    # if n==1: return 1\naddi a0, a0, -1  # a0 = n-1 = 3\njal  ra, fact    # call factorial(3)',
+            regs:  { ra: 'fact+12', sp: '0x1FF8', a0: 3, s0: '?', t0: 3 },
+            stack: [{ addr: '0x1FFC', label: 'ra', color: 'amber' }, { addr: '0x1FF8', label: 'n=4', color: 'indigo' }],
+            sp:    0x1FF8,
+            explain: 'n != 1, also rekursiver Aufruf mit n-1=3. ra wird jetzt auf die Adresse nach dem JAL gesetzt (überschreibt den alten Wert — deshalb musste er gesichert werden!).'
+          },
+          {
+            label: '... Rekursion fact(3), fact(2), fact(1) ...',
+            asm:   '# [fact(3), fact(2) werden analog ausgeführt]\n# fact(1): Basisfall → a0 = 1, ret\n# Stack ist auf 0x1FE8 gewachsen (3 weitere Frames)',
+            regs:  { ra: '...', sp: '0x1FE8', a0: 1, s0: '?', t0: '?' },
+            stack: [
+              { addr: '0x1FFC', label: 'ra (→caller)', color: 'amber' }, { addr: '0x1FF8', label: 'n=4', color: 'indigo' },
+              { addr: '0x1FF4', label: 'ra (→fact+12)', color: 'amber' }, { addr: '0x1FF0', label: 'n=3', color: 'indigo' },
+              { addr: '0x1FEC', label: 'ra (→fact+12)', color: 'amber' }, { addr: '0x1FE8', label: 'n=2', color: 'indigo' },
+            ],
+            sp:    0x1FE8,
+            explain: 'Jede rekursive Instanz legt ihren eigenen Frame an. fact(1) gibt 1 zurück. Der Stack wächst nach unten.'
+          },
+          {
+            label: 'fact(2): Epilog & Rückgabe',
+            asm:   '# a0 = fact(1) = 1 zurück\nlw   t0, 0(sp)    # n=2 laden\nlw   ra, 4(sp)    # ra wiederherstellen\naddi sp, sp, 8   # Frame freigeben\nmul  a0, a0, t0  # a0 = 1 * 2 = 2\nret',
+            regs:  { ra: 'fact+12', sp: '0x1FF0', a0: 2, s0: '?', t0: 2 },
+            stack: [
+              { addr: '0x1FFC', label: 'ra (→caller)', color: 'amber' }, { addr: '0x1FF8', label: 'n=4', color: 'indigo' },
+              { addr: '0x1FF4', label: 'ra (→fact+12)', color: 'amber' }, { addr: '0x1FF0', label: 'n=3', color: 'indigo' },
+            ],
+            sp:    0x1FF0,
+            explain: 'Epilog: gespeicherte Werte laden, sp freigeben, Ergebnis berechnen, zurückspringen. fact(2)=2 in a0.'
+          },
+          {
+            label: 'fact(4): Epilog — Ergebnis = 24',
+            asm:   '# a0 = fact(3) = 6 zurück\nlw   t0, 0(sp)    # n=4 laden\nlw   ra, 4(sp)    # ra = caller_ra\naddi sp, sp, 8   # Frame freigeben\nmul  a0, a0, t0  # a0 = 6 * 4 = 24\nret              # zurück zum Caller',
+            regs:  { ra: 'caller_ra', sp: '0x2000', a0: 24, s0: '?', t0: 4 },
+            stack: [],
+            sp:    0x2000,
+            explain: 'Der Stack ist wieder auf 0x2000 — genau wie vor dem Aufruf. a0 = 24 = 4!. ra wurde wiederhergestellt, sp ist aligned.'
+          },
+        ]
+      },
+      nested: {
+        title: 'void foo() ruft bar()  — Caller/Callee Sicherung',
+        steps: [
+          {
+            label: 'foo(): Prolog',
+            asm:   'foo:\naddi sp, sp, -8\nsw   ra, 4(sp)   # ra sichern\nsw   s0, 0(sp)   # s0 (callee-saved) sichern',
+            regs:  { ra: 'main_ra', sp: '0x3FF8', a0: '?', s0: 'original_s0', t0: '?' },
+            stack: [{ addr: '0x3FFC', label: 'ra (→main_ra)', color: 'amber' }, { addr: '0x3FF8', label: 's0 (original)', color: 'emerald' }],
+            sp:    0x3FF8,
+            explain: 'foo() ist non-leaf: ra sichern (wird von jal überschrieben). foo() benutzt s0 → muss es als Callee sichern.'
+          },
+          {
+            label: 'foo(): s0 für eigene Arbeit nutzen',
+            asm:   'li   s0, 42      # s0 = 42 (lokale Variable in s0)\n# ... weitere Arbeit ...',
+            regs:  { ra: 'main_ra', sp: '0x3FF8', a0: '?', s0: 42, t0: '?' },
+            stack: [{ addr: '0x3FFC', label: 'ra (→main_ra)', color: 'amber' }, { addr: '0x3FF8', label: 's0 = original', color: 'emerald' }],
+            sp:    0x3FF8,
+            explain: 's0 kann jetzt frei verwendet werden, da der Originalwert auf dem Stack gesichert ist.'
+          },
+          {
+            label: 'foo(): bar() aufrufen',
+            asm:   'li   a0, 7       # Argument für bar()\njal  ra, bar    # call bar(); ra = foo+8',
+            regs:  { ra: 'foo+8', sp: '0x3FF8', a0: 7, s0: 42, t0: '?' },
+            stack: [{ addr: '0x3FFC', label: 'ra (→main_ra)', color: 'amber' }, { addr: '0x3FF8', label: 's0 = original', color: 'emerald' }],
+            sp:    0x3FF8,
+            explain: 'ra wird durch JAL überschrieben (jetzt → foo+8). Das ist OK, weil der alte ra auf dem Stack gesichert ist.'
+          },
+          {
+            label: 'bar(): eigener Prolog (Leaf)',
+            asm:   'bar:\n# Leaf → kein Prolog nötig\nadd  a0, a0, a0  # a0 = 7+7 = 14\nret              # zurück zu foo+8',
+            regs:  { ra: 'foo+8', sp: '0x3FF8', a0: 14, s0: 42, t0: '?' },
+            stack: [{ addr: '0x3FFC', label: 'ra (→main_ra)', color: 'amber' }, { addr: '0x3FF8', label: 's0 = original', color: 'emerald' }],
+            sp:    0x3FF8,
+            explain: 'bar() ist eine Leaf-Funktion und verändert s0 NICHT (weil es callee-saved ist und bar() es nicht benutzt). Ergebnis a0=14.'
+          },
+          {
+            label: 'foo(): Nach bar() — s0 noch intakt!',
+            asm:   '# s0 ist noch 42 (bar hat es nicht verändert)\n# ABI garantiert das!',
+            regs:  { ra: 'foo+8', sp: '0x3FF8', a0: 14, s0: 42, t0: '?' },
+            stack: [{ addr: '0x3FFC', label: 'ra (→main_ra)', color: 'amber' }, { addr: '0x3FF8', label: 's0 = original', color: 'emerald' }],
+            sp:    0x3FF8,
+            explain: 'Die ABI garantiert: Callee-saved Register sind nach einem Aufruf unverändert. s0 = 42, als hätte kein Aufruf stattgefunden.'
+          },
+          {
+            label: 'foo(): Epilog — alles wiederherstellen',
+            asm:   'lw   s0, 0(sp)   # s0 wiederherstellen\nlw   ra, 4(sp)   # ra = main_ra\naddi sp, sp, 8\nret              # zurück zu main',
+            regs:  { ra: 'main_ra', sp: '0x4000', a0: 14, s0: 'original_s0', t0: '?' },
+            stack: [],
+            sp:    0x4000,
+            explain: 'Epilog: s0 und ra werden aus dem Stack geladen. sp wird auf den ursprünglichen Wert zurückgesetzt. main() sieht s0 unverändert (= original_s0).'
+          },
+        ]
+      }
+    };
+
+    let currentSimScenario = null;
+    let simStepIdx = 0;
+
+    function loadCallScenario(key) {
+      currentSimScenario = key;
+      simStepIdx = 0;
+      const scenario = CALL_SCENARIOS[key];
+
+      // Render assembly steps list
+      const stepsEl = document.getElementById('sim-asm-steps');
+      stepsEl.innerHTML = scenario.steps.map((s, i) => `
+        <div id="sim-step-${i}" class="flex gap-2 p-2 rounded-lg transition ${i === 0 ? 'bg-indigo-950/60 border border-indigo-700/50' : 'border border-transparent'}">
+          <span class="text-indigo-400 font-bold flex-shrink-0 text-[10px] mt-0.5">${i + 1}.</span>
+          <div>
+            <div class="text-slate-200 font-semibold text-[11px]">${s.label}</div>
+            <pre class="text-[10px] text-slate-400 leading-relaxed whitespace-pre-wrap">${s.asm}</pre>
+          </div>
+        </div>`).join('');
+
+      simRenderState();
+    }
+
+    function simReset() {
+      simStepIdx = 0;
+      if (currentSimScenario) loadCallScenario(currentSimScenario);
+    }
+
+    function simStep(dir) {
+      if (!currentSimScenario) { loadCallScenario('simple'); return; }
+      const scenario = CALL_SCENARIOS[currentSimScenario];
+      simStepIdx = Math.max(0, Math.min(scenario.steps.length - 1, simStepIdx + dir));
+      simRenderState();
+    }
+
+    function simRenderState() {
+      if (!currentSimScenario) return;
+      const scenario = CALL_SCENARIOS[currentSimScenario];
+      const step = scenario.steps[simStepIdx];
+
+      document.getElementById('sim-step-badge').textContent = `Schritt ${simStepIdx + 1} / ${scenario.steps.length}`;
+
+      // Highlight current step
+      scenario.steps.forEach((_, i) => {
+        const el = document.getElementById('sim-step-' + i);
+        if (!el) return;
+        if (i === simStepIdx) {
+          el.className = 'flex gap-2 p-2 rounded-lg bg-indigo-950/60 border border-indigo-700/50 transition';
+        } else if (i < simStepIdx) {
+          el.className = 'flex gap-2 p-2 rounded-lg bg-emerald-950/30 border border-transparent transition opacity-60';
+        } else {
+          el.className = 'flex gap-2 p-2 rounded-lg border border-transparent transition opacity-30';
+        }
+      });
+
+      // Render Stack
+      const stackEl = document.getElementById('sim-stack-vis');
+      const colorMap = { amber: '#fbbf24', emerald: '#34d399', indigo: '#818cf8', slate: '#475569' };
+      const bgMap    = { amber: '#451a03', emerald: '#064e3b', indigo: '#1e1b4b', slate: '#1e293b' };
+      if (step.stack.length === 0) {
+        stackEl.innerHTML = `<div class="text-center text-slate-500 text-xs p-4">
+          Stack leer (sp = 0x${step.sp.toString(16).toUpperCase()})
+        </div>`;
+      } else {
+        stackEl.innerHTML = step.stack.map(s => {
+          const col = colorMap[s.color] || '#94a3b8';
+          const bg  = bgMap[s.color]  || '#1e293b';
+          return `<div class="flex items-center gap-2">
+            <span class="text-[10px] text-slate-500 font-mono w-24 text-right flex-shrink-0">${s.addr}</span>
+            <div class="flex-1 border rounded px-3 py-1 flex justify-between items-center" style="border-color: ${col}55; background-color: ${bg};">
+              <span class="font-bold text-[11px]" style="color: ${col}">${s.label}</span>
+            </div>
+          </div>`;
+        }).join('') +
+        `<div class="text-[10px] text-indigo-400 font-mono mt-1 pl-26">sp = 0x${step.sp.toString(16).toUpperCase()} ↑</div>`;
+      }
+
+      // Render registers
+      const regEl = document.getElementById('sim-reg-state');
+      regEl.innerHTML = Object.entries(step.regs).map(([name, val]) => `
+        <div class="bg-[#070919] p-2 rounded border border-indigo-950 flex justify-between items-center">
+          <span class="text-slate-400 text-[11px]">${name}</span>
+          <span class="font-bold text-indigo-300 text-[11px] font-mono">${typeof val === 'number' ? '0x' + val.toString(16).toUpperCase().padStart(4,'0') : val}</span>
+        </div>`).join('');
+
+      // Explanation
+      document.getElementById('sim-explanation').innerHTML = `<b class="text-indigo-300">Schritt ${simStepIdx + 1}:</b> ${step.explain}`;
+    }
+
+    // --- ABI Quiz ---
+    const ABI_QUIZ = [
+      {
+        q: 'In welchem Register wird der Rückgabewert einer RISC-V Funktion (erstes 32-Bit-Ergebnis) übergeben?',
+        opts: ['a0 (x10)', 't0 (x5)', 's0 (x8)', 'ra (x1)'],
+        correct: 0,
+        exp: 'Der erste Rückgabewert steht in a0 (x10). Bei 64-Bit-Werten werden a0 und a1 zusammen verwendet.'
+      },
+      {
+        q: 'Eine Funktion foo() möchte s3 verwenden. Was muss sie tun, um ABI-konform zu sein?',
+        opts: [
+          's3 im Prolog auf dem Stack sichern und im Epilog wiederherstellen (callee-saved)',
+          'Nichts, s3 ist caller-saved und kann direkt benutzt werden',
+          's3 vor jedem Untercall sichern',
+          's3 durch t0 ersetzen, da t3 caller-saved ist'
+        ],
+        correct: 0,
+        exp: 's0–s11 sind callee-saved: Der Callee (die aufgerufene Funktion) muss sie vor Benutzung sichern und beim Return wiederherstellen.'
+      },
+      {
+        q: 'Was passiert mit dem Inhalt von t2, wenn eine Funktion bar() aufgerufen wird?',
+        opts: [
+          't2 kann nach dem Aufruf einen anderen Wert enthalten — der Caller muss es vorher sichern, wenn er es danach braucht',
+          't2 ist garantiert unverändert, da es callee-saved ist',
+          't2 wird automatisch von der Hardware gesichert',
+          't2 enthält nach dem Aufruf immer 0'
+        ],
+        correct: 0,
+        exp: 't0–t6 sind caller-saved (temporär): Die aufgerufene Funktion darf sie verändern. Wer den Wert danach braucht, muss ihn selbst sichern.'
+      },
+      {
+        q: 'Eine nicht-Blatt-Funktion (non-leaf) hat genau einen Untercall. Welche Aussage ist korrekt?',
+        opts: [
+          'ra muss im Prolog gesichert werden, da JAL es überschreibt',
+          'ra muss nicht gesichert werden, da non-leaf Funktionen kein ra benutzen',
+          'sp muss nicht verändert werden, wenn keine lokalen Variablen vorhanden sind',
+          'Das Ergebnis des Untercalls steht immer in a2'
+        ],
+        correct: 0,
+        exp: 'JAL schreibt die Rücksprungadresse in ra. Ein weiterer JAL überschreibt ra. Deshalb muss ra einer non-leaf Funktion im Prolog auf den Stack gesichert werden.'
+      },
+      {
+        q: 'Eine Funktion benötigt 5 Argumente. Wie werden sie gemäß RISC-V ABI übergeben?',
+        opts: [
+          'Argumente 1–5 in a0–a4, kein Stack nötig',
+          'Argumente 1–4 in a0–a3, Argument 5 auf dem Stack',
+          'Alle 5 auf dem Stack',
+          'Argumente 1–8 in a0–a7 (also immer Register, erst ab 9 Stack)'
+        ],
+        correct: 0,
+        exp: 'RISC-V ABI überträgt die ersten 8 Argumente in a0–a7. 5 Argumente passen alle in Register (a0–a4). Erst ab dem 9. Argument wird der Stack verwendet.'
+      },
+      {
+        q: 'Der Stack Pointer sp muss gemäß RISC-V ABI an welcher Grenze ausgerichtet sein?',
+        opts: [
+          '16-Byte-Alignment (sp % 16 == 0)',
+          '4-Byte-Alignment (sp % 4 == 0)',
+          '8-Byte-Alignment (sp % 8 == 0)',
+          'Keine Anforderung — sp kann beliebig sein'
+        ],
+        correct: 0,
+        exp: 'Der RISC-V ABI erfordert 16-Byte-Alignment für sp beim Funktionsaufruf. Prolog und Epilog müssen die Framesize entsprechend auf ein Vielfaches von 16 aufrunden.'
+      },
+    ];
+
+    let abiQuizIdx = 0;
+    let abiQuizScore = 0;
+
+    function renderABIQuestion() {
+      const card = document.getElementById('abi-quiz-card');
+      const total = ABI_QUIZ.length;
+      if (abiQuizIdx >= total) {
+        card.innerHTML = `
+          <div class="text-center p-8 space-y-3 bg-[#070919] rounded-xl border border-indigo-950">
+            <h3 class="text-xl font-bold text-white">Quiz abgeschlossen!</h3>
+            <p class="text-indigo-300 font-mono text-base">Ergebnis: ${abiQuizScore} von ${total} Fragen richtig.</p>
+            <p class="text-xs text-slate-400">${abiQuizScore === total ? '🎉 Perfekt! ABI vollständig verstanden.' : abiQuizScore >= total * 0.7 ? '👍 Gut! Noch ein paar Details zum Auffrischen.' : '📚 Noch üben! Die Registerrollen nochmal durchlesen.'}</p>
+            <button onclick="abiQuizIdx=0;abiQuizScore=0;renderABIQuestion()" class="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold transition">Nochmal versuchen</button>
+          </div>`;
+        return;
+      }
+      const q = ABI_QUIZ[abiQuizIdx];
+      document.getElementById('abi-quiz-q-num').textContent = `Frage ${abiQuizIdx + 1} von ${total}`;
+      document.getElementById('abi-quiz-q-text').textContent = q.q;
+      const optContainer = document.getElementById('abi-quiz-options');
+      optContainer.innerHTML = '';
+      document.getElementById('abi-quiz-feedback').className = 'hidden';
+      document.getElementById('btn-abi-quiz-next').className = 'hidden';
+      q.opts.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full p-3 rounded-lg bg-[#070919] hover:bg-indigo-950/60 border border-indigo-950 text-left text-slate-200 font-medium transition text-xs';
+        btn.textContent = opt;
+        btn.onclick = () => selectABIAnswer(idx);
+        optContainer.appendChild(btn);
+      });
+    }
+
+    function selectABIAnswer(idx) {
+      const q = ABI_QUIZ[abiQuizIdx];
+      const isOk = idx === q.correct;
+      if (isOk) abiQuizScore++;
+      document.getElementById('abi-quiz-score').textContent = `${abiQuizScore} / ${ABI_QUIZ.length} Punkte`;
+      const fb = document.getElementById('abi-quiz-feedback');
+      fb.className = `p-3.5 rounded-xl text-xs leading-relaxed ${isOk ? 'bg-emerald-950/70 border border-emerald-500/30 text-emerald-200' : 'bg-rose-950/70 border border-rose-500/30 text-rose-200'}`;
+      fb.innerHTML = `<b>${isOk ? '✓ Richtig!' : '✗ Leider falsch.'}</b> ${q.exp}`;
+      document.getElementById('btn-abi-quiz-next').className = 'px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition';
+      // Disable options
+      document.querySelectorAll('#abi-quiz-options button').forEach((b, i) => {
+        b.disabled = true;
+        if (i === q.correct) b.classList.add('border-emerald-500', 'text-emerald-300');
+        else if (i === idx && !isOk) b.classList.add('border-rose-500', 'text-rose-300');
+      });
+    }
+
+    function nextABIQuestion() {
+      abiQuizIdx++;
+      renderABIQuestion();
+    }
+
   </script>
 </body>
 </html>
