@@ -439,6 +439,26 @@ function ensureUniformPageStyles() {
     'selection:bg-blue-600',
     'selection:text-white'
   )
+
+  document.documentElement.style.overflowX = 'hidden'
+  document.body.style.overflowX = 'hidden'
+
+  if (!document.getElementById('unisuite-layout-polish')) {
+    const style = document.createElement('style')
+    style.id = 'unisuite-layout-polish'
+    style.textContent = `
+      *, *::before, *::after { box-sizing: border-box; }
+      body, main, header, footer, section, article, div { min-width: 0; }
+      img, svg, video, canvas, iframe { max-width: 100%; }
+      pre, code { overflow-wrap: anywhere; }
+      table { max-width: 100%; }
+      @media (max-width: 767px) {
+        main { width: 100%; overflow-x: hidden; }
+        .overflow-x-auto { max-width: 100%; }
+      }
+    `
+    document.head.appendChild(style)
+  }
 }
 
 function standardizeModuleHero() {
@@ -475,26 +495,13 @@ function standardizeModuleHero() {
   const subtitle =
     topLevelHeroBlock.querySelector('p')?.textContent?.trim() ||
     `${moduleMeta.groupLabel}-Modul in UniSuite.`
-  const moduleTag =
-    /^\d+_/.test(moduleMeta.label) ? moduleMeta.label : `${moduleMeta.groupPrefix}_${moduleMeta.mobileLabel || slug}`
-
   const standardHero = document.createElement('div')
   standardHero.dataset.unisuiteStandardHero = 'true'
-  standardHero.className = 'border border-[#1e2533] rounded-xl bg-[#0d1117] p-6 sm:p-8 space-y-4'
+  standardHero.className = 'border-l-2 border-blue-500 pl-5 sm:pl-7 py-2 space-y-3 max-w-4xl'
   standardHero.innerHTML = `
-    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#1e2533] pb-3 text-xs font-mono text-slate-400">
-      <div class="flex items-center gap-2">
-        <span class="${moduleMeta.colorClass} font-bold">$</span>
-        <span>cat /etc/unisuite/modules/${slug}.md</span>
-      </div>
-      <div class="text-[11px] text-slate-500">
-        TU Darmstadt • FB Informatik • ${moduleTag}
-      </div>
-    </div>
-    <div class="space-y-2 pt-1">
-      <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white font-heading">${title}</h1>
-      <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">${subtitle}</p>
-    </div>
+    <div class="text-[11px] font-mono uppercase tracking-wider ${moduleMeta.colorClass}">${moduleMeta.groupLabel} · persönliches Lernmaterial</div>
+    <h1 class="text-2xl sm:text-4xl font-bold tracking-tight text-white font-heading">${title}</h1>
+    <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">${subtitle}</p>
   `
 
   topLevelHeroBlock.replaceWith(standardHero)
@@ -528,10 +535,10 @@ function renderMobileMenu(relativePath) {
   ).join('')
 
   return `
-    <nav class="md:hidden border-b border-[#1e2533] bg-[#0c1017] overflow-x-auto custom-scrollbar" aria-label="Mobile Modulnavigation">
-      <div class="flex min-w-max items-center gap-2 px-4 py-2 text-[11px] font-mono">
-        <a href="${relativePath}" class="shrink-0 rounded-md border border-[#273248] bg-[#151c28] px-3 py-1.5 text-slate-300">Startseite</a>
-        <button onclick="window.openTucanModal()" class="shrink-0 rounded-md border border-blue-500/50 bg-blue-950/40 px-3 py-1.5 text-blue-300 font-bold">+ TUCaN Modul-Katalog</button>
+    <nav class="md:hidden border-b border-[#1e2533] bg-[#0c1017] overflow-x-hidden" aria-label="Mobile Modulnavigation">
+      <div class="flex flex-wrap items-center gap-2 px-4 py-2 text-[11px] font-mono">
+        <a href="${relativePath}" class="rounded-md border border-[#273248] bg-[#151c28] px-3 py-1.5 text-slate-300">Startseite</a>
+        <button onclick="window.openTucanModal()" class="rounded-md border border-blue-500/50 bg-blue-950/40 px-3 py-1.5 text-blue-300 font-bold">+ TUCaN Modul-Katalog</button>
         ${links}
       </div>
     </nav>
@@ -544,7 +551,7 @@ function renderHeader(relativePath) {
 
   const headerHtml = `
   <header class="sticky top-0 z-50 bg-[#0c1017]/95 backdrop-blur border-b border-[#1e2533]">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-14 py-2 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center space-x-6">
         <a href="${relativePath}" class="flex items-center space-x-3 text-slate-100 hover:text-blue-400 transition group">
           <div class="w-8 h-8 rounded-lg bg-[#151c28] border border-[#273248] p-1 flex items-center justify-center font-mono font-bold text-xs text-blue-400 group-hover:border-blue-500 transition">
@@ -557,7 +564,6 @@ function renderHeader(relativePath) {
           </div>
           <div class="flex items-center gap-2">
             <span class="font-mono font-bold text-base tracking-tight text-white">UniSuite</span>
-            <span class="text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded bg-[#151c28] border border-[#273248]">v2.6.0</span>
           </div>
         </a>
 
@@ -636,7 +642,6 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 
   registerServiceWorker()
-  initBugReporter()
   initTucanModal()
   initAccountModal()
   updateHeaderUserDisplay()
@@ -681,181 +686,6 @@ printStyle.innerHTML = `
   }
 `
 document.head.appendChild(printStyle)
-
-function initBugReporter() {
-  if (document.getElementById('bug-reporter-widget')) return
-
-  const bugReporterHTML = `
-    <div id="bug-reporter-widget" class="hidden-print">
-      <button id="bug-open-btn" class="fixed bottom-6 right-6 z-50 bg-rose-600 hover:bg-rose-500 text-white p-3 rounded-full shadow-[0_0_15px_rgba(225,29,72,0.4)] transition flex items-center justify-center group" title="Bug melden" aria-label="Bug melden">
-        <span class="text-xl" aria-hidden="true">🐞</span>
-        <span class="max-w-0 overflow-hidden group-hover:max-w-xs group-hover:ml-2 whitespace-nowrap transition-all duration-300 ease-in-out font-bold text-sm">Fehler melden</span>
-      </button>
-
-      <div id="bug-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="bug-modal-title" aria-describedby="bug-modal-description">
-        <div class="bg-[#0f131a] border border-[#1e2533] rounded-2xl p-6 w-full max-w-lg shadow-2xl space-y-4 relative">
-          <h3 id="bug-modal-title" class="text-xl font-bold text-white font-heading flex items-center gap-2">
-            <span aria-hidden="true">🐞</span> Fehlerbericht einreichen
-          </h3>
-          <p id="bug-modal-description" class="text-sm text-slate-400">Melde einen Fehler im aktuellen Modul. Der Bericht wird an den zentralen Endpoint gesendet, bei Ausfall lokal gespeichert.</p>
-
-          <div>
-            <label for="bug-url" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Modul / URL</label>
-            <input type="text" id="bug-url" readonly value="" class="w-full bg-[#151c28] border border-[#273248] rounded px-3 py-2 text-xs text-slate-300 font-mono">
-          </div>
-
-          <div>
-            <label for="bug-desc" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Fehlerbeschreibung</label>
-            <textarea id="bug-desc" rows="4" placeholder="Was genau funktioniert nicht?" class="w-full bg-[#0a0c10] border border-[#1e2533] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-rose-500 transition"></textarea>
-          </div>
-
-          <div id="bug-status" class="text-xs text-slate-400 min-h-[1rem]" role="status" aria-live="polite"></div>
-
-          <div class="flex justify-end gap-3 pt-2">
-            <button id="bug-cancel-btn" class="px-4 py-2 text-sm font-bold text-slate-400 hover:text-white transition">Abbrechen</button>
-            <button id="bug-save-btn" class="px-4 py-2 text-sm font-bold text-white bg-rose-600 hover:bg-rose-500 rounded-lg transition shadow-lg">Senden</button>
-          </div>
-
-          <div class="mt-4 pt-4 border-t border-[#1e2533] flex items-center justify-between">
-            <span class="text-xs text-slate-500" id="bug-count">0 lokale Bugs gespeichert</span>
-            <button id="bug-export-btn" class="text-xs text-blue-400 hover:text-blue-300 transition flex items-center gap-1">
-              <span aria-hidden="true">⬇️</span> Lokale Bugs exportieren (.json)
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  `
-
-  document.body.insertAdjacentHTML('beforeend', bugReporterHTML)
-
-  const modal = document.getElementById('bug-modal')
-  const openBtn = document.getElementById('bug-open-btn')
-  const cancelBtn = document.getElementById('bug-cancel-btn')
-  const saveBtn = document.getElementById('bug-save-btn')
-  const exportBtn = document.getElementById('bug-export-btn')
-  const descField = document.getElementById('bug-desc')
-  const urlField = document.getElementById('bug-url')
-  const statusField = document.getElementById('bug-status')
-
-  let previousFocus = null
-
-  function setStatus(message, colorClass = 'text-slate-400') {
-    statusField.className = `text-xs min-h-[1rem] ${colorClass}`
-    statusField.textContent = message
-  }
-
-  function openModal() {
-    previousFocus = document.activeElement
-    urlField.value = window.location.href
-    modal.classList.remove('hidden')
-    descField.focus()
-  }
-
-  function closeModal() {
-    modal.classList.add('hidden')
-    setStatus('')
-    if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus()
-  }
-
-  function updateBugCount() {
-    const bugs = JSON.parse(localStorage.getItem('unisuite_bugs') || '[]')
-    const countEl = document.getElementById('bug-count')
-    if (countEl) countEl.textContent = `${bugs.length} lokale Bugs gespeichert`
-  }
-
-  async function submitBugReport(payload) {
-    const endpoint =
-      window.UNISUITE_BUG_REPORT_ENDPOINT ||
-      document.documentElement.dataset.bugReportEndpoint ||
-      localStorage.getItem('unisuite_bug_report_endpoint')
-
-    if (!endpoint) return false
-
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
-
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      })
-      return response.ok
-    } catch {
-      return false
-    } finally {
-      clearTimeout(timeout)
-    }
-  }
-
-  function saveBugLocally(payload) {
-    const bugs = JSON.parse(localStorage.getItem('unisuite_bugs') || '[]')
-    bugs.push({ ...payload, status: 'local-open' })
-    localStorage.setItem('unisuite_bugs', JSON.stringify(bugs))
-    updateBugCount()
-  }
-
-  async function saveBugReport() {
-    const desc = descField.value.trim()
-    if (!desc) {
-      setStatus('Bitte zuerst eine Fehlerbeschreibung eintragen.', 'text-amber-400')
-      return
-    }
-
-    saveBtn.disabled = true
-    setStatus('Sende Fehlerbericht...', 'text-blue-400')
-
-    const payload = {
-      date: new Date().toISOString(),
-      url: window.location.href,
-      desc,
-      userAgent: navigator.userAgent
-    }
-
-    const sent = await submitBugReport(payload)
-
-    if (sent) {
-      setStatus('Fehlerbericht erfolgreich an den zentralen Endpoint gesendet.', 'text-emerald-400')
-    } else {
-      saveBugLocally(payload)
-      setStatus('Endpoint nicht erreichbar. Bericht lokal gespeichert.', 'text-amber-400')
-    }
-
-    descField.value = ''
-    saveBtn.disabled = false
-    window.setTimeout(closeModal, 1100)
-  }
-
-  function downloadBugs() {
-    const bugs = localStorage.getItem('unisuite_bugs') || '[]'
-    const blob = new Blob([JSON.stringify(JSON.parse(bugs), null, 2)], { type: 'application/json' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = 'unisuite_bug_reports.json'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-
-  openBtn.addEventListener('click', openModal)
-  cancelBtn.addEventListener('click', closeModal)
-  saveBtn.addEventListener('click', saveBugReport)
-  exportBtn.addEventListener('click', downloadBugs)
-
-  modal.addEventListener('click', event => {
-    if (event.target === modal) closeModal()
-  })
-
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !modal.classList.contains('hidden')) closeModal()
-  })
-
-  window.saveBugReport = saveBugReport
-  window.downloadBugs = downloadBugs
-  updateBugCount()
-}
 
 // ============================================================================
 // TUCAN MODULKATALOG & LIVE-SYNC MODAL ("Neues Fenster")
