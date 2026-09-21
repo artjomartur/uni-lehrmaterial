@@ -41,6 +41,17 @@
     .bit-btn { font-family: 'JetBrains Mono', monospace; transition: all 0.15s ease; }
     .bit-1 { background: #15803d; color: #ffffff; border-color: #22c55e; }
     .bit-0 { background: #0f131a; color: #64748b; border-color: #1e2533; }
+    #section-lecture > div:first-child { border-left: 2px solid #6366f1; border-top: 0; border-right: 0; border-bottom: 0; border-radius: 0; background: transparent; box-shadow: none; padding-left: 1.5rem; }
+    #section-lecture > div:not(:first-child) { max-width: 56rem; }
+    #section-lecture > div:not(:first-child) > div.grid { display: block; border-left: 1px solid #1e1b4b; padding-left: 1.75rem; }
+    #section-lecture article.cs-card { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 0; margin: 0 0 1.75rem; }
+    #section-lecture article.cs-card:last-child { margin-bottom: 0; }
+    #section-lecture article.cs-card h3 { font-size: 0.95rem; color: #f8fafc; }
+    #section-lecture article.cs-card p { max-width: 48rem; line-height: 1.8; }
+    #section-lecture article.cs-card > div:not(.grid) { max-width: 48rem; }
+    #section-lecture article.cs-card .grid { display: grid; }
+    #section-lecture > div:first-child .grid { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; }
+    #section-lecture > div:first-child .grid a { padding: 0; background: transparent; border: 0; border-radius: 0; }
   </style>
 </head>
 <body class="min-h-full flex flex-col bg-[#0a0c10] text-slate-200 antialiased custom-scrollbar selection:bg-emerald-600 selection:text-white">
@@ -76,10 +87,10 @@
 
     <!-- Main Section Tabs -->
     <div class="flex flex-wrap gap-2 border-b border-[#1e2533] pb-3 font-mono text-xs">
-      <button onclick="switchROTab('lecture')" id="tab-btn-lecture" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
+      <button onclick="switchROTab('lecture')" id="tab-btn-lecture" class="ro-tab-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-bold transition shadow">
         Vorlesung kompakt
       </button>
-      <button onclick="switchROTab('pipeline')" id="tab-btn-pipeline" class="ro-tab-btn px-4 py-2 rounded-lg bg-emerald-600 text-white font-bold transition">
+      <button onclick="switchROTab('pipeline')" id="tab-btn-pipeline" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
         5-Stufen RISC-V Pipeline
       </button>
       <button onclick="switchROTab('cache')" id="tab-btn-cache" class="ro-tab-btn px-4 py-2 rounded-lg bg-[#151c28] text-slate-300 hover:text-white border border-[#273248] transition">
@@ -99,7 +110,7 @@
     <!-- ======================================================== -->
     <!-- SECTION 0: VORLESUNGSKOMPENDIUM                         -->
     <!-- ======================================================== -->
-    <section id="section-lecture" class="space-y-6 hidden">
+    <section id="section-lecture" class="space-y-10">
       <div class="border border-[#1e2533] rounded-2xl bg-[#0d1117] p-6 space-y-4 shadow-xl">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#1e2533] pb-4">
           <div>
@@ -156,7 +167,7 @@
     <!-- ======================================================== -->
     <!-- SECTION 1: 5-STUFEN RISC-V PIPELINE SIMULATOR            -->
     <!-- ======================================================== -->
-    <section id="section-pipeline" class="space-y-6">
+    <section id="section-pipeline" class="space-y-6 hidden">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- Left: Instruction Schedule & Pipeline Grid -->
